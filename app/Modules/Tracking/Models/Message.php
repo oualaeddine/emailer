@@ -8,6 +8,8 @@ use App\Modules\DeliveryEngine\Models\SendAttempt;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
 use App\Modules\Recipients\Models\Recipient;
 use App\Support\Concerns\HasUuid;
+use Database\Factories\MessageFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,7 +32,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Message extends Model
 {
-    use HasUuid;
+    /** @use HasFactory<MessageFactory> */
+    use HasFactory, HasUuid;
 
     protected $fillable = [
         'campaign_id',
@@ -119,5 +122,10 @@ class Message extends Model
         }
 
         $this->save();
+    }
+
+    protected static function newFactory(): MessageFactory
+    {
+        return MessageFactory::new();
     }
 }

@@ -6,6 +6,7 @@ use App\Domain\Enums\RoleName;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
 use App\Modules\DeliveryEngine\Services\SmtpConnectionTesterContract;
 use App\Modules\Identity\Models\User;
+use App\Modules\Tracking\Models\Message;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\FakeSmtpConnectionTester;
@@ -117,8 +118,9 @@ class SmtpAccountManagementTest extends TestCase
             'password_encrypted' => 'secret',
             'health_status' => 'healthy',
         ]);
+        $message = Message::factory()->create();
         $account->sendAttempts()->create([
-            'message_id' => 1,
+            'message_id' => $message->id,
             'attempt_number' => 1,
             'status' => 'success',
             'attempted_at' => now(),

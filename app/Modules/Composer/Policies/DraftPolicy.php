@@ -40,4 +40,13 @@ class DraftPolicy
 
         return $draft->user_id === $user->id && $user->hasPermission(PermissionName::ComposerCompose->value);
     }
+
+    public function send(User $user, Draft $draft): bool
+    {
+        if ($user->hasPermission(PermissionName::MailboxViewAll->value)) {
+            return $user->hasPermission(PermissionName::ComposerSend->value);
+        }
+
+        return $draft->user_id === $user->id && $user->hasPermission(PermissionName::ComposerSend->value);
+    }
 }

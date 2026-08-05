@@ -15,7 +15,7 @@ use Symfony\Component\Mime\Email;
  * documented "concurrency limits" being a worker-level concern — a fresh
  * PHP-FPM/CLI process for each queue worker naturally resets the pool).
  */
-class SmtpManagerService
+class SmtpManagerService implements SmtpManagerContract
 {
     /** @var array<int, EsmtpTransport> */
     private static array $pool = [];

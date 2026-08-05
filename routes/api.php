@@ -67,6 +67,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     Route::post('drafts/{draft}/versions', [DraftController::class, 'saveVersion']);
     Route::get('drafts/{draft}/versions', [DraftController::class, 'versions']);
     Route::post('drafts/{draft}/versions/{versionId}/restore', [DraftController::class, 'restoreVersion']);
+    Route::post('drafts/{draft}/send', [DraftController::class, 'send']);
 
     Route::get('signatures', [SignatureController::class, 'index']);
     Route::post('signatures', [SignatureController::class, 'store']);

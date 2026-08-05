@@ -12,7 +12,7 @@ use App\Modules\DeliveryEngine\Services\FailoverEngine;
 use App\Modules\DeliveryEngine\Services\QuotaManager;
 use App\Modules\DeliveryEngine\Services\RetryEngine;
 use App\Modules\DeliveryEngine\Services\RotationEngine;
-use App\Modules\DeliveryEngine\Services\SmtpManagerService;
+use App\Modules\DeliveryEngine\Services\SmtpManagerContract;
 use App\Modules\Suppression\Services\SuppressionManager;
 use App\Modules\Tracking\Models\Message;
 use Illuminate\Bus\Queueable;
@@ -55,7 +55,7 @@ class SendEmailJob implements ShouldQueue
         SuppressionManager $suppression,
         RotationEngine $rotation,
         QuotaManager $quota,
-        SmtpManagerService $smtpManager,
+        SmtpManagerContract $smtpManager,
         RetryEngine $retryEngine,
         FailoverEngine $failover,
     ): void {

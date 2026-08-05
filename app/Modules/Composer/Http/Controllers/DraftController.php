@@ -4,11 +4,15 @@ namespace App\Modules\Composer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Composer\Http\Requests\SaveDraftRequest;
+use App\Modules\Composer\Http\Requests\SendDraftRequest;
 use App\Modules\Composer\Http\Resources\DraftResource;
 use App\Modules\Composer\Http\Resources\DraftVersionResource;
 use App\Modules\Composer\Models\Draft;
 use App\Modules\Composer\Models\Signature;
 use App\Modules\Composer\Services\DraftService;
+use App\Modules\DeliveryEngine\Services\ComposerSendService;
+use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Tracking\Http\Resources\MessageResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -17,8 +21,10 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class DraftController extends Controller
 {
-    public function __construct(private readonly DraftService $drafts)
-    {
+    public function __construct(
+        private readonly DraftService $drafts,
+        private readonly ComposerSendService $composerSend,
+    ) {
     }
 
     public function index(): AnonymousResourceCollection
@@ -81,6 +87,17 @@ class DraftController extends Controller
         $restored = $this->drafts->restoreVersion($draft, $version, request()->user());
 
         return new DraftResource($restored);
+    }
+
+    public function send(SendDraftRequest $request, Draft $draft): JsonResponse
+    {
+        $this->authorize('send', $draft);
+
+        $recipient = Recipient::query()->where('uuid', $request->input('recipient_id'))->firstOrFail();
+
+        $message = $this->composerSend->send($draft, $recipient);
+
+        return (new MessageResource($message))->response()->setStatusCode(201);
     }
 
     private function resolveSignatureId(?string $signatureUuid): ?int

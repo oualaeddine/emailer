@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Modules\DeliveryEngine\Services\SmtpConnectionTesterContract;
+use App\Modules\DeliveryEngine\Services\SmtpManagerContract;
+use App\Modules\DeliveryEngine\Services\SmtpManagerService;
 use App\Modules\DeliveryEngine\Services\SymfonySmtpConnectionTester;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
         // production; tests bind a fake implementation instead
         // (docs/32-testing.md §32.4).
         $this->app->bind(SmtpConnectionTesterContract::class, SymfonySmtpConnectionTester::class);
+
+        // docs/17-delivery-engine.md §17.6 — real SMTP send in production;
+        // tests bind a fake implementation instead (docs/32-testing.md §32.4).
+        $this->app->bind(SmtpManagerContract::class, SmtpManagerService::class);
     }
 
     /**
