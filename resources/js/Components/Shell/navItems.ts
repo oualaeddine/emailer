@@ -18,6 +18,8 @@ import {
     ServerFilled,
     ShieldProhibitedRegular,
     ShieldProhibitedFilled,
+    MegaphoneLoudRegular,
+    MegaphoneLoudFilled,
     bundleIcon,
 } from '@fluentui/react-icons';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
@@ -31,6 +33,7 @@ const MailIcon = bundleIcon(MailFilled, MailRegular);
 const DocumentIcon = bundleIcon(DocumentFilled, DocumentRegular);
 const ServerIcon = bundleIcon(ServerFilled, ServerRegular);
 const ShieldProhibitedIcon = bundleIcon(ShieldProhibitedFilled, ShieldProhibitedRegular);
+const MegaphoneLoudIcon = bundleIcon(MegaphoneLoudFilled, MegaphoneLoudRegular);
 
 /**
  * docs/08-navigation.md §8.2 — Primary Navigation Tree.
@@ -132,5 +135,12 @@ export const navItems: NavItem[] = [
         label: (t) => t.nav.mailbox,
         match: 'exact',
         permissions: ['mailbox.view_own', 'mailbox.view_all'],
+    },
+    {
+        href: '/campaigns',
+        icon: MegaphoneLoudIcon,
+        label: (t) => t.nav.campaigns,
+        match: 'exact',
+        permissions: ['campaigns.view'],
     },
 ];
