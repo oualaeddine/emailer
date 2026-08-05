@@ -44,6 +44,17 @@ export const fr = {
     dashboard: {
         welcome: 'Bienvenue',
         placeholder: 'Le tableau de bord complet sera disponible au fur et à mesure de l’implémentation des modules.',
+        // docs/09-dashboard.md §9.2 — widget labels (WP-33).
+        sendVolumeTitle: "Volume d'envoi",
+        sendVolumeLastDays: 'derniers jours',
+        deliverabilityTitle: 'Taux de délivrabilité',
+        deliverabilitySent: 'Envoyés',
+        deliverabilityDelivered: 'Délivrés',
+        quotaUsageTitle: 'Utilisation des quotas SMTP',
+        quotaUsageEmpty: 'Aucun compte SMTP actif.',
+        quotaUsageNoLimit: 'Sans limite',
+        recentCampaignsTitle: 'Campagnes récentes',
+        recentCampaignsEmpty: 'Aucune campagne pour le moment.',
     },
     users: {
         title: 'Utilisateurs',

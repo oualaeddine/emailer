@@ -29,4 +29,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/suppression.php';
     require __DIR__.'/api/queues.php';
     require __DIR__.'/api/campaigns.php';
+    require __DIR__.'/api/dashboard.php';
 });
