@@ -153,4 +153,16 @@ export const navItems: NavItem[] = [
         match: 'exact',
         permissions: ['audit.view'],
     },
+    {
+        href: '/reporting',
+        // Reuses the Templates entry's DocumentIcon (already imported/verified
+        // above) rather than guessing an unverified icon export name — same
+        // reasoning as the `/mailbox` entry's MailIcon reuse (this repo has no
+        // npm/tsc available to confirm icon names exist before the wave's
+        // build gate, docs/42-parallel-execution-plan.md §42.9).
+        icon: DocumentIcon,
+        label: (t) => t.nav.reporting,
+        match: 'exact',
+        permissions: ['reporting.view'],
+    },
 ];

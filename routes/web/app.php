@@ -40,3 +40,4 @@ require __DIR__.'/suppression.php';
 require __DIR__.'/mailbox.php';
 require __DIR__.'/campaigns.php';
 require __DIR__.'/audit.php';
+require __DIR__.'/reporting.php';
