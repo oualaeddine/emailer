@@ -16,6 +16,8 @@ import {
     DocumentFilled,
     ServerRegular,
     ServerFilled,
+    ShieldProhibitedRegular,
+    ShieldProhibitedFilled,
     bundleIcon,
 } from '@fluentui/react-icons';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
@@ -28,6 +30,7 @@ const ContactCardIcon = bundleIcon(ContactCardFilled, ContactCardRegular);
 const MailIcon = bundleIcon(MailFilled, MailRegular);
 const DocumentIcon = bundleIcon(DocumentFilled, DocumentRegular);
 const ServerIcon = bundleIcon(ServerFilled, ServerRegular);
+const ShieldProhibitedIcon = bundleIcon(ShieldProhibitedFilled, ShieldProhibitedRegular);
 
 /**
  * docs/08-navigation.md §8.2 — Primary Navigation Tree.
@@ -111,5 +114,12 @@ export const navItems: NavItem[] = [
         label: (t) => t.nav.import,
         match: 'exact',
         permissions: ['recipients.import'],
+    },
+    {
+        href: '/suppression',
+        icon: ShieldProhibitedIcon,
+        label: (t) => t.nav.suppression,
+        match: 'exact',
+        permissions: ['suppression.view'],
     },
 ];

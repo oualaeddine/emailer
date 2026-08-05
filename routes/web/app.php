@@ -35,3 +35,5 @@ Route::get('compose', fn () => Inertia::render('Composer/Index'))->name('compose
 Route::get('templates', fn () => Inertia::render('Templates/Index'))->name('templates.index');
 
 Route::get('smtp', fn () => Inertia::render('Smtp/Index'))->name('smtp.index');
+
+require __DIR__.'/web/suppression.php';

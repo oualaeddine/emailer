@@ -210,6 +210,26 @@ export const fr = {
         reason: 'Motif',
         remove: 'Retirer',
         confirmRemove: 'Retirer cette adresse de la liste de suppression ?',
+        // docs/23-suppression-list.md §23.5/§23.7 — WP-14 additions, nested
+        // under the existing `suppression` key only.
+        createTitle: 'Ajouter une adresse à la liste de suppression',
+        notes: 'Notes',
+        notesPlaceholder: 'Ex. : demande de retrait via le ticket support #1234',
+        dateAdded: "Date d'ajout",
+        searchPlaceholder: 'Rechercher par adresse e-mail…',
+        allReasons: 'Tous les motifs',
+        noResults: 'Aucune adresse dans la liste de suppression.',
+        alreadyExists: 'Cette adresse est déjà présente dans la liste de suppression.',
+        confirmRemoveStrong:
+            'Cette adresse a été supprimée suite à une plainte pour spam ou un rebond définitif. La retirer présente un risque important pour la délivrabilité. Confirmez-vous ce retrait ?',
+        reasons: {
+            hard_bounce: 'Rebond définitif',
+            spam_complaint: 'Plainte pour spam',
+            manual_unsubscribe: 'Désabonnement manuel',
+            global_unsubscribe: 'Désabonnement global (tout)',
+            invalid_address: 'Adresse invalide',
+            manual_block: 'Blocage manuel',
+        },
     },
     verification: {
         title: 'Vérification',
