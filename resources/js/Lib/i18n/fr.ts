@@ -44,6 +44,17 @@ export const fr = {
     dashboard: {
         welcome: 'Bienvenue',
         placeholder: 'Le tableau de bord complet sera disponible au fur et à mesure de l’implémentation des modules.',
+        // docs/09-dashboard.md §9.2 — widget labels (WP-33).
+        sendVolumeTitle: "Volume d'envoi",
+        sendVolumeLastDays: 'derniers jours',
+        deliverabilityTitle: 'Taux de délivrabilité',
+        deliverabilitySent: 'Envoyés',
+        deliverabilityDelivered: 'Délivrés',
+        quotaUsageTitle: 'Utilisation des quotas SMTP',
+        quotaUsageEmpty: 'Aucun compte SMTP actif.',
+        quotaUsageNoLimit: 'Sans limite',
+        recentCampaignsTitle: 'Campagnes récentes',
+        recentCampaignsEmpty: 'Aucune campagne pour le moment.',
     },
     users: {
         title: 'Utilisateurs',
@@ -332,6 +343,36 @@ export const fr = {
         templatePerformance: 'Performance des modèles',
         smtpPerformance: 'Performance SMTP',
         export: 'Exporter',
+        // docs/25-reporting.md — WP-31 additions, nested under the existing
+        // `reporting` key only (docs/42-parallel-execution-plan.md §42.11 —
+        // the pre-added stub above is filled in by this work package).
+        subtitle: 'Vue d’ensemble des envois, de la livraison et de l’engagement.',
+        dateFrom: 'Du',
+        dateTo: 'Au',
+        campaignFilter: 'Campagne',
+        allCampaigns: 'Toutes les campagnes',
+        smtpAccountFilter: 'Compte SMTP',
+        allSmtpAccounts: 'Tous les comptes SMTP',
+        apply: 'Appliquer',
+        sent: 'Envoyés',
+        delivered: 'Délivrés',
+        opened: 'Ouverts (uniques)',
+        clicked: 'Cliqués (uniques)',
+        bounced: 'Rejetés',
+        failed: 'Échoués',
+        totalOpens: 'Ouvertures (total)',
+        totalClicks: 'Clics (total)',
+        deliveryRate: 'Taux de livraison',
+        openRate: "Taux d'ouverture",
+        clickRate: 'Taux de clic',
+        bounceRate: 'Taux de rejet',
+        byStatus: 'Répartition par statut',
+        byCampaign: 'Par campagne',
+        byCampaignName: 'Campagne',
+        bySmtpAccount: 'Par compte SMTP',
+        bySmtpAccountName: 'Compte SMTP',
+        healthStatus: 'État',
+        noData: 'Aucune donnée pour cette période.',
     },
     audit: {
         title: "Journal d'audit",
@@ -340,6 +381,39 @@ export const fr = {
         target: 'Cible',
         timestamp: 'Date',
         export: 'Exporter',
+        // WP-32 (docs/42-parallel-execution-plan.md §42.8) additions —
+        // the six keys above predate this work package (Wave-0 nav
+        // placeholder); left untouched, new keys appended below.
+        userIdFilter: 'ID utilisateur',
+        actionFilter: 'Action',
+        auditableTypeFilter: "Type d'entité",
+        dateFromFilter: 'Date de début',
+        dateToFilter: 'Date de fin',
+        resetFilters: 'Réinitialiser les filtres',
+        viewDetails: 'Voir les détails',
+        detailsTitle: "Détails de l'événement",
+        oldValues: 'Anciennes valeurs',
+        newValues: 'Nouvelles valeurs',
+        noValues: 'Aucune valeur enregistrée',
+        system: 'Système',
+        loadMore: 'Charger plus',
+        noResults: 'Aucun résultat',
+        close: 'Fermer',
+        entityType: "Type d'entité",
+        entityId: 'ID entité',
+        ipAddress: 'Adresse IP',
+    },
+    // docs/41-notification-center.md §41.5 — Top Bar bell icon + panel.
+    // New top-level namespace (WP-34): unlike the WP-00 nav-labeled modules,
+    // the notification bell was never a nav-rail item, so no placeholder
+    // key existed here before this addition.
+    notifications: {
+        title: 'Notifications',
+        markAllRead: 'Tout marquer comme lu',
+        noNotifications: 'Aucune notification',
+        unreadAriaLabel: 'notifications non lues',
+        loading: 'Chargement des notifications…',
+        loadError: 'Impossible de charger les notifications.',
     },
 } as const;
 
