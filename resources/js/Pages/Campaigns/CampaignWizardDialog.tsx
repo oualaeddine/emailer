@@ -108,10 +108,23 @@ export function CampaignWizardDialog({ open, onOpenChange, onCreated }: Campaign
     const selectedTemplate = templates.find((template) => template.id === templateId);
     const canReview = name.trim().length > 0 && templateId.length > 0 && targetId.trim().length > 0;
 
+    /**
+     * `StoreCampaignRequest` takes `recipient_list_id`/`segment_id` directly
+     * (`required_without`/`prohibits` each other), not a `target_type`/
+     * `target_id` pair — `targetType` here is purely a UI radio choice.
+     */
+    function buildPayload() {
+        return {
+            name,
+            template_id: templateId,
+            ...(targetType === 'list' ? { recipient_list_id: targetId } : { segment_id: targetId }),
+        };
+    }
+
     async function handleSaveDraft() {
         setSubmitting(true);
         try {
-            await createCampaign({ name, template_id: templateId, target_type: targetType, target_id: targetId });
+            await createCampaign(buildPayload());
             await onCreated();
             handleOpenChange(false);
         } finally {
@@ -122,12 +135,7 @@ export function CampaignWizardDialog({ open, onOpenChange, onCreated }: Campaign
     async function handleConfirmSend() {
         setSubmitting(true);
         try {
-            const campaign = await createCampaign({
-                name,
-                template_id: templateId,
-                target_type: targetType,
-                target_id: targetId,
-            });
+            const campaign = await createCampaign(buildPayload());
             if (sendMode === 'scheduled' && scheduledAt) {
                 await scheduleCampaign(campaign.id, new Date(scheduledAt).toISOString());
             } else {

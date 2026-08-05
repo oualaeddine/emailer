@@ -36,6 +36,7 @@ import {
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
 import { cancelCampaign, cloneCampaign, fetchCampaigns, pauseCampaign, resumeCampaign } from '@/Lib/api/campaigns';
+import { fetchTemplates } from '@/Lib/api/templates';
 import type { Campaign, CampaignStatus } from '@/Lib/types/campaigns';
 import { CampaignDetail } from '@/Pages/Campaigns/CampaignDetail';
 import { CampaignWizardDialog } from '@/Pages/Campaigns/CampaignWizardDialog';
@@ -61,22 +62,25 @@ const useStyles = makeStyles({
 const STATUS_COLOR: Record<CampaignStatus, 'subtle' | 'informative' | 'warning' | 'success' | 'danger'> = {
     draft: 'subtle',
     scheduled: 'informative',
-    sending: 'warning',
-    sent: 'success',
+    running: 'warning',
+    completed: 'success',
     paused: 'warning',
     cancelled: 'danger',
 };
 
 /**
  * docs/15-campaign-management.md §15.6 — list view w/ status-gated row
- * actions (pause only while `sending`, resume only while `paused`, cancel
+ * actions (pause only while `running`, resume only while `paused`, cancel
  * while `draft`/`scheduled`/`paused`, clone always available per §15.7).
+ * Status values match `App\Modules\Campaigns\Enums\CampaignStatus`
+ * (`running`/`completed`, not `sending`/`sent`) — see `Lib/types/campaigns.ts`.
  */
 export default function CampaignsIndex() {
     const styles = useStyles();
     const t = useText();
 
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [templateNames, setTemplateNames] = useState<Record<string, string>>({});
     const [wizardOpen, setWizardOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -87,14 +91,19 @@ export default function CampaignsIndex() {
 
     useEffect(() => {
         void load();
+        // `CampaignResource` only exposes `template_id` (no embedded name) —
+        // resolved here the same way `CampaignWizardDialog` resolves it.
+        void fetchTemplates().then((templates) => {
+            setTemplateNames(Object.fromEntries(templates.map((template) => [template.id, template.name])));
+        });
     }, [load]);
 
     function statusLabel(status: CampaignStatus): string {
         const labels: Record<CampaignStatus, string> = {
             draft: t.campaigns.statusDraft,
             scheduled: t.campaigns.statusScheduled,
-            sending: t.campaigns.statusSending,
-            sent: t.campaigns.statusSent,
+            running: t.campaigns.statusSending,
+            completed: t.campaigns.statusSent,
             paused: t.campaigns.statusPaused,
             cancelled: t.campaigns.statusCancelled,
         };
@@ -150,7 +159,7 @@ export default function CampaignsIndex() {
         createTableColumn<Campaign>({
             columnId: 'template',
             renderHeaderCell: () => t.campaigns.template,
-            renderCell: (c) => c.template?.name ?? '—',
+            renderCell: (c) => (c.template_id ? (templateNames[c.template_id] ?? c.template_id) : '—'),
         }),
         createTableColumn<Campaign>({
             columnId: 'scheduled_at',
@@ -172,7 +181,7 @@ export default function CampaignsIndex() {
                     </MenuTrigger>
                     <MenuPopover>
                         <MenuList>
-                            {c.status === 'sending' && (
+                            {c.status === 'running' && (
                                 <MenuItem icon={<PauseRegular />} onClick={() => void handlePause(c.id)}>
                                     {t.campaigns.pause}
                                 </MenuItem>

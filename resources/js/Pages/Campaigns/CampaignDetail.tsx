@@ -11,7 +11,9 @@ import {
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaign, fetchCampaignAnalytics, fetchCampaignRecipients } from '@/Lib/api/campaigns';
-import type { CampaignAnalytics, CampaignDetail as CampaignDetailModel, CampaignRecipient, CampaignStatus } from '@/Lib/types/campaigns';
+import { fetchTemplates } from '@/Lib/api/templates';
+import type { CampaignAnalytics, CampaignDetail as CampaignDetailModel, CampaignStatus } from '@/Lib/types/campaigns';
+import type { Message } from '@/Lib/types/messages';
 
 interface CampaignDetailProps {
     campaignId: string;
@@ -51,8 +53,8 @@ const useStyles = makeStyles({
 const STATUS_COLOR: Record<CampaignStatus, 'subtle' | 'informative' | 'warning' | 'success' | 'danger'> = {
     draft: 'subtle',
     scheduled: 'informative',
-    sending: 'warning',
-    sent: 'success',
+    running: 'warning',
+    completed: 'success',
     paused: 'warning',
     cancelled: 'danger',
 };
@@ -70,8 +72,9 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
 
     const [tab, setTab] = useState<DetailTab>('overview');
     const [detail, setDetail] = useState<CampaignDetailModel | null>(null);
-    const [recipients, setRecipients] = useState<CampaignRecipient[] | null>(null);
+    const [recipients, setRecipients] = useState<Message[] | null>(null);
     const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
+    const [templateNames, setTemplateNames] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     const loadDetail = useCallback(async () => {
@@ -89,6 +92,10 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
         setAnalytics(null);
         setTab('overview');
         void loadDetail();
+        // `CampaignResource` only exposes `template_id` (no embedded name).
+        void fetchTemplates().then((templates) => {
+            setTemplateNames(Object.fromEntries(templates.map((template) => [template.id, template.name])));
+        });
     }, [campaignId, loadDetail]);
 
     useEffect(() => {
@@ -104,13 +111,25 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
         const labels: Record<CampaignStatus, string> = {
             draft: t.campaigns.statusDraft,
             scheduled: t.campaigns.statusScheduled,
-            sending: t.campaigns.statusSending,
-            sent: t.campaigns.statusSent,
+            running: t.campaigns.statusSending,
+            completed: t.campaigns.statusSent,
             paused: t.campaigns.statusPaused,
             cancelled: t.campaigns.statusCancelled,
         };
 
         return labels[status];
+    }
+
+    /** `CampaignResource` exposes `recipient_list_id`/`segment_id`, not a resolved `target_name` — no list/segment-name lookup endpoint exists yet, so the raw id is shown (same degradation the wizard's review step already uses). */
+    function targetLabel(): string {
+        if (detail?.recipient_list_id) {
+            return `${t.campaigns.targetTypeList} (${detail.recipient_list_id})`;
+        }
+        if (detail?.segment_id) {
+            return `${t.campaigns.targetTypeSegment} (${detail.segment_id})`;
+        }
+
+        return '—';
     }
 
     function formatDate(value: string): string {
@@ -141,15 +160,11 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
                 <div className={styles.root}>
                     <div className={styles.row}>
                         <Text weight="semibold">{t.campaigns.template}</Text>
-                        <Text>{detail.template?.name ?? '—'}</Text>
+                        <Text>{detail.template_id ? (templateNames[detail.template_id] ?? detail.template_id) : '—'}</Text>
                     </div>
                     <div className={styles.row}>
                         <Text weight="semibold">{t.campaigns.target}</Text>
-                        <Text>{detail.target_name ?? detail.target_id ?? '—'}</Text>
-                    </div>
-                    <div className={styles.row}>
-                        <Text weight="semibold">{t.campaigns.audienceSize}</Text>
-                        <Text>{detail.audience_size ?? '—'}</Text>
+                        <Text>{targetLabel()}</Text>
                     </div>
                     <div className={styles.row}>
                         <Text weight="semibold">{t.campaigns.scheduledAt}</Text>
@@ -171,8 +186,8 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
                     ) : (
                         recipients.map((recipient) => (
                             <div key={recipient.id} className={styles.recipientRow}>
-                                <Text>{recipient.email}</Text>
-                                <Text>{recipient.message_status ?? '—'}</Text>
+                                <Text>{recipient.recipient_email}</Text>
+                                <Text>{recipient.status}</Text>
                             </div>
                         ))
                     )}
@@ -195,30 +210,35 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
                         <Spinner label={t.common.loading} />
                     ) : (
                         <>
+                            {/*
+                                `CampaignController::analytics()` returns
+                                `{targeted, by_status, open_count, click_count}`
+                                (docs/25-reporting.md's funnel shape), not the
+                                originally-assumed `{sent, delivered, opened,
+                                clicked, bounced, complained}` — `by_status` is
+                                keyed by the raw `MessageStatus` enum value
+                                (English, per doc 07 §7.12's DB/API identifier
+                                convention), shown as-is like `Lib/types/messages.ts`'s
+                                `status: string` already does elsewhere in this app.
+                            */}
                             <div className={styles.row}>
-                                <Text weight="semibold">{t.campaigns.analyticsSent}</Text>
-                                <Text>{analytics.sent}</Text>
-                            </div>
-                            <div className={styles.row}>
-                                <Text weight="semibold">{t.campaigns.analyticsDelivered}</Text>
-                                <Text>{analytics.delivered}</Text>
+                                <Text weight="semibold">{t.campaigns.audienceSize}</Text>
+                                <Text>{analytics.targeted}</Text>
                             </div>
                             <div className={styles.row}>
                                 <Text weight="semibold">{t.campaigns.analyticsOpened}</Text>
-                                <Text>{analytics.opened}</Text>
+                                <Text>{analytics.open_count}</Text>
                             </div>
                             <div className={styles.row}>
                                 <Text weight="semibold">{t.campaigns.analyticsClicked}</Text>
-                                <Text>{analytics.clicked}</Text>
+                                <Text>{analytics.click_count}</Text>
                             </div>
-                            <div className={styles.row}>
-                                <Text weight="semibold">{t.campaigns.analyticsBounced}</Text>
-                                <Text>{analytics.bounced}</Text>
-                            </div>
-                            <div className={styles.row}>
-                                <Text weight="semibold">{t.campaigns.analyticsComplained}</Text>
-                                <Text>{analytics.complained}</Text>
-                            </div>
+                            {Object.entries(analytics.by_status).map(([status, count]) => (
+                                <div className={styles.row} key={status}>
+                                    <Text weight="semibold">{status}</Text>
+                                    <Text>{count}</Text>
+                                </div>
+                            ))}
                         </>
                     )}
                 </div>
