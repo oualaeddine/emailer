@@ -59,6 +59,7 @@ This documentation is written so that **another AI or engineering team can imple
 | 39 | [Deliverability Analyzer](39-deliverability-analyzer.md) | Pre-send SPF/DKIM/DMARC/content scoring |
 | 40 | [Central Search Service](40-search-service.md) | Shared cross-entity search abstraction |
 | 41 | [Notification Center](41-notification-center.md) | Centralized in-app notification routing & preferences |
+| 42 | [Parallel Execution Plan](42-parallel-execution-plan.md) | Agent-orchestrated work packages, waves, file ownership, token-economy protocol |
 
 ## How to Use This Documentation
 
