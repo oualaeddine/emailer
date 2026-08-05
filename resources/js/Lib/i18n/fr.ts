@@ -22,6 +22,16 @@ export const fr = {
         import: 'Importer (CSV/Excel)',
         templates: 'Modèles',
         logout: 'Se déconnecter',
+        // docs/42-parallel-execution-plan.md §42.5 (WP-00) — nav labels for
+        // not-yet-built modules, added up front so Wave 1-3 agents never
+        // touch this file's existing keys (§42.11).
+        mailbox: 'Boîte de réception',
+        campaigns: 'Campagnes',
+        suppression: 'Liste de suppression',
+        verification: 'Vérification',
+        queues: "Files d'attente",
+        reporting: 'Rapports',
+        audit: "Journal d'audit",
     },
     auth: {
         loginTitle: 'Connexion',
@@ -170,6 +180,67 @@ export const fr = {
         testFailure: 'Échec de la connexion',
         createTitle: 'Créer un compte SMTP',
         cannotDelete: 'Ce compte SMTP a déjà été utilisé pour des envois ; désactivez-le à la place.',
+    },
+    // docs/42-parallel-execution-plan.md §42.5 (WP-00) — additive namespaces
+    // for not-yet-built modules (docs 10/15/22/23/24/25/27), added up front
+    // per §42.11 so the file is frozen for Wave 1-3 agents. Kept minimal —
+    // owning work packages may still add fine-grained keys for their pages.
+    mailbox: {
+        title: 'Boîte de réception',
+        inbox: 'Boîte de réception',
+        sent: 'Envoyés',
+        drafts: 'Brouillons',
+        outbox: "Boîte d'envoi",
+        scheduled: 'Planifiés',
+    },
+    campaigns: {
+        title: 'Campagnes',
+        newCampaign: 'Nouvelle campagne',
+        statusDraft: 'Brouillon',
+        statusScheduled: 'Planifiée',
+        statusSending: 'Envoi en cours',
+        statusSent: 'Envoyée',
+        statusPaused: 'En pause',
+        statusCancelled: 'Annulée',
+    },
+    suppression: {
+        title: 'Liste de suppression',
+        newEntry: 'Ajouter une adresse',
+        email: 'Adresse e-mail',
+        reason: 'Motif',
+        remove: 'Retirer',
+        confirmRemove: 'Retirer cette adresse de la liste de suppression ?',
+    },
+    verification: {
+        title: 'Vérification',
+        verify: 'Vérifier',
+        statusValid: 'Valide',
+        statusInvalid: 'Invalide',
+        statusRisky: 'Risqué',
+        statusUnknown: 'Inconnu',
+    },
+    queues: {
+        title: "Files d'attente",
+        transactional: 'Transactionnel',
+        campaigns: 'Campagnes',
+        imports: 'Imports',
+        maintenance: 'Maintenance',
+    },
+    reporting: {
+        title: 'Rapports',
+        delivery: 'Rapports de livraison',
+        campaignComparison: 'Comparaison des campagnes',
+        templatePerformance: 'Performance des modèles',
+        smtpPerformance: 'Performance SMTP',
+        export: 'Exporter',
+    },
+    audit: {
+        title: "Journal d'audit",
+        action: 'Action',
+        actor: 'Utilisateur',
+        target: 'Cible',
+        timestamp: 'Date',
+        export: 'Exporter',
     },
 } as const;
 

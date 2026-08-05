@@ -1,35 +1,8 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
-import {
-    HomeRegular,
-    HomeFilled,
-    PeopleRegular,
-    PeopleFilled,
-    SettingsRegular,
-    SettingsFilled,
-    BuildingRegular,
-    BuildingFilled,
-    ContactCardRegular,
-    ContactCardFilled,
-    MailRegular,
-    MailFilled,
-    DocumentRegular,
-    DocumentFilled,
-    ServerRegular,
-    ServerFilled,
-    bundleIcon,
-} from '@fluentui/react-icons';
 import { Link, usePage } from '@inertiajs/react';
 import { useText } from '@/Hooks/useText';
-import { hasPermission } from '@/Lib/permissions';
-
-const HomeIcon = bundleIcon(HomeFilled, HomeRegular);
-const PeopleIcon = bundleIcon(PeopleFilled, PeopleRegular);
-const SettingsIcon = bundleIcon(SettingsFilled, SettingsRegular);
-const BuildingIcon = bundleIcon(BuildingFilled, BuildingRegular);
-const ContactCardIcon = bundleIcon(ContactCardFilled, ContactCardRegular);
-const MailIcon = bundleIcon(MailFilled, MailRegular);
-const DocumentIcon = bundleIcon(DocumentFilled, DocumentRegular);
-const ServerIcon = bundleIcon(ServerFilled, ServerRegular);
+import { hasAnyPermission } from '@/Lib/permissions';
+import { navItems } from './navItems';
 
 const useStyles = makeStyles({
     root: {
@@ -64,10 +37,11 @@ const useStyles = makeStyles({
 
 /**
  * docs/08-navigation.md §8.2 — Primary Navigation Tree.
- * Only the items the Identity module actually delivers are wired here;
- * the remaining nav tree is filled in by each consuming module as it
- * lands (§8.4 — items are hidden entirely, not merely disabled, when the
- * current user lacks every permission within them).
+ * Renders from the shared `navItems` data array (see ./navItems.ts) so
+ * later modules append entries there instead of editing this component
+ * (docs/42-parallel-execution-plan.md §42.5/§42.11 — items are hidden
+ * entirely, not merely disabled, when the current user lacks every
+ * permission within them, per §8.4).
  */
 export function NavRail() {
     const styles = useStyles();
@@ -75,81 +49,27 @@ export function NavRail() {
     const { url, props } = usePage<{ auth: { permissions: string[] } }>();
     const permissions = props.auth.permissions;
 
-    const isActive = (path: string) => url.startsWith(path);
-
     return (
         <nav className={styles.root}>
-            <Link
-                href="/dashboard"
-                className={`${styles.item} ${isActive('/dashboard') ? styles.itemActive : ''}`}
-            >
-                <HomeIcon />
-                {t.nav.dashboard}
-            </Link>
-            {hasPermission(permissions, 'composer.compose') && (
-                <Link href="/compose" className={`${styles.item} ${url === '/compose' ? styles.itemActive : ''}`}>
-                    <MailIcon />
-                    {t.composer.title}
-                </Link>
-            )}
-            {hasPermission(permissions, 'templates.view') && (
-                <Link href="/templates" className={`${styles.item} ${url === '/templates' ? styles.itemActive : ''}`}>
-                    <DocumentIcon />
-                    {t.nav.templates}
-                </Link>
-            )}
-            {hasPermission(permissions, 'users.manage') && (
-                <Link
-                    href="/admin/users"
-                    className={`${styles.item} ${isActive('/admin/users') ? styles.itemActive : ''}`}
-                >
-                    <PeopleIcon />
-                    {t.nav.users}
-                </Link>
-            )}
-            {(hasPermission(permissions, 'settings.branding_only') ||
-                hasPermission(permissions, 'settings.manage')) && (
-                <Link
-                    href="/settings/branding"
-                    className={`${styles.item} ${isActive('/settings/branding') ? styles.itemActive : ''}`}
-                >
-                    <SettingsIcon />
-                    {t.nav.settings}
-                </Link>
-            )}
-            {hasPermission(permissions, 'smtp.view') && (
-                <Link href="/smtp" className={`${styles.item} ${url === '/smtp' ? styles.itemActive : ''}`}>
-                    <ServerIcon />
-                    {t.smtp.title}
-                </Link>
-            )}
-            {hasPermission(permissions, 'recipients.view') && (
-                <Link
-                    href="/recipients"
-                    className={`${styles.item} ${url === '/recipients' ? styles.itemActive : ''}`}
-                >
-                    <ContactCardIcon />
-                    {t.nav.recipients}
-                </Link>
-            )}
-            {hasPermission(permissions, 'recipients.import') && (
-                <Link
-                    href="/recipients/import/pagejaunes"
-                    className={`${styles.item} ${isActive('/recipients/import/pagejaunes') ? styles.itemActive : ''}`}
-                >
-                    <BuildingIcon />
-                    {t.nav.pagejaunes}
-                </Link>
-            )}
-            {hasPermission(permissions, 'recipients.import') && (
-                <Link
-                    href="/recipients/import"
-                    className={`${styles.item} ${url === '/recipients/import' ? styles.itemActive : ''}`}
-                >
-                    <PeopleIcon />
-                    {t.nav.import}
-                </Link>
-            )}
+            {navItems.map((item) => {
+                if (item.permissions && !hasAnyPermission(permissions, ...item.permissions)) {
+                    return null;
+                }
+
+                const Icon = item.icon;
+                const isActive = item.match === 'exact' ? url === item.href : url.startsWith(item.href);
+
+                return (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`${styles.item} ${isActive ? styles.itemActive : ''}`}
+                    >
+                        <Icon />
+                        {item.label(t)}
+                    </Link>
+                );
+            })}
         </nav>
     );
 }
