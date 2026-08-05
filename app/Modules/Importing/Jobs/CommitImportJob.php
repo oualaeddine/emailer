@@ -21,6 +21,11 @@ class CommitImportJob implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
+     * docs/24-queue-management.md §24.1 — `imports` queue.
+     */
+    public string $queue = 'imports';
+
+    /**
      * @param  list<int>  $excludedRowIds
      */
     public function __construct(private readonly int $importJobId, private readonly array $excludedRowIds = [])

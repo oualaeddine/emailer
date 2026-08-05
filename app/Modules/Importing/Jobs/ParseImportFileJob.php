@@ -25,6 +25,11 @@ class ParseImportFileJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * docs/24-queue-management.md §24.1 — `imports` queue.
+     */
+    public string $queue = 'imports';
+
     public function __construct(private readonly int $importJobId)
     {
     }
