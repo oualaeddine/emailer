@@ -43,6 +43,14 @@ class SendEmailJob implements ShouldQueue
     public int $tries = 1;
 
     /**
+     * docs/24-queue-management.md §24.1 — dispatched only from
+     * ComposerSendService (direct/transactional composition, not chunked
+     * campaign dispatch), so it belongs on the highest-priority
+     * `smtp-send-high` queue rather than the campaign-throughput queue.
+     */
+    public string $queue = 'smtp-send-high';
+
+    /**
      * @param  list<int>  $excludedAccountIds  accounts already tried and failed for this message (Failover Engine, §17.8)
      */
     public function __construct(

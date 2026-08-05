@@ -1,6 +1,8 @@
 <?php
 
 use App\Modules\Suppression\Http\Controllers\UnsubscribeController;
+use App\Modules\Tracking\Http\Controllers\TrackClickController;
+use App\Modules\Tracking\Http\Controllers\TrackOpenController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,4 +38,30 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware('signed')->group(function (): void {
     Route::get('unsubscribe/{token}', [UnsubscribeController::class, 'show'])->name('unsubscribe.show');
     Route::post('unsubscribe/{token}', [UnsubscribeController::class, 'confirm'])->name('unsubscribe.confirm');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Public Open/Click Tracking Routes (WP-21)
+|--------------------------------------------------------------------------
+| docs/21-open-click-tracking.md §21.1-21.2 — GET /t/o/{message}.gif
+| (tracking pixel) and GET /t/c/{message}?url=... (click redirect): public,
+| unauthenticated, no session guard, same rationale as the unsubscribe
+| group above — its own top-level group gated by the `signed` URL
+| middleware rather than a member of `guest`/`auth`, mirroring that
+| group's exact pattern.
+|
+| `{message}` binds via Message::getRouteKeyName() (`uuid`,
+| docs/04-database-design.md §4.10) and is constrained to the UUID shape
+| so the literal `.gif` suffix on the pixel route can't be swallowed into
+| the parameter.
+*/
+Route::middleware('signed')->group(function (): void {
+    Route::get('t/o/{message}.gif', [TrackOpenController::class, 'open'])
+        ->where('message', '[0-9a-fA-F-]{36}')
+        ->name('tracking.open');
+
+    Route::get('t/c/{message}', [TrackClickController::class, 'redirect'])
+        ->where('message', '[0-9a-fA-F-]{36}')
+        ->name('tracking.click');
 });

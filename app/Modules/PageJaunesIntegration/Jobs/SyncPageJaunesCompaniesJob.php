@@ -22,6 +22,15 @@ class SyncPageJaunesCompaniesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * docs/24-queue-management.md §24.1 — `maintenance` queue. This is the
+     * periodic company-data reconciliation sweep (resumable cursor sync),
+     * distinct from the `imports` queue's user-initiated file processing
+     * (`ParseImportFileJob`/`CommitImportJob`), so it belongs with the
+     * other low-priority background/health-probe workloads.
+     */
+    public string $queue = 'maintenance';
+
     private const PROGRESS_KEY = 'pagejaunes.last_synced_company_id';
 
     private const CHUNK_SIZE = 500;
