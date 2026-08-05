@@ -33,4 +33,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/verification.php';
     require __DIR__.'/api/audit.php';
     require __DIR__.'/api/reporting.php';
+    require __DIR__.'/api/notifications.php';
 });

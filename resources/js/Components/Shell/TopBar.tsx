@@ -14,6 +14,7 @@ import { SignOutRegular } from '@fluentui/react-icons';
 import { router } from '@inertiajs/react';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import { useText } from '@/Hooks/useText';
+import { NotificationBell } from '@/Components/Shell/NotificationBell';
 
 const useStyles = makeStyles({
     root: {
@@ -49,6 +50,7 @@ export function TopBar({ user }: TopBarProps) {
         <header className={styles.root}>
             <span className={styles.brand}>PageJaunes Mailer</span>
             <Toolbar>
+                <NotificationBell />
                 <Menu>
                     <MenuTrigger disableButtonEnhancement>
                         <ToolbarButton

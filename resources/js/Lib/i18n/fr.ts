@@ -403,6 +403,18 @@ export const fr = {
         entityId: 'ID entité',
         ipAddress: 'Adresse IP',
     },
+    // docs/41-notification-center.md §41.5 — Top Bar bell icon + panel.
+    // New top-level namespace (WP-34): unlike the WP-00 nav-labeled modules,
+    // the notification bell was never a nav-rail item, so no placeholder
+    // key existed here before this addition.
+    notifications: {
+        title: 'Notifications',
+        markAllRead: 'Tout marquer comme lu',
+        noNotifications: 'Aucune notification',
+        unreadAriaLabel: 'notifications non lues',
+        loading: 'Chargement des notifications…',
+        loadError: 'Impossible de charger les notifications.',
+    },
 } as const;
 
 export type TranslationDictionary = typeof fr;
