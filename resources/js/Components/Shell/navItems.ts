@@ -122,4 +122,15 @@ export const navItems: NavItem[] = [
         match: 'exact',
         permissions: ['suppression.view'],
     },
+    {
+        href: '/mailbox',
+        // Reuses the Compose entry's MailIcon rather than guessing at an
+        // unverified `MailInboxRegular`/`MailInboxFilled` import — this repo
+        // has no npm/tsc available to confirm icon names exist before the
+        // wave's build gate (docs/42-parallel-execution-plan.md §42.9).
+        icon: MailIcon,
+        label: (t) => t.nav.mailbox,
+        match: 'exact',
+        permissions: ['mailbox.view_own', 'mailbox.view_all'],
+    },
 ];

@@ -36,4 +36,5 @@ Route::get('templates', fn () => Inertia::render('Templates/Index'))->name('temp
 
 Route::get('smtp', fn () => Inertia::render('Smtp/Index'))->name('smtp.index');
 
-require __DIR__.'/web/suppression.php';
+require __DIR__.'/suppression.php';
+require __DIR__.'/mailbox.php';
