@@ -143,4 +143,14 @@ export const navItems: NavItem[] = [
         match: 'exact',
         permissions: ['campaigns.view'],
     },
+    {
+        href: '/admin/audit-log',
+        // Reuses the Templates entry's DocumentIcon (already imported above)
+        // rather than guessing an unverified icon export name, mirroring
+        // the `/mailbox` entry's rationale above.
+        icon: DocumentIcon,
+        label: (t) => t.nav.audit,
+        match: 'exact',
+        permissions: ['audit.view'],
+    },
 ];

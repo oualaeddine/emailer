@@ -39,3 +39,4 @@ Route::get('smtp', fn () => Inertia::render('Smtp/Index'))->name('smtp.index');
 require __DIR__.'/suppression.php';
 require __DIR__.'/mailbox.php';
 require __DIR__.'/campaigns.php';
+require __DIR__.'/audit.php';

@@ -351,6 +351,27 @@ export const fr = {
         target: 'Cible',
         timestamp: 'Date',
         export: 'Exporter',
+        // WP-32 (docs/42-parallel-execution-plan.md §42.8) additions —
+        // the six keys above predate this work package (Wave-0 nav
+        // placeholder); left untouched, new keys appended below.
+        userIdFilter: 'ID utilisateur',
+        actionFilter: 'Action',
+        auditableTypeFilter: "Type d'entité",
+        dateFromFilter: 'Date de début',
+        dateToFilter: 'Date de fin',
+        resetFilters: 'Réinitialiser les filtres',
+        viewDetails: 'Voir les détails',
+        detailsTitle: "Détails de l'événement",
+        oldValues: 'Anciennes valeurs',
+        newValues: 'Nouvelles valeurs',
+        noValues: 'Aucune valeur enregistrée',
+        system: 'Système',
+        loadMore: 'Charger plus',
+        noResults: 'Aucun résultat',
+        close: 'Fermer',
+        entityType: "Type d'entité",
+        entityId: 'ID entité',
+        ipAddress: 'Adresse IP',
     },
 } as const;
 
