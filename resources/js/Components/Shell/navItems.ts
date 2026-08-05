@@ -16,6 +16,8 @@ import {
     DocumentFilled,
     ServerRegular,
     ServerFilled,
+    ShieldProhibitedRegular,
+    ShieldProhibitedFilled,
     bundleIcon,
 } from '@fluentui/react-icons';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
@@ -28,6 +30,7 @@ const ContactCardIcon = bundleIcon(ContactCardFilled, ContactCardRegular);
 const MailIcon = bundleIcon(MailFilled, MailRegular);
 const DocumentIcon = bundleIcon(DocumentFilled, DocumentRegular);
 const ServerIcon = bundleIcon(ServerFilled, ServerRegular);
+const ShieldProhibitedIcon = bundleIcon(ShieldProhibitedFilled, ShieldProhibitedRegular);
 
 /**
  * docs/08-navigation.md §8.2 — Primary Navigation Tree.
@@ -111,5 +114,23 @@ export const navItems: NavItem[] = [
         label: (t) => t.nav.import,
         match: 'exact',
         permissions: ['recipients.import'],
+    },
+    {
+        href: '/suppression',
+        icon: ShieldProhibitedIcon,
+        label: (t) => t.nav.suppression,
+        match: 'exact',
+        permissions: ['suppression.view'],
+    },
+    {
+        href: '/mailbox',
+        // Reuses the Compose entry's MailIcon rather than guessing at an
+        // unverified `MailInboxRegular`/`MailInboxFilled` import — this repo
+        // has no npm/tsc available to confirm icon names exist before the
+        // wave's build gate (docs/42-parallel-execution-plan.md §42.9).
+        icon: MailIcon,
+        label: (t) => t.nav.mailbox,
+        match: 'exact',
+        permissions: ['mailbox.view_own', 'mailbox.view_all'],
     },
 ];
