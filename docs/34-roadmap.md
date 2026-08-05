@@ -4,6 +4,8 @@
 
 This documentation set specifies a complete v1 architecture. This roadmap identifies (a) suggested build-order phasing for v1 itself, and (b) explicitly deferred capabilities noted throughout the documents as "roadmap items," so implementers know what was deliberately scoped out rather than overlooked.
 
+> **Execution status & orchestration:** Phases 0–2 are implemented and Phase 3 is ~80% complete on `main`. The remaining scope is decomposed into parallel-agent work packages — with per-package read lists, file-ownership boundaries, and a wave schedule — in [42-parallel-execution-plan.md](42-parallel-execution-plan.md). That document tracks *how* the rest gets built; this one remains the *what/why*.
+
 ## 34.2 Suggested Build Phases (v1)
 
 | Phase | Scope | Rationale |
