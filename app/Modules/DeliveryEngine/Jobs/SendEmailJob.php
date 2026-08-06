@@ -47,16 +47,18 @@ class SendEmailJob implements ShouldQueue
      * ComposerSendService (direct/transactional composition, not chunked
      * campaign dispatch), so it belongs on the highest-priority
      * `smtp-send-high` queue rather than the campaign-throughput queue.
-     */
-    public string $queue = 'smtp-send-high';
-
-    /**
+     *
+     * Set in the constructor rather than as a typed property — `Queueable`
+     * already declares an untyped `$queue`, and redeclaring it with a type
+     * is a fatal trait-composition conflict.
+     *
      * @param  list<int>  $excludedAccountIds  accounts already tried and failed for this message (Failover Engine, §17.8)
      */
     public function __construct(
         public readonly int $messageId,
         public readonly array $excludedAccountIds = [],
     ) {
+        $this->queue = 'smtp-send-high';
     }
 
     public function handle(

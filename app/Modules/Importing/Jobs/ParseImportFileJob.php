@@ -27,11 +27,14 @@ class ParseImportFileJob implements ShouldQueue
 
     /**
      * docs/24-queue-management.md §24.1 — `imports` queue.
+     *
+     * Set in the constructor rather than as a typed property — `Queueable`
+     * already declares an untyped `$queue`, and redeclaring it with a type
+     * is a fatal trait-composition conflict.
      */
-    public string $queue = 'imports';
-
     public function __construct(private readonly int $importJobId)
     {
+        $this->queue = 'imports';
     }
 
     public function handle(

@@ -22,14 +22,16 @@ class CommitImportJob implements ShouldQueue, ShouldBeUnique
 
     /**
      * docs/24-queue-management.md §24.1 — `imports` queue.
-     */
-    public string $queue = 'imports';
-
-    /**
+     *
+     * Set in the constructor rather than as a typed property — `Queueable`
+     * already declares an untyped `$queue`, and redeclaring it with a type
+     * is a fatal trait-composition conflict.
+     *
      * @param  list<int>  $excludedRowIds
      */
     public function __construct(private readonly int $importJobId, private readonly array $excludedRowIds = [])
     {
+        $this->queue = 'imports';
     }
 
     public function uniqueId(): string
