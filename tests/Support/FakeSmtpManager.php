@@ -37,7 +37,9 @@ class FakeSmtpManager implements SmtpManagerContract
 
         self::$sent[] = [
             'account_id' => $account->id,
-            'to' => (string) $email->getTo()[0],
+            // `Address` has no `__toString()` — `getAddress()` is the plain
+            // email string accessor.
+            'to' => $email->getTo()[0]->getAddress(),
             'subject' => (string) $email->getSubject(),
         ];
     }
