@@ -28,13 +28,16 @@ class BulkVerifyRecipientsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public string $queue = 'maintenance';
-
     /**
+     * Set in the constructor rather than as a typed property — `Queueable`
+     * already declares an untyped `$queue`, and redeclaring it with a type
+     * is a fatal trait-composition conflict.
+     *
      * @param  list<string>  $recipientUuids
      */
     public function __construct(private readonly array $recipientUuids)
     {
+        $this->queue = 'maintenance';
     }
 
     public function handle(VerificationService $verification): void

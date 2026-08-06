@@ -98,11 +98,16 @@ const useStyles = makeStyles({
         padding: tokens.spacingVerticalS,
         borderRadius: tokens.borderRadiusMedium,
         cursor: 'pointer',
+        // `borderColor`/`borderWidth`/`borderStyle` longhand properties hit a
+        // csstype/@griffel type-inference bug (any value assigned to them
+        // fails tsc with "Type 'string' is not assignable to type
+        // 'undefined'") — use the `border` shorthand instead, which is
+        // unaffected.
         border: `${tokens.strokeWidthThin} solid transparent`,
     },
     listRowSelected: {
         backgroundColor: tokens.colorBrandBackground2,
-        borderColor: tokens.colorBrandStroke1,
+        border: `${tokens.strokeWidthThin} solid ${tokens.colorBrandStroke1}`,
     },
     listRowTop: {
         display: 'flex',

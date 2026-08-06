@@ -22,18 +22,25 @@ class SyncPageJaunesCompaniesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private const PROGRESS_KEY = 'pagejaunes.last_synced_company_id';
+
+    private const CHUNK_SIZE = 500;
+
     /**
      * docs/24-queue-management.md §24.1 — `maintenance` queue. This is the
      * periodic company-data reconciliation sweep (resumable cursor sync),
      * distinct from the `imports` queue's user-initiated file processing
      * (`ParseImportFileJob`/`CommitImportJob`), so it belongs with the
      * other low-priority background/health-probe workloads.
+     *
+     * Set in the constructor rather than as a typed property — `Queueable`
+     * already declares an untyped `$queue`, and redeclaring it with a type
+     * is a fatal trait-composition conflict.
      */
-    public string $queue = 'maintenance';
-
-    private const PROGRESS_KEY = 'pagejaunes.last_synced_company_id';
-
-    private const CHUNK_SIZE = 500;
+    public function __construct()
+    {
+        $this->queue = 'maintenance';
+    }
 
     public function handle(PageJaunesSyncService $sync, SettingsService $settings): void
     {
