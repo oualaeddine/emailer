@@ -130,7 +130,7 @@ class CampaignLifecycleTest extends TestCase
         $response = $this->actingAs($operator)->postJson('/api/v1/campaigns', $this->apiPayload($template, $list));
 
         $response->assertCreated();
-        $response->assertJsonPath('status', CampaignStatus::Draft->value);
+        $response->assertJsonPath('data.status', CampaignStatus::Draft->value);
         $this->assertDatabaseHas('campaigns', ['name' => 'Campagne Test', 'status' => 'draft']);
     }
 
@@ -205,7 +205,7 @@ class CampaignLifecycleTest extends TestCase
 
         $response = $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/send");
         $response->assertOk();
-        $response->assertJsonPath('status', CampaignStatus::Running->value);
+        $response->assertJsonPath('data.status', CampaignStatus::Running->value);
 
         Bus::assertDispatched(DispatchCampaignJob::class);
     }
@@ -240,12 +240,12 @@ class CampaignLifecycleTest extends TestCase
 
         $response = $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/pause");
         $response->assertOk();
-        $response->assertJsonPath('status', CampaignStatus::Paused->value);
+        $response->assertJsonPath('data.status', CampaignStatus::Paused->value);
 
         Bus::fake();
         $response = $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/resume");
         $response->assertOk();
-        $response->assertJsonPath('status', CampaignStatus::Running->value);
+        $response->assertJsonPath('data.status', CampaignStatus::Running->value);
         Bus::assertDispatched(DispatchCampaignJob::class);
     }
 
@@ -283,7 +283,7 @@ class CampaignLifecycleTest extends TestCase
             $response = $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/cancel");
 
             $response->assertOk();
-            $response->assertJsonPath('status', CampaignStatus::Cancelled->value);
+            $response->assertJsonPath('data.status', CampaignStatus::Cancelled->value);
         }
     }
 
@@ -386,10 +386,10 @@ class CampaignLifecycleTest extends TestCase
         $response = $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/clone");
 
         $response->assertCreated();
-        $response->assertJsonPath('status', CampaignStatus::Draft->value);
-        $response->assertJsonPath('scheduled_at', null);
-        $response->assertJsonPath('subject', $campaign->subject);
-        $response->assertJsonPath('name', 'Copie de '.$campaign->name);
+        $response->assertJsonPath('data.status', CampaignStatus::Draft->value);
+        $response->assertJsonPath('data.scheduled_at', null);
+        $response->assertJsonPath('data.subject', $campaign->subject);
+        $response->assertJsonPath('data.name', 'Copie de '.$campaign->name);
 
         $this->assertDatabaseHas('campaigns', [
             'cloned_from_campaign_id' => $campaign->id,

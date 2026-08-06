@@ -59,6 +59,25 @@ class ReportingTest extends TestCase
     }
 
     /**
+     * `Message::$fillable` deliberately excludes the `*_at`/`*_count`
+     * columns real code only ever mutates via direct property assignment
+     * (`Message::markStatus()`, `TrackingEventRecorder`) — never via mass
+     * assignment. Seeding historical report fixtures needs to set them
+     * directly too, so `forceFill()` here (test-only) instead of
+     * `Message::query()->create()`, which would silently drop them.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createMessage(array $attributes): Message
+    {
+        $message = new Message();
+        $message->forceFill($attributes);
+        $message->save();
+
+        return $message;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function messageAttributes(?Campaign $campaign, ?SmtpAccount $smtpAccount, MessageStatus $status, ?\Illuminate\Support\Carbon $queuedAt = null): array
@@ -75,12 +94,16 @@ class ReportingTest extends TestCase
             'click_count' => 0,
         ];
 
+        // `array_merge`, not `+` — the `+` union operator keeps the
+        // left-hand array's value for a key that already exists, so
+        // `$attributes + ['open_count' => 2]` would silently never
+        // override the base `open_count => 0` above.
         return match ($status) {
-            MessageStatus::Delivered => $attributes + ['delivered_at' => now()],
-            MessageStatus::Opened => $attributes + ['delivered_at' => now(), 'opened_at' => now(), 'open_count' => 2],
-            MessageStatus::Clicked => $attributes + ['delivered_at' => now(), 'opened_at' => now(), 'clicked_at' => now(), 'open_count' => 1, 'click_count' => 3],
-            MessageStatus::SoftBounced, MessageStatus::HardBounced => $attributes + ['bounced_at' => now()],
-            MessageStatus::Failed => $attributes + ['failed_at' => now()],
+            MessageStatus::Delivered => array_merge($attributes, ['delivered_at' => now()]),
+            MessageStatus::Opened => array_merge($attributes, ['delivered_at' => now(), 'opened_at' => now(), 'open_count' => 2]),
+            MessageStatus::Clicked => array_merge($attributes, ['delivered_at' => now(), 'opened_at' => now(), 'clicked_at' => now(), 'open_count' => 1, 'click_count' => 3]),
+            MessageStatus::SoftBounced, MessageStatus::HardBounced => array_merge($attributes, ['bounced_at' => now()]),
+            MessageStatus::Failed => array_merge($attributes, ['failed_at' => now()]),
             default => $attributes,
         };
     }
@@ -91,11 +114,11 @@ class ReportingTest extends TestCase
         $campaign = $this->createCampaign();
 
         // 5 messages total: 1 delivered, 1 opened, 1 clicked, 1 soft-bounced, 1 failed.
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Opened));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Clicked));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::SoftBounced));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Failed));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Opened));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Clicked));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::SoftBounced));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Failed));
 
         $response = $this->actingAs($viewer)->getJson('/api/v1/reporting/summary');
 
@@ -125,9 +148,9 @@ class ReportingTest extends TestCase
         $campaignB = $this->createCampaign('Campagne B');
         $smtpAccount = $this->createSmtpAccount();
 
-        Message::query()->create($this->messageAttributes($campaignA, $smtpAccount, MessageStatus::Delivered));
-        Message::query()->create($this->messageAttributes($campaignA, $smtpAccount, MessageStatus::Delivered));
-        Message::query()->create($this->messageAttributes($campaignB, null, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaignA, $smtpAccount, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaignA, $smtpAccount, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaignB, null, MessageStatus::Delivered));
 
         $response = $this->actingAs($viewer)->getJson("/api/v1/reporting/summary?campaign_id={$campaignA->uuid}");
         $response->assertOk();
@@ -143,8 +166,8 @@ class ReportingTest extends TestCase
         $viewer = User::factory()->withRole(RoleName::Viewer)->create();
         $campaign = $this->createCampaign();
 
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered, now()->subDays(10)));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered, now()));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered, now()->subDays(10)));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered, now()));
 
         $response = $this->actingAs($viewer)->getJson(
             '/api/v1/reporting/summary?date_from='.now()->subDay()->toDateString().'&date_to='.now()->toDateString(),
@@ -159,8 +182,8 @@ class ReportingTest extends TestCase
         $manager = User::factory()->withRole(RoleName::MarketingManager)->create();
         $campaign = $this->createCampaign('Campagne X');
 
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::SoftBounced));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::SoftBounced));
 
         $response = $this->actingAs($manager)->getJson('/api/v1/reporting/campaigns');
 
@@ -174,7 +197,7 @@ class ReportingTest extends TestCase
         $smtpAccount = $this->createSmtpAccount('SMTP Principal');
         $campaign = $this->createCampaign();
 
-        Message::query()->create($this->messageAttributes($campaign, $smtpAccount, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaign, $smtpAccount, MessageStatus::Delivered));
 
         $response = $this->actingAs($manager)->getJson('/api/v1/reporting/smtp-accounts');
 
@@ -208,8 +231,8 @@ class ReportingTest extends TestCase
         $admin = User::factory()->withRole(RoleName::Administrator)->create();
         $campaign = $this->createCampaign('Campagne Export');
 
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered));
-        Message::query()->create($this->messageAttributes($campaign, null, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered));
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered));
 
         $response = $this->actingAs($admin)->get('/api/v1/reporting/export');
 

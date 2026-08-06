@@ -23,6 +23,18 @@ use Illuminate\Support\Str;
 class NotificationResource extends JsonResource
 {
     /**
+     * This resource's own `data` field (the notification payload) has the
+     * same key as Laravel's default `data` wrapper, so
+     * `ResourceResponse::haveDefaultWrapperAndDataIsUnwrapped()` sees a
+     * `data` key already present and skips wrapping — breaking the
+     * single-resource `{"data": {...}}` contract every other endpoint in
+     * this app relies on (e.g. `markNotificationAsRead()` in
+     * `Lib/api/notifications.ts` reads `response.data.data`). Force
+     * wrapping regardless.
+     */
+    public static bool $forceWrapping = true;
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array

@@ -10,6 +10,7 @@ use App\Modules\Verification\Http\Resources\VerificationResultResource;
 use App\Modules\Verification\Jobs\BulkVerifyRecipientsJob;
 use App\Modules\Verification\Services\VerificationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -30,14 +31,21 @@ class VerificationController extends Controller
      * `/api/v1/recipients/{uuid}/verify`: "synchronous, may take up to
      * provider timeout."
      */
-    public function verifySingle(string $uuid): VerificationResultResource
+    public function verifySingle(string $uuid): JsonResponse
     {
         Gate::authorize(PermissionName::RecipientsVerify->value);
 
         $recipient = $this->recipients->findByUuid($uuid);
         $result = $this->verification->verifyRecipient($recipient);
 
-        return new VerificationResultResource($result);
+        // A synchronous action endpoint (docs/29-api-specification.md
+        // §29.4), not a "create a resource collection item" endpoint — a
+        // first-time verify creates a new `VerificationResult` row while a
+        // cache-window reuse doesn't, which would otherwise leak Laravel's
+        // automatic `wasRecentlyCreated` 201 status inconsistently between
+        // the two cases. Force 200 for both, consistent with every other
+        // action endpoint in this app (e.g. Campaign send/pause/resume).
+        return (new VerificationResultResource($result))->response()->setStatusCode(200);
     }
 
     /**

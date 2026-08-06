@@ -5,6 +5,7 @@ namespace Tests\Feature\Modules\Dashboard;
 use App\Domain\Enums\RoleName;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
+use App\Modules\Identity\Models\Role;
 use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Tracking\Models\Message;
@@ -138,7 +139,12 @@ class DashboardWidgetsTest extends TestCase
 
     public function test_dashboard_view_permission_is_required(): void
     {
-        $user = User::factory()->create();
+        // All four seeded roles (including Viewer, the least privileged)
+        // grant `dashboard.view` — a bare `User::factory()->create()` would
+        // default to the Viewer role and pass authorization. Use a role
+        // with no permissions at all to exercise the negative case.
+        $roleWithNoPermissions = Role::factory()->create();
+        $user = User::factory()->create(['role_id' => $roleWithNoPermissions->id]);
 
         $this->actingAs($user)->getJson('/api/v1/dashboard/widgets')->assertForbidden();
     }

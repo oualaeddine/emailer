@@ -54,14 +54,19 @@ Route::middleware('signed')->group(function (): void {
 | `{message}` binds via Message::getRouteKeyName() (`uuid`,
 | docs/04-database-design.md §4.10) and is constrained to the UUID shape
 | so the literal `.gif` suffix on the pixel route can't be swallowed into
-| the parameter.
+| the parameter. The constraint anchors dash positions (8-4-4-4-12), not
+| just character class + length — `messages.uuid` is a native Postgres
+| `uuid` column, which throws a raw SQL exception (500) for a
+| malformed-but-same-length value like 36 `a`s; a route pattern that
+| actually enforces UUID shape rejects it at the router (404) before it
+| ever reaches the database.
 */
 Route::middleware('signed')->group(function (): void {
     Route::get('t/o/{message}.gif', [TrackOpenController::class, 'open'])
-        ->where('message', '[0-9a-fA-F-]{36}')
+        ->whereUuid('message')
         ->name('tracking.open');
 
     Route::get('t/c/{message}', [TrackClickController::class, 'redirect'])
-        ->where('message', '[0-9a-fA-F-]{36}')
+        ->whereUuid('message')
         ->name('tracking.click');
 });
