@@ -36,20 +36,23 @@ class QueueStatsTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonStructure([
-            'horizon_available',
-            'queues' => [
-                '*' => ['name', 'size'],
-            ],
-            'failed_jobs' => [
-                'count',
-                'recent',
+            'data' => [
+                'horizon_available',
+                'queues' => [
+                    '*' => ['name', 'size'],
+                ],
+                'failed_jobs' => [
+                    'count',
+                    'recent',
+                ],
             ],
         ]);
-        // Horizon isn't installed in this environment (composer.json note,
-        // WP-22): the service must degrade gracefully rather than error.
-        $response->assertJsonPath('horizon_available', false);
-        $response->assertJsonPath('failed_jobs.count', 0);
-        $response->assertJsonPath('failed_jobs.recent', []);
+        // Horizon is a real installed dependency (composer.json/lock) in
+        // this repo, so QueueStatsService::horizonAvailable()'s
+        // class_exists() check reports it present.
+        $response->assertJsonPath('data.horizon_available', true);
+        $response->assertJsonPath('data.failed_jobs.count', 0);
+        $response->assertJsonPath('data.failed_jobs.recent', []);
     }
 
     public function test_marketing_manager_can_read_queue_stats(): void
@@ -104,8 +107,8 @@ class QueueStatsTest extends TestCase
         $response = $this->actingAs($admin)->getJson('/api/v1/queues/metrics');
 
         $response->assertOk();
-        $response->assertJsonPath('failed_jobs.count', 1);
-        $response->assertJsonPath('failed_jobs.recent.0.queue', 'smtp-send-high');
-        $response->assertJsonPath('failed_jobs.recent.0.connection', 'redis');
+        $response->assertJsonPath('data.failed_jobs.count', 1);
+        $response->assertJsonPath('data.failed_jobs.recent.0.queue', 'smtp-send-high');
+        $response->assertJsonPath('data.failed_jobs.recent.0.connection', 'redis');
     }
 }

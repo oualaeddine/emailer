@@ -37,8 +37,8 @@ class VerificationManagementTest extends TestCase
         $response = $this->actingAs($operator)->postJson("/api/v1/recipients/{$recipient->uuid}/verify");
 
         $response->assertOk();
-        $response->assertJsonPath('email', 'valide@example.com');
-        $response->assertJsonPath('status', 'valid');
+        $response->assertJsonPath('data.email', 'valide@example.com');
+        $response->assertJsonPath('data.status', 'valid');
         $this->assertDatabaseHas('verification_results', [
             'email' => 'valide@example.com',
             'verdict' => 'deliverable',
@@ -56,7 +56,7 @@ class VerificationManagementTest extends TestCase
         $response = $this->actingAs($operator)->postJson("/api/v1/recipients/{$recipient->uuid}/verify");
 
         $response->assertOk();
-        $response->assertJsonPath('status', 'invalid');
+        $response->assertJsonPath('data.status', 'invalid');
         $this->assertSame(RecipientStatus::Invalid->value, $recipient->fresh()->status);
     }
 
@@ -74,7 +74,7 @@ class VerificationManagementTest extends TestCase
         FakeVerificationProvider::$verdict = VerificationVerdict::Undeliverable;
         $response = $this->actingAs($operator)->postJson("/api/v1/recipients/{$recipient->uuid}/verify");
 
-        $response->assertJsonPath('status', 'valid');
+        $response->assertJsonPath('data.status', 'valid');
         $this->assertSame(1, \App\Modules\Verification\Models\VerificationResult::query()->where('email', 'cache@example.com')->count());
     }
 

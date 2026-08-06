@@ -29,7 +29,15 @@ class OpenClickTrackingTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'image/gif');
-        $response->assertHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        // Symfony's ResponseHeaderBag parses `Cache-Control` into a
+        // directive set and re-serializes it (reordered, with `private`
+        // appended) regardless of the exact string the controller set —
+        // assert the required directives are present rather than an exact
+        // string match.
+        $cacheControl = $response->headers->get('Cache-Control');
+        foreach (['no-store', 'no-cache', 'must-revalidate'] as $directive) {
+            $this->assertStringContainsString($directive, $cacheControl);
+        }
 
         $message->refresh();
         $this->assertSame(1, $message->open_count);
