@@ -32,6 +32,12 @@ export const fr = {
         queues: "Files d'attente",
         reporting: 'Rapports',
         audit: "Journal d'audit",
+        groups: {
+            messaging: 'Messagerie',
+            campaigns: 'Campagnes',
+            contacts: 'Contacts',
+            administration: 'Administration',
+        },
     },
     auth: {
         loginTitle: 'Connexion',

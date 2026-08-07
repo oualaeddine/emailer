@@ -17,7 +17,7 @@ class SettingsSeeder extends Seeder
         $defaults = [
             BrandingSettingKey::OrganizationName->value => 'PageJaunes Mailer',
             BrandingSettingKey::LogoPath->value => null,
-            BrandingSettingKey::BrandColor->value => '#7740D6',
+            BrandingSettingKey::BrandColor->value => '#DF0A0A',
             BrandingSettingKey::DefaultTheme->value => 'light',
         ];
 
