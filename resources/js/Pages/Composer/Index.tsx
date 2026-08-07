@@ -41,8 +41,11 @@ const useStyles = makeStyles({
     },
     toolbarRow: {
         display: 'flex',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'center',
+        rowGap: tokens.spacingVerticalS,
+        columnGap: tokens.spacingHorizontalS,
     },
     previewFrame: {
         border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke1}`,
@@ -180,7 +183,7 @@ export default function ComposerIndex() {
             <div className={styles.layout}>
                 <div className={styles.toolbarRow}>
                     <Title1>{t.composer.title}</Title1>
-                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalS, alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalS, alignItems: 'center' }}>
                         {savingState === 'saving' && <Text size={200}>{t.composer.saving}</Text>}
                         {savingState === 'saved' && draft && (
                             <Text size={200}>

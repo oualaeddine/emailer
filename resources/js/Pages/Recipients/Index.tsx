@@ -40,6 +40,10 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '680px',
     },
 });
 
@@ -108,7 +112,7 @@ export default function Index() {
             renderHeaderCell: () => t.recipients.status,
             renderCell: (r) => (
                 <Badge appearance="tint" color={STATUS_COLOR[r.status] ?? 'informative'}>
-                    {r.status}
+                    {t.recipients[r.status as 'active' | 'suppressed' | 'invalid'] ?? r.status}
                 </Badge>
             ),
         }),
@@ -144,7 +148,13 @@ export default function Index() {
                 {recipients.length === 0 ? (
                     <EmptyState icon={ContactCardRegular} title={t.recipients.emptyTitle} body={t.recipients.emptyBody} />
                 ) : (
-                    <DataGrid items={recipients} columns={columns} getRowId={(r) => r.id} resizableColumns>
+                    <div className={styles.gridScroll}>
+                    <DataGrid
+                        items={recipients}
+                        columns={columns}
+                        getRowId={(r) => r.id}
+                        resizableColumns
+                    >
                         <DataGridHeader>
                             <DataGridRow>
                                 {({ renderHeaderCell }) => (
@@ -160,6 +170,7 @@ export default function Index() {
                             )}
                         </DataGridBody>
                     </DataGrid>
+                    </div>
                 )}
             </div>
             <RecipientFormDialog

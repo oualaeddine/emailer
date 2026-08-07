@@ -34,6 +34,10 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '640px',
     },
 });
 
@@ -127,6 +131,7 @@ export default function SmtpIndex() {
                 </Toolbar>
             </div>
             <div className={styles.card}>
+                <div className={styles.gridScroll}>
                 <DataGrid items={accounts} columns={columns} getRowId={(a) => a.id} resizableColumns>
                     <DataGridHeader>
                         <DataGridRow>
@@ -141,6 +146,7 @@ export default function SmtpIndex() {
                         )}
                     </DataGridBody>
                 </DataGrid>
+                </div>
             </div>
             <SmtpAccountFormDialog open={dialogOpen} onOpenChange={setDialogOpen} onSubmit={handleCreate} />
         </AppShell>

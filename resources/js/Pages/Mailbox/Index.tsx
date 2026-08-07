@@ -61,6 +61,10 @@ function folderLabel(t: TranslationDictionary, folder: FolderKey): string {
     return t.mailbox[folder];
 }
 
+function statusLabel(t: TranslationDictionary, status: string): string {
+    return t.mailbox.statusLabels[status as keyof typeof t.mailbox.statusLabels] ?? status;
+}
+
 function formatDate(value: string | null | undefined): string {
     return value ? new Date(value).toLocaleString('fr-FR') : '—';
 }
@@ -343,7 +347,7 @@ export default function MailboxIndex() {
                                 <div className={styles.listRowTop}>
                                     <Text weight="semibold">{message.recipient_email}</Text>
                                     <Badge appearance="tint" color={STATUS_COLOR[message.status] ?? 'informative'}>
-                                        {message.status}
+                                        {statusLabel(t, message.status)}
                                     </Badge>
                                 </div>
                                 <Text size={200}>{message.subject}</Text>
@@ -399,7 +403,7 @@ export default function MailboxIndex() {
                             <Text block>{detail.recipient_email}</Text>
                             <div style={{ margin: `${tokens.spacingVerticalM} 0` }}>
                                 <Badge appearance="tint" color={STATUS_COLOR[detail.status] ?? 'informative'}>
-                                    {detail.status}
+                                    {statusLabel(t, detail.status)}
                                 </Badge>
                             </div>
 

@@ -52,6 +52,10 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '760px',
     },
     nameButton: {
         padding: 0,
@@ -222,6 +226,7 @@ export default function CampaignsIndex() {
                 </Toolbar>
             </div>
             <div className={styles.card}>
+                <div className={styles.gridScroll}>
                 <DataGrid items={campaigns} columns={columns} getRowId={(c) => c.id} resizableColumns>
                     <DataGridHeader>
                         <DataGridRow>
@@ -236,6 +241,7 @@ export default function CampaignsIndex() {
                         )}
                     </DataGridBody>
                 </DataGrid>
+                </div>
             </div>
 
             <CampaignWizardDialog open={wizardOpen} onOpenChange={setWizardOpen} onCreated={load} />
@@ -244,7 +250,7 @@ export default function CampaignsIndex() {
                 open={selectedId !== null}
                 onOpenChange={(_, data) => !data.open && setSelectedId(null)}
                 position="end"
-                style={{ width: '640px' }}
+                style={{ width: 'min(640px, 100vw)' }}
             >
                 <DrawerHeader>
                     <DrawerHeaderTitle>{t.campaigns.title}</DrawerHeaderTitle>

@@ -67,6 +67,10 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '560px',
     },
 });
 
@@ -211,6 +215,7 @@ export default function SuppressionIndex() {
                 {entries.length === 0 ? (
                     <EmptyState icon={ShieldProhibitedRegular} title={t.suppression.noResults} />
                 ) : (
+                    <div className={styles.gridScroll}>
                     <DataGrid items={entries} columns={columns} getRowId={(entry) => entry.id} resizableColumns>
                         <DataGridHeader>
                             <DataGridRow>
@@ -225,6 +230,7 @@ export default function SuppressionIndex() {
                             )}
                         </DataGridBody>
                     </DataGrid>
+                    </div>
                 )}
             </div>
             <SuppressionEntryFormDialog

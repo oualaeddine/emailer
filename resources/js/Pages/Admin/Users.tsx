@@ -9,8 +9,10 @@ import {
     DataGridHeader,
     DataGridHeaderCell,
     DataGridRow,
+    Text,
     Title1,
     Toolbar,
+    Tooltip,
     createTableColumn,
     makeStyles,
     tokens,
@@ -34,6 +36,17 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '760px',
+    },
+    truncatedCell: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        display: 'block',
+        maxWidth: '320px',
     },
 });
 
@@ -111,7 +124,15 @@ export default function Users() {
         createTableColumn<User>({
             columnId: 'role',
             renderHeaderCell: () => t.users.role,
-            renderCell: (user) => user.role?.description ?? user.role?.name ?? '—',
+            renderCell: (user) => {
+                const label = user.role?.description ?? user.role?.name ?? '—';
+
+                return (
+                    <Tooltip content={label} relationship="label">
+                        <Text className={styles.truncatedCell}>{label}</Text>
+                    </Tooltip>
+                );
+            },
         }),
         createTableColumn<User>({
             columnId: 'status',
@@ -154,6 +175,7 @@ export default function Users() {
                 </Toolbar>
             </div>
             <div className={styles.card}>
+                <div className={styles.gridScroll}>
                 <DataGrid items={users} columns={columns} getRowId={(user) => user.id} resizableColumns>
                     <DataGridHeader>
                         <DataGridRow>
@@ -170,6 +192,7 @@ export default function Users() {
                         )}
                     </DataGridBody>
                 </DataGrid>
+                </div>
             </div>
             <UserFormDialog
                 open={dialogOpen}
