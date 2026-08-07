@@ -41,6 +41,15 @@ const useStyles = makeStyles({
         overflow: 'hidden',
         backgroundColor: tokens.colorNeutralBackground3,
     },
+    card: {
+        transitionProperty: 'box-shadow, transform',
+        transitionDuration: tokens.durationNormal,
+        transitionTimingFunction: tokens.curveEasyEase,
+        ':hover': {
+            boxShadow: tokens.shadow8,
+            transform: 'translateY(-2px)',
+        },
+    },
     cardTop: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -104,7 +113,7 @@ export default function TemplatesIndex() {
             </div>
             <div className={styles.grid}>
                 {templates.map((template) => (
-                    <Card key={template.id}>
+                    <Card key={template.id} className={styles.card}>
                         <div className={styles.cardTop}>
                             <CardHeader
                                 header={<Text weight="semibold">{template.name}</Text>}
@@ -139,7 +148,11 @@ export default function TemplatesIndex() {
                             />
                         </CardPreview>
                         <Text size={200}>{t.templates.usage.replace('%d', String(template.usage_count))}</Text>
-                        {template.is_archived && <Badge color="subtle">{t.templates.archived}</Badge>}
+                        {template.is_archived && (
+                            <Badge appearance="tint" color="subtle">
+                                {t.templates.archived}
+                            </Badge>
+                        )}
                     </Card>
                 ))}
             </div>

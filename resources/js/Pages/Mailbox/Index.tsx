@@ -13,8 +13,17 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
-import { SearchRegular } from '@fluentui/react-icons';
+import {
+    ArchiveRegular,
+    ClockRegular,
+    DrawerRegular,
+    MailInboxRegular,
+    SearchRegular,
+    SendRegular,
+} from '@fluentui/react-icons';
+import type { ComponentType } from 'react';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
 import { hasPermission } from '@/Lib/permissions';
@@ -267,12 +276,12 @@ export default function MailboxIndex() {
         }
     }
 
-    const emptyCopy: Record<FolderKey, { title: string; body: string }> = {
-        inbox: { title: t.mailbox.emptyInboxTitle, body: t.mailbox.emptyInboxBody },
-        drafts: { title: t.mailbox.emptyDraftsTitle, body: t.mailbox.emptyDraftsBody },
-        outbox: { title: t.mailbox.emptyOutboxTitle, body: t.mailbox.emptyOutboxBody },
-        scheduled: { title: t.mailbox.emptyScheduledTitle, body: t.mailbox.emptyScheduledBody },
-        sent: { title: t.mailbox.emptySentTitle, body: t.mailbox.emptySentBody },
+    const emptyCopy: Record<FolderKey, { title: string; body: string; icon: ComponentType }> = {
+        inbox: { title: t.mailbox.emptyInboxTitle, body: t.mailbox.emptyInboxBody, icon: MailInboxRegular },
+        drafts: { title: t.mailbox.emptyDraftsTitle, body: t.mailbox.emptyDraftsBody, icon: DrawerRegular },
+        outbox: { title: t.mailbox.emptyOutboxTitle, body: t.mailbox.emptyOutboxBody, icon: SendRegular },
+        scheduled: { title: t.mailbox.emptyScheduledTitle, body: t.mailbox.emptyScheduledBody, icon: ClockRegular },
+        sent: { title: t.mailbox.emptySentTitle, body: t.mailbox.emptySentBody, icon: ArchiveRegular },
     };
 
     const isMessageFolder = folder === 'outbox' || folder === 'scheduled' || folder === 'sent';
@@ -333,7 +342,9 @@ export default function MailboxIndex() {
                             >
                                 <div className={styles.listRowTop}>
                                     <Text weight="semibold">{message.recipient_email}</Text>
-                                    <Badge color={STATUS_COLOR[message.status] ?? 'informative'}>{message.status}</Badge>
+                                    <Badge appearance="tint" color={STATUS_COLOR[message.status] ?? 'informative'}>
+                                        {message.status}
+                                    </Badge>
                                 </div>
                                 <Text size={200}>{message.subject}</Text>
                                 <Text size={200}>{formatDate(message.sent_at ?? message.queued_at)}</Text>
@@ -357,12 +368,11 @@ export default function MailboxIndex() {
 
                 <div className={styles.readingPane}>
                     {showEmptyState && (
-                        <div className={styles.emptyState}>
-                            <Text weight="semibold" size={500}>
-                                {emptyCopy[folder].title}
-                            </Text>
-                            <Text>{emptyCopy[folder].body}</Text>
-                        </div>
+                        <EmptyState
+                            icon={emptyCopy[folder].icon}
+                            title={emptyCopy[folder].title}
+                            body={emptyCopy[folder].body}
+                        />
                     )}
 
                     {!showEmptyState && folder === 'drafts' && (
@@ -388,7 +398,9 @@ export default function MailboxIndex() {
                             </Text>
                             <Text block>{detail.recipient_email}</Text>
                             <div style={{ margin: `${tokens.spacingVerticalM} 0` }}>
-                                <Badge color={STATUS_COLOR[detail.status] ?? 'informative'}>{detail.status}</Badge>
+                                <Badge appearance="tint" color={STATUS_COLOR[detail.status] ?? 'informative'}>
+                                    {detail.status}
+                                </Badge>
                             </div>
 
                             <div className={styles.timelineRow}>

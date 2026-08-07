@@ -117,7 +117,7 @@ export default function Users() {
             columnId: 'status',
             renderHeaderCell: () => t.users.status,
             renderCell: (user) => (
-                <Badge color={user.is_active ? 'success' : 'danger'}>
+                <Badge appearance="tint" color={user.is_active ? 'success' : 'danger'}>
                     {user.is_active ? t.users.active : t.users.inactive}
                 </Badge>
             ),

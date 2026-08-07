@@ -15,6 +15,7 @@ import { router } from '@inertiajs/react';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import { useText } from '@/Hooks/useText';
 import { NotificationBell } from '@/Components/Shell/NotificationBell';
+import { BrandMark } from '@/Components/Shell/BrandMark';
 
 const useStyles = makeStyles({
     root: {
@@ -26,6 +27,11 @@ const useStyles = makeStyles({
         borderBottomStyle: 'solid',
         borderBottomColor: tokens.colorNeutralStroke2,
         backgroundColor: tokens.colorNeutralBackground1,
+    },
+    brandGroup: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalS,
     },
     brand: {
         fontWeight: tokens.fontWeightSemibold,
@@ -48,13 +54,16 @@ export function TopBar({ user }: TopBarProps) {
 
     return (
         <header className={styles.root}>
-            <span className={styles.brand}>PageJaunes Mailer</span>
+            <span className={styles.brandGroup}>
+                <BrandMark size={28} />
+                <span className={styles.brand}>PageJaunes Mailer</span>
+            </span>
             <Toolbar>
                 <NotificationBell />
                 <Menu>
                     <MenuTrigger disableButtonEnhancement>
                         <ToolbarButton
-                            icon={<Avatar name={user.name} size={28} />}
+                            icon={<Avatar name={user.name} size={28} color="colorful" />}
                             aria-label={user.name}
                         >
                             {user.name}

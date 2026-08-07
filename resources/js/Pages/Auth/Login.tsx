@@ -12,24 +12,40 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { BrandMark } from '@/Components/Shell/BrandMark';
 
 const useStyles = makeStyles({
     page: {
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        gap: tokens.spacingVerticalXL,
         height: '100vh',
-        backgroundColor: tokens.colorNeutralBackground3,
+        backgroundImage: `radial-gradient(circle at 50% 0%, ${tokens.colorBrandBackground2} 0%, ${tokens.colorNeutralBackground3} 55%)`,
+    },
+    wordmark: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalS,
+        fontWeight: tokens.fontWeightSemibold,
+        fontSize: tokens.fontSizeBase500,
+        color: tokens.colorNeutralForeground1,
     },
     card: {
         width: '360px',
         padding: tokens.spacingVerticalXL,
+        boxShadow: tokens.shadow16,
     },
     form: {
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalM,
         marginTop: tokens.spacingVerticalM,
+    },
+    submit: {
+        width: '100%',
+        marginTop: tokens.spacingVerticalXS,
     },
 });
 
@@ -56,6 +72,10 @@ export default function Login() {
     return (
         <div className={styles.page}>
             <Head title={t.auth.loginTitle} />
+            <span className={styles.wordmark}>
+                <BrandMark size={36} />
+                PageJaunes Mailer
+            </span>
             <Card className={styles.card}>
                 <CardHeader header={<Title2>{t.auth.loginTitle}</Title2>} />
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -90,7 +110,7 @@ export default function Login() {
                         checked={data.remember}
                         onChange={(_, value) => setData('remember', value.checked === true)}
                     />
-                    <Button appearance="primary" type="submit" disabled={processing}>
+                    <Button appearance="primary" type="submit" disabled={processing} className={styles.submit}>
                         {t.auth.submit}
                     </Button>
                 </form>
