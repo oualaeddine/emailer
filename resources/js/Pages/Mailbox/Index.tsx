@@ -154,8 +154,8 @@ const useStyles = makeStyles({
 export default function MailboxIndex() {
     const styles = useStyles();
     const t = useText();
-    const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
-    const permissions = props.auth.user.permissions;
+    const { props } = usePage<{ auth: { user: AuthenticatedUser; permissions: string[] } }>();
+    const permissions = props.auth.permissions;
     const canViewAll = hasPermission(permissions, 'mailbox.view_all');
 
     const [folder, setFolder] = useState<FolderKey>('inbox');

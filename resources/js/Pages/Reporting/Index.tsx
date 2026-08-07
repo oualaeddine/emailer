@@ -117,8 +117,8 @@ function thirtyDaysAgoIso(): string {
 export default function ReportingIndex() {
     const styles = useStyles();
     const t = useText();
-    const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
-    const permissions = props.auth.user.permissions;
+    const { props } = usePage<{ auth: { user: AuthenticatedUser; permissions: string[] } }>();
+    const permissions = props.auth.permissions;
     const canExport = hasPermission(permissions, 'reporting.export');
 
     const [dateFrom, setDateFrom] = useState(thirtyDaysAgoIso());
