@@ -146,7 +146,9 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
                 <Text size={500} weight="semibold">
                     {detail.name}
                 </Text>
-                <Badge color={STATUS_COLOR[detail.status]}>{statusLabel(detail.status)}</Badge>
+                <Badge appearance="tint" color={STATUS_COLOR[detail.status]}>
+                    {statusLabel(detail.status)}
+                </Badge>
             </div>
 
             <TabList selectedValue={tab} onTabSelect={(_, data: SelectTabData) => setTab(data.value as DetailTab)}>

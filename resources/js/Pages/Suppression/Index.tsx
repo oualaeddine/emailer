@@ -26,8 +26,9 @@ import {
     tokens,
     type TableColumnDefinition,
 } from '@fluentui/react-components';
-import { AddRegular, DeleteRegular, SearchRegular } from '@fluentui/react-icons';
+import { AddRegular, DeleteRegular, SearchRegular, ShieldProhibitedRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import {
     createSuppressionEntry,
@@ -37,6 +38,15 @@ import {
 } from '@/Lib/api/suppression';
 import type { SuppressionEntry, SuppressionReason } from '@/Lib/types/suppression';
 import { SuppressionEntryFormDialog } from '@/Pages/Suppression/SuppressionEntryFormDialog';
+
+const REASON_COLOR: Record<SuppressionReason, 'danger' | 'severe' | 'warning' | 'informative' | 'brand' | 'subtle'> = {
+    hard_bounce: 'danger',
+    spam_complaint: 'severe',
+    invalid_address: 'warning',
+    manual_unsubscribe: 'informative',
+    global_unsubscribe: 'brand',
+    manual_block: 'subtle',
+};
 
 const useStyles = makeStyles({
     header: {
@@ -136,7 +146,11 @@ export default function SuppressionIndex() {
         createTableColumn<SuppressionEntry>({
             columnId: 'reason',
             renderHeaderCell: () => t.suppression.reason,
-            renderCell: (entry) => <Badge appearance="outline">{t.suppression.reasons[entry.reason]}</Badge>,
+            renderCell: (entry) => (
+                <Badge appearance="tint" color={REASON_COLOR[entry.reason]}>
+                    {t.suppression.reasons[entry.reason]}
+                </Badge>
+            ),
         }),
         createTableColumn<SuppressionEntry>({
             columnId: 'dateAdded',
@@ -194,20 +208,24 @@ export default function SuppressionIndex() {
                 </Dropdown>
             </div>
             <div className={styles.card}>
-                <DataGrid items={entries} columns={columns} getRowId={(entry) => entry.id} resizableColumns>
-                    <DataGridHeader>
-                        <DataGridRow>
-                            {({ renderHeaderCell }) => <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>}
-                        </DataGridRow>
-                    </DataGridHeader>
-                    <DataGridBody<SuppressionEntry>>
-                        {({ item, rowId }) => (
-                            <DataGridRow<SuppressionEntry> key={rowId}>
-                                {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
+                {entries.length === 0 ? (
+                    <EmptyState icon={ShieldProhibitedRegular} title={t.suppression.noResults} />
+                ) : (
+                    <DataGrid items={entries} columns={columns} getRowId={(entry) => entry.id} resizableColumns>
+                        <DataGridHeader>
+                            <DataGridRow>
+                                {({ renderHeaderCell }) => <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>}
                             </DataGridRow>
-                        )}
-                    </DataGridBody>
-                </DataGrid>
+                        </DataGridHeader>
+                        <DataGridBody<SuppressionEntry>>
+                            {({ item, rowId }) => (
+                                <DataGridRow<SuppressionEntry> key={rowId}>
+                                    {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
+                                </DataGridRow>
+                            )}
+                        </DataGridBody>
+                    </DataGrid>
+                )}
             </div>
             <SuppressionEntryFormDialog
                 open={dialogOpen}

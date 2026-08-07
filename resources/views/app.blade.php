@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title inertia>{{ config('app.name', 'PageJaunes Mailer') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])

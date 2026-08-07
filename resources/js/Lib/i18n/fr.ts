@@ -125,6 +125,8 @@ export const fr = {
         sourceInternalContact: 'Contact interne',
         searchPlaceholder: 'Rechercher par nom, e-mail ou entreprise…',
         alreadyExists: 'Un destinataire avec cette adresse e-mail existe déjà.',
+        emptyTitle: 'Aucun destinataire trouvé',
+        emptyBody: 'Essayez une autre recherche ou ajoutez un nouveau destinataire.',
     },
     imports: {
         title: 'Importer des destinataires',

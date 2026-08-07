@@ -88,7 +88,11 @@ export default function SmtpIndex() {
         createTableColumn<SmtpAccount>({
             columnId: 'health',
             renderHeaderCell: () => t.smtp.health,
-            renderCell: (a) => <Badge color={HEALTH_COLOR[a.health_status]}>{t.smtp[a.health_status]}</Badge>,
+            renderCell: (a) => (
+                <Badge appearance="tint" color={HEALTH_COLOR[a.health_status]}>
+                    {t.smtp[a.health_status]}
+                </Badge>
+            ),
         }),
         createTableColumn<SmtpAccount>({
             columnId: 'quota',

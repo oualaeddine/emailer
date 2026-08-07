@@ -17,8 +17,9 @@ import {
     tokens,
     type TableColumnDefinition,
 } from '@fluentui/react-components';
-import { AddRegular, SearchRegular } from '@fluentui/react-icons';
+import { AddRegular, ContactCardRegular, SearchRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import { createRecipient, fetchRecipients, type CreateRecipientPayload } from '@/Lib/api/recipients';
 import type { Recipient } from '@/Lib/types/recipients';
@@ -105,7 +106,11 @@ export default function Index() {
         createTableColumn<Recipient>({
             columnId: 'status',
             renderHeaderCell: () => t.recipients.status,
-            renderCell: (r) => <Badge color={STATUS_COLOR[r.status] ?? 'informative'}>{r.status}</Badge>,
+            renderCell: (r) => (
+                <Badge appearance="tint" color={STATUS_COLOR[r.status] ?? 'informative'}>
+                    {r.status}
+                </Badge>
+            ),
         }),
         createTableColumn<Recipient>({
             columnId: 'tags',
@@ -136,22 +141,26 @@ export default function Index() {
                 }}
             />
             <div className={styles.card}>
-                <DataGrid items={recipients} columns={columns} getRowId={(r) => r.id} resizableColumns>
-                    <DataGridHeader>
-                        <DataGridRow>
-                            {({ renderHeaderCell }) => (
-                                <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
-                            )}
-                        </DataGridRow>
-                    </DataGridHeader>
-                    <DataGridBody<Recipient>>
-                        {({ item, rowId }) => (
-                            <DataGridRow<Recipient> key={rowId}>
-                                {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
+                {recipients.length === 0 ? (
+                    <EmptyState icon={ContactCardRegular} title={t.recipients.emptyTitle} body={t.recipients.emptyBody} />
+                ) : (
+                    <DataGrid items={recipients} columns={columns} getRowId={(r) => r.id} resizableColumns>
+                        <DataGridHeader>
+                            <DataGridRow>
+                                {({ renderHeaderCell }) => (
+                                    <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>
+                                )}
                             </DataGridRow>
-                        )}
-                    </DataGridBody>
-                </DataGrid>
+                        </DataGridHeader>
+                        <DataGridBody<Recipient>>
+                            {({ item, rowId }) => (
+                                <DataGridRow<Recipient> key={rowId}>
+                                    {({ renderCell }) => <DataGridCell>{renderCell(item)}</DataGridCell>}
+                                </DataGridRow>
+                            )}
+                        </DataGridBody>
+                    </DataGrid>
+                )}
             </div>
             <RecipientFormDialog
                 open={dialogOpen}

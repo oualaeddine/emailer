@@ -23,6 +23,9 @@ const useStyles = makeStyles({
         padding: tokens.spacingVerticalXL,
         maxWidth: '640px',
         marginBottom: tokens.spacingVerticalL,
+        borderLeftWidth: tokens.strokeWidthThicker,
+        borderLeftStyle: 'solid',
+        borderLeftColor: tokens.colorBrandStroke1,
     },
     grid: {
         display: 'grid',
@@ -48,6 +51,9 @@ const useStyles = makeStyles({
     },
     emptyState: {
         color: tokens.colorNeutralForeground3,
+    },
+    statValue: {
+        color: tokens.colorBrandForeground1,
     },
 });
 
@@ -133,7 +139,7 @@ export default function Dashboard() {
                 <div className={styles.grid}>
                     <Card className={styles.widgetCard}>
                         <Title3>{t.dashboard.sendVolumeTitle}</Title3>
-                        <Text size={600} weight="semibold">
+                        <Text size={600} weight="semibold" className={styles.statValue}>
                             {totalSendVolume}
                         </Text>
                         <Text className={styles.emptyState}>
@@ -149,7 +155,7 @@ export default function Dashboard() {
 
                     <Card className={styles.widgetCard}>
                         <Title3>{t.dashboard.deliverabilityTitle}</Title3>
-                        <Text size={600} weight="semibold">
+                        <Text size={600} weight="semibold" className={styles.statValue}>
                             {deliverabilityPercent}%
                         </Text>
                         <div className={styles.row}>
@@ -196,7 +202,9 @@ export default function Dashboard() {
                                 widgets.recent_campaigns.map((campaign) => (
                                     <div className={styles.row} key={campaign.id}>
                                         <Text>{campaign.name}</Text>
-                                        <Badge color={STATUS_COLOR[campaign.status]}>{statusLabel(campaign.status)}</Badge>
+                                        <Badge appearance="tint" color={STATUS_COLOR[campaign.status]}>
+                                            {statusLabel(campaign.status)}
+                                        </Badge>
                                         <Text className={styles.emptyState}>
                                             {formatDate(campaign.sent_at ?? campaign.scheduled_at ?? campaign.created_at)}
                                         </Text>

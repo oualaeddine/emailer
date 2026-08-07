@@ -154,7 +154,11 @@ export default function CampaignsIndex() {
         createTableColumn<Campaign>({
             columnId: 'status',
             renderHeaderCell: () => t.campaigns.status,
-            renderCell: (c) => <Badge color={STATUS_COLOR[c.status]}>{statusLabel(c.status)}</Badge>,
+            renderCell: (c) => (
+                <Badge appearance="tint" color={STATUS_COLOR[c.status]}>
+                    {statusLabel(c.status)}
+                </Badge>
+            ),
         }),
         createTableColumn<Campaign>({
             columnId: 'template',
