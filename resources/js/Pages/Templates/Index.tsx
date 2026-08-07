@@ -17,8 +17,9 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
-import { AddRegular, MoreHorizontalRegular, ArchiveRegular, DeleteRegular } from '@fluentui/react-icons';
+import { AddRegular, DocumentRegular, MoreHorizontalRegular, ArchiveRegular, DeleteRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import { archiveTemplate, createTemplate, deleteTemplate, fetchTemplates } from '@/Lib/api/templates';
 import type { Template } from '@/Lib/types/templates';
@@ -111,6 +112,9 @@ export default function TemplatesIndex() {
                     </Button>
                 </Toolbar>
             </div>
+            {templates.length === 0 ? (
+                <EmptyState icon={DocumentRegular} title={t.templates.emptyTitle} body={t.templates.emptyBody} />
+            ) : (
             <div className={styles.grid}>
                 {templates.map((template) => (
                     <Card key={template.id} className={styles.card}>
@@ -156,6 +160,7 @@ export default function TemplatesIndex() {
                     </Card>
                 ))}
             </div>
+            )}
             <TemplateFormDialog open={dialogOpen} onOpenChange={setDialogOpen} onSubmit={handleCreate} />
         </AppShell>
     );

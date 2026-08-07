@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import {
     Button,
@@ -13,6 +13,7 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
+import { ArrowUploadRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
 import { commitImport, fetchImportRows, submitColumnMapping, uploadImportFile } from '@/Lib/api/imports';
@@ -35,6 +36,20 @@ const useStyles = makeStyles({
         flexDirection: 'column',
         alignItems: 'center',
     },
+    filePicker: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalS,
+        flexWrap: 'wrap',
+    },
+    hiddenFileInput: {
+        position: 'absolute',
+        width: '1px',
+        height: '1px',
+        overflow: 'hidden',
+        clip: 'rect(0 0 0 0)',
+        whiteSpace: 'nowrap',
+    },
 });
 
 type Step = 'upload' | 'mapping' | 'review' | 'done';
@@ -54,12 +69,15 @@ export default function Import() {
     const [headers, setHeaders] = useState<string[]>([]);
     const [mapping, setMapping] = useState<Record<string, string>>({});
     const [rows, setRows] = useState<ImportRow[]>([]);
+    const [fileName, setFileName] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
         if (!file) {
             return;
         }
+        setFileName(file.name);
         setUploading(true);
         try {
             const sourceType = file.name.toLowerCase().endsWith('.xlsx') ? 'excel' : 'csv';
@@ -105,8 +123,25 @@ export default function Import() {
 
             {step === 'upload' && (
                 <Card className={styles.card}>
-                    <Field label={t.imports.chooseFile}>
-                        <input type="file" accept=".csv,.txt,.xlsx" onChange={handleFileChange} disabled={uploading} />
+                    <Field label={t.imports.chooseFile} hint={t.imports.acceptedFormats}>
+                        <div className={styles.filePicker}>
+                            <Button
+                                icon={<ArrowUploadRegular />}
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                            >
+                                {t.imports.chooseFile}
+                            </Button>
+                            <Text>{fileName ?? t.imports.noFileChosen}</Text>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                className={styles.hiddenFileInput}
+                                accept=".csv,.txt,.xlsx"
+                                onChange={handleFileChange}
+                                disabled={uploading}
+                            />
+                        </div>
                     </Field>
                     {uploading && <Spinner label={t.common.loading} />}
                 </Card>

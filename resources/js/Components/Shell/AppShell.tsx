@@ -1,5 +1,6 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
 import type { PropsWithChildren } from 'react';
+import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import { TopBar } from '@/Components/Shell/TopBar';
 import { NavRail } from '@/Components/Shell/NavRail';
@@ -18,27 +19,33 @@ const useStyles = makeStyles({
     },
     content: {
         flex: '1 1 auto',
+        minWidth: 0,
         overflowY: 'auto',
         padding: tokens.spacingVerticalXL,
         backgroundColor: tokens.colorNeutralBackground3,
+        '@media (max-width: 639px)': {
+            padding: tokens.spacingVerticalM,
+        },
     },
 });
 
 /**
  * docs/08-navigation.md §8.1 — App Shell Layout.
- * Minimal shell for the Identity module (top bar + nav rail skeleton) —
- * the full three-pane mailbox layout and richer nav tree are delivered by
- * their own modules as they land.
+ * docs/07-ui-design.md §7.7 — Responsive Behavior: the nav rail collapses to
+ * an icon-only rail on tablet and an off-canvas drawer (opened from TopBar's
+ * hamburger button) on mobile — `mobileNavOpen` is owned here so both TopBar
+ * (the toggle) and NavRail (the drawer + persistent rail) share it.
  */
 export function AppShell({ children }: PropsWithChildren) {
     const styles = useStyles();
     const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
     return (
         <div className={styles.root}>
-            <TopBar user={props.auth.user} />
+            <TopBar user={props.auth.user} onToggleNav={() => setMobileNavOpen((open) => !open)} />
             <div className={styles.body}>
-                <NavRail />
+                <NavRail mobileOpen={mobileNavOpen} onMobileOpenChange={setMobileNavOpen} />
                 <main className={styles.content}>{children}</main>
             </div>
         </div>

@@ -48,6 +48,10 @@ const useStyles = makeStyles({
         borderBottomStyle: 'solid',
         borderBottomColor: tokens.colorNeutralStroke2,
     },
+    tabList: {
+        overflowX: 'auto',
+        flexWrap: 'nowrap',
+    },
 });
 
 const STATUS_COLOR: Record<CampaignStatus, 'subtle' | 'informative' | 'warning' | 'success' | 'danger'> = {
@@ -151,7 +155,11 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
                 </Badge>
             </div>
 
-            <TabList selectedValue={tab} onTabSelect={(_, data: SelectTabData) => setTab(data.value as DetailTab)}>
+            <TabList
+                className={styles.tabList}
+                selectedValue={tab}
+                onTabSelect={(_, data: SelectTabData) => setTab(data.value as DetailTab)}
+            >
                 <Tab value="overview">{t.campaigns.tabOverview}</Tab>
                 <Tab value="recipients">{t.campaigns.tabRecipients}</Tab>
                 <Tab value="content">{t.campaigns.tabContent}</Tab>

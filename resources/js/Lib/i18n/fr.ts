@@ -12,6 +12,7 @@ export const fr = {
         loading: 'Chargement…',
         confirm: 'Confirmer',
         actions: 'Actions',
+        close: 'Fermer',
     },
     nav: {
         dashboard: 'Tableau de bord',
@@ -32,6 +33,8 @@ export const fr = {
         queues: "Files d'attente",
         reporting: 'Rapports',
         audit: "Journal d'audit",
+        openMenu: 'Ouvrir le menu de navigation',
+        menuTitle: 'Navigation',
         groups: {
             messaging: 'Messagerie',
             campaigns: 'Campagnes',
@@ -148,6 +151,8 @@ export const fr = {
         commit: 'Importer les lignes valides',
         summary: 'Résumé de l’import',
         imported: 'Destinataires importés',
+        noFileChosen: 'Aucun fichier sélectionné',
+        acceptedFormats: 'Formats acceptés : CSV, TXT, XLSX',
     },
     composer: {
         title: 'Nouvel e-mail',
@@ -176,6 +181,8 @@ export const fr = {
         archived: 'Archivé',
         createTitle: 'Créer un modèle',
         cannotDelete: "Ce modèle est utilisé et ne peut pas être supprimé ; archivez-le à la place.",
+        emptyTitle: 'Aucun modèle',
+        emptyBody: 'Créez votre premier modèle pour le réutiliser dans vos campagnes et vos e-mails.',
     },
     smtp: {
         title: 'Comptes SMTP',
@@ -242,6 +249,22 @@ export const fr = {
         emptyScheduledBody: 'Aucun envoi planifié pour le moment.',
         emptySentTitle: 'Aucun message envoyé',
         emptySentBody: "L'historique des envois est vide.",
+        // docs/07-ui-design.md §7.12 — internal MessageStatus identifiers
+        // never shown raw; mirrors the status label table there.
+        statusLabels: {
+            queued: "En file d'attente",
+            sending: 'Envoi en cours',
+            accepted: 'Accepté',
+            delivered: 'Distribué',
+            opened: 'Ouvert',
+            clicked: 'Cliqué',
+            soft_bounced: 'Rebond temporaire',
+            hard_bounced: 'Rebond définitif',
+            failed: 'Échec',
+            rejected: 'Rejeté',
+            spam_complaint: 'Signalement spam',
+            unsubscribed: 'Désabonné',
+        },
     },
     campaigns: {
         title: 'Campagnes',

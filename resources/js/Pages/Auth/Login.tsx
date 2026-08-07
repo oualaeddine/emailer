@@ -21,7 +21,9 @@ const useStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         gap: tokens.spacingVerticalXL,
-        height: '100vh',
+        minHeight: '100vh',
+        padding: tokens.spacingHorizontalM,
+        boxSizing: 'border-box',
         backgroundImage: `radial-gradient(circle at 50% 0%, ${tokens.colorBrandBackground2} 0%, ${tokens.colorNeutralBackground3} 55%)`,
     },
     wordmark: {
@@ -34,6 +36,8 @@ const useStyles = makeStyles({
     },
     card: {
         width: '360px',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         padding: tokens.spacingVerticalXL,
         boxShadow: tokens.shadow16,
     },

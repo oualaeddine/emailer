@@ -43,7 +43,11 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalM,
-        minWidth: '480px',
+        width: 'min(480px, 100%)',
+    },
+    tabList: {
+        overflowX: 'auto',
+        flexWrap: 'nowrap',
     },
     summaryRow: {
         display: 'flex',
@@ -155,6 +159,7 @@ export function CampaignWizardDialog({ open, onOpenChange, onCreated }: Campaign
                     <DialogTitle>{t.campaigns.wizardTitle}</DialogTitle>
                     <DialogContent className={styles.body}>
                         <TabList
+                            className={styles.tabList}
                             selectedValue={step}
                             onTabSelect={(_, data: SelectTabData) => setStep(data.value as WizardStep)}
                         >

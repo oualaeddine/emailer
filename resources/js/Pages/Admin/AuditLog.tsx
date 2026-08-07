@@ -21,6 +21,7 @@ import {
     Text,
     Title1,
     Toolbar,
+    Tooltip,
     createTableColumn,
     makeStyles,
     tokens,
@@ -50,6 +51,17 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground1,
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
+        overflowX: 'auto',
+    },
+    gridScroll: {
+        minWidth: '680px',
+    },
+    truncatedCell: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        display: 'block',
+        maxWidth: '220px',
     },
     footer: {
         display: 'flex',
@@ -60,6 +72,9 @@ const useStyles = makeStyles({
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: tokens.spacingHorizontalM,
+        '@media (max-width: 639px)': {
+            gridTemplateColumns: '1fr',
+        },
     },
     pre: {
         backgroundColor: tokens.colorNeutralBackground3,
@@ -154,12 +169,24 @@ export default function AuditLog() {
         createTableColumn<AuditLogRow>({
             columnId: 'action',
             renderHeaderCell: () => t.audit.action,
-            renderCell: (row) => row.action,
+            renderCell: (row) => (
+                <Tooltip content={row.action} relationship="label">
+                    <Text className={styles.truncatedCell}>{row.action}</Text>
+                </Tooltip>
+            ),
         }),
         createTableColumn<AuditLogRow>({
             columnId: 'target',
             renderHeaderCell: () => t.audit.target,
-            renderCell: (row) => `${row.auditable_type.split('\\').pop()} #${row.auditable_id}`,
+            renderCell: (row) => {
+                const label = `${row.auditable_type.split('\\').pop()} #${row.auditable_id}`;
+
+                return (
+                    <Tooltip content={label} relationship="label">
+                        <Text className={styles.truncatedCell}>{label}</Text>
+                    </Tooltip>
+                );
+            },
         }),
         createTableColumn<AuditLogRow>({
             columnId: 'details',
@@ -245,6 +272,7 @@ export default function AuditLog() {
                 ) : rows.length === 0 ? (
                     <Text>{t.audit.noResults}</Text>
                 ) : (
+                    <div className={styles.gridScroll}>
                     <DataGrid items={rows} columns={columns} getRowId={(row) => row.id} resizableColumns>
                         <DataGridHeader>
                             <DataGridRow>
@@ -261,6 +289,7 @@ export default function AuditLog() {
                             )}
                         </DataGridBody>
                     </DataGrid>
+                    </div>
                 )}
                 {nextCursor && (
                     <div className={styles.footer}>
