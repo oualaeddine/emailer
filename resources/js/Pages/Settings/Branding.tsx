@@ -37,7 +37,7 @@ export default function Branding() {
     const t = useText();
 
     const [organizationName, setOrganizationName] = useState('');
-    const [brandColor, setBrandColor] = useState('#7740D6');
+    const [brandColor, setBrandColor] = useState('#DF0A0A');
     const [defaultTheme, setDefaultTheme] = useState('light');
     const [saved, setSaved] = useState(false);
 
