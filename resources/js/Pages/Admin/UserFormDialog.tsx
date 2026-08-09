@@ -15,6 +15,7 @@ import {
     Switch,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import type { Role, User } from '@/Lib/types/identity';
 
 export interface UserFormValues {
@@ -67,7 +68,9 @@ export function UserFormDialog({ open, onOpenChange, roles, user, onSubmit, erro
             <DialogSurface>
                 <form onSubmit={handleSubmit}>
                     <DialogBody>
-                        <DialogTitle>{isEditing ? t.users.editTitle : t.users.createTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="dialog-user-form" />}>
+                            {isEditing ? t.users.editTitle : t.users.createTitle}
+                        </DialogTitle>
                         <DialogContent>
                             <Field
                                 label={t.users.name}

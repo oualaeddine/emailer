@@ -41,3 +41,4 @@ require __DIR__.'/mailbox.php';
 require __DIR__.'/campaigns.php';
 require __DIR__.'/audit.php';
 require __DIR__.'/reporting.php';
+require __DIR__.'/help.php';

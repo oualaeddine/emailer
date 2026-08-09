@@ -20,6 +20,8 @@ import {
     ShieldProhibitedFilled,
     MegaphoneLoudRegular,
     MegaphoneLoudFilled,
+    QuestionCircleRegular,
+    QuestionCircleFilled,
     bundleIcon,
 } from '@fluentui/react-icons';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
@@ -34,6 +36,7 @@ const DocumentIcon = bundleIcon(DocumentFilled, DocumentRegular);
 const ServerIcon = bundleIcon(ServerFilled, ServerRegular);
 const ShieldProhibitedIcon = bundleIcon(ShieldProhibitedFilled, ShieldProhibitedRegular);
 const MegaphoneLoudIcon = bundleIcon(MegaphoneLoudFilled, MegaphoneLoudRegular);
+const QuestionCircleIcon = bundleIcon(QuestionCircleFilled, QuestionCircleRegular);
 
 /**
  * docs/08-navigation.md §8.2 — Primary Navigation Tree.
@@ -61,8 +64,10 @@ export interface NavItem {
     label: (t: TranslationDictionary) => string;
     /** 'exact' matches `url === href`; 'prefix' matches `url.startsWith(href)`. */
     match: 'exact' | 'prefix';
-    /** Omit for the standalone Tableau de bord entry above all groups. */
+    /** Omit for standalone entries (Tableau de bord above the groups, Aide below them). */
     group?: NavGroup;
+    /** Standalone entries render above the groups unless this puts them below. */
+    footer?: boolean;
     /** Item is shown if the user holds ANY of these permissions; omit to always show. */
     permissions?: string[];
 }
@@ -206,5 +211,15 @@ export const navItems: NavItem[] = [
         match: 'exact',
         group: 'administration',
         permissions: ['audit.view'],
+    },
+
+    // Aide — centre de documentation, visible par tous les utilisateurs
+    // (les rubriques y sont filtrées individuellement selon les permissions).
+    {
+        href: '/help',
+        icon: QuestionCircleIcon,
+        label: (t) => t.nav.help,
+        match: 'prefix',
+        footer: true,
     },
 ];

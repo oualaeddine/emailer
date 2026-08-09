@@ -150,7 +150,8 @@ export function NavRail({ mobileOpen, onMobileOpenChange }: NavRailProps) {
         );
     }
 
-    const standaloneItems = navItems.filter((item) => !item.group && visible(item));
+    const standaloneItems = navItems.filter((item) => !item.group && !item.footer && visible(item));
+    const footerItems = navItems.filter((item) => item.footer && visible(item));
     const groupedItems = (group: NavGroup) => navItems.filter((item) => item.group === group && visible(item));
 
     function renderNavContent(options?: { collapsible?: boolean; onNavigate?: () => void }) {
@@ -171,6 +172,7 @@ export function NavRail({ mobileOpen, onMobileOpenChange }: NavRailProps) {
                         </div>
                     );
                 })}
+                {footerItems.map((item) => renderItem(item, options))}
             </>
         );
     }

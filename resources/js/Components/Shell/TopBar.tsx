@@ -15,6 +15,7 @@ import { router } from '@inertiajs/react';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import { useText } from '@/Hooks/useText';
 import { NotificationBell } from '@/Components/Shell/NotificationBell';
+import { HelpMenuButton } from '@/Components/Help/HelpMenuButton';
 import { BrandMark } from '@/Components/Shell/BrandMark';
 
 const useStyles = makeStyles({
@@ -85,6 +86,7 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                 <span className={styles.brand}>PageJaunes Mailer</span>
             </span>
             <Toolbar>
+                <HelpMenuButton />
                 <NotificationBell />
                 <Menu>
                     <MenuTrigger disableButtonEnhancement>

@@ -22,6 +22,7 @@ import { HistoryRegular, DesktopRegular, TabletRegular, PhoneRegular } from '@fl
 import { AppShell } from '@/Components/Shell/AppShell';
 import { RichTextEditor } from '@/Components/Composer/RichTextEditor';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import {
     autosaveDraft,
     createDraft,
@@ -53,7 +54,9 @@ const useStyles = makeStyles({
         padding: tokens.spacingVerticalM,
         backgroundColor: tokens.colorNeutralBackground1,
         margin: '0 auto',
-        transition: 'max-width 0.2s ease',
+        width: '100%',
+        boxSizing: 'border-box',
+        transition: 'max-width 0.2s ease, width 0.2s ease',
     },
     versionItem: {
         display: 'flex',
@@ -259,11 +262,31 @@ export default function ComposerIndex() {
                         />
                     </div>
                 </div>
-                <div className={styles.previewFrame} style={{ maxWidth: PREVIEW_WIDTHS[preview] }}>
+                <div className={styles.previewFrame} style={{ width: '100%', maxWidth: PREVIEW_WIDTHS[preview] }}>
                     <iframe
                         title="Aperçu de l'e-mail"
                         sandbox=""
-                        srcDoc={htmlBody + signatureHtml}
+                        srcDoc={`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 16px;
+      color: #242424;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    img { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  ${htmlBody}${signatureHtml}
+</body>
+</html>`}
                         style={{ width: '100%', height: '400px', border: 'none' }}
                     />
                 </div>
@@ -271,7 +294,9 @@ export default function ComposerIndex() {
 
             <Drawer open={versionsOpen} onOpenChange={(_, data) => setVersionsOpen(data.open)} position="end">
                 <DrawerHeader>
-                    <DrawerHeaderTitle>{t.composer.versionHistory}</DrawerHeaderTitle>
+                    <DrawerHeaderTitle action={<HelpButton topic="composer" />}>
+                        {t.composer.versionHistory}
+                    </DrawerHeaderTitle>
                 </DrawerHeader>
                 <DrawerBody>
                     {versions.map((version) => (

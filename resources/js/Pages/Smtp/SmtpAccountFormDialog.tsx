@@ -14,6 +14,7 @@ import {
     Option,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import type { CreateSmtpAccountPayload } from '@/Lib/api/smtp';
 
 interface SmtpAccountFormDialogProps {
@@ -54,7 +55,9 @@ export function SmtpAccountFormDialog({ open, onOpenChange, onSubmit }: SmtpAcco
             <DialogSurface>
                 <form onSubmit={handleSubmit}>
                     <DialogBody>
-                        <DialogTitle>{t.smtp.createTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="dialog-smtp-account-form" />}>
+                            {t.smtp.createTitle}
+                        </DialogTitle>
                         <DialogContent>
                             <Field label={t.smtp.name} required>
                                 <Input value={values.name} onChange={(_, d) => setValues((v) => ({ ...v, name: d.value }))} />

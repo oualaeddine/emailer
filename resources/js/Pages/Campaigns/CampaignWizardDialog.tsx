@@ -22,6 +22,7 @@ import {
     type SelectTabData,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import { createCampaign, scheduleCampaign, sendCampaign } from '@/Lib/api/campaigns';
 import { fetchTemplates } from '@/Lib/api/templates';
 import type { CampaignTargetType } from '@/Lib/types/campaigns';
@@ -156,7 +157,9 @@ export function CampaignWizardDialog({ open, onOpenChange, onCreated }: Campaign
         <Dialog open={open} onOpenChange={(_, data) => handleOpenChange(data.open)}>
             <DialogSurface>
                 <DialogBody>
-                    <DialogTitle>{t.campaigns.wizardTitle}</DialogTitle>
+                    <DialogTitle action={<HelpButton topic="dialog-campaign-wizard" />}>
+                        {t.campaigns.wizardTitle}
+                    </DialogTitle>
                     <DialogContent className={styles.body}>
                         <TabList
                             className={styles.tabList}

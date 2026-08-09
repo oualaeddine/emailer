@@ -30,6 +30,7 @@ import {
 import { ArrowDownloadRegular, EyeRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import { exportAuditLogs, fetchAuditLogs } from '@/Lib/api/audit';
 import type { AuditLog as AuditLogRow, AuditLogFilters } from '@/Lib/types/audit';
 
@@ -302,7 +303,7 @@ export default function AuditLog() {
             <Dialog open={selected != null} onOpenChange={(_, data) => !data.open && setSelected(null)}>
                 <DialogSurface>
                     <DialogBody>
-                        <DialogTitle>{t.audit.detailsTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="audit-log" />}>{t.audit.detailsTitle}</DialogTitle>
                         <DialogContent>
                             {selected && (
                                 <>

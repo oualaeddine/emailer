@@ -15,6 +15,7 @@ import {
     Textarea,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import type { CreateSuppressionEntryPayload } from '@/Lib/api/suppression';
 import type { SuppressionReason } from '@/Lib/types/suppression';
 
@@ -68,7 +69,9 @@ export function SuppressionEntryFormDialog({ open, onOpenChange, onSubmit, error
             <DialogSurface>
                 <form onSubmit={handleSubmit}>
                     <DialogBody>
-                        <DialogTitle>{t.suppression.createTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="dialog-suppression-entry-form" />}>
+                            {t.suppression.createTitle}
+                        </DialogTitle>
                         <DialogContent>
                             <Field
                                 label={t.suppression.email}

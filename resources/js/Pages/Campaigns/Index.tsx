@@ -35,6 +35,7 @@ import {
 } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import { cancelCampaign, cloneCampaign, fetchCampaigns, pauseCampaign, resumeCampaign } from '@/Lib/api/campaigns';
 import { fetchTemplates } from '@/Lib/api/templates';
 import type { Campaign, CampaignStatus } from '@/Lib/types/campaigns';
@@ -253,7 +254,9 @@ export default function CampaignsIndex() {
                 style={{ width: 'min(640px, 100vw)' }}
             >
                 <DrawerHeader>
-                    <DrawerHeaderTitle>{t.campaigns.title}</DrawerHeaderTitle>
+                    <DrawerHeaderTitle action={<HelpButton topic="campaigns" />}>
+                        {t.campaigns.title}
+                    </DrawerHeaderTitle>
                 </DrawerHeader>
                 <DrawerBody>
                     {selectedId && <CampaignDetail campaignId={selectedId} onChange={load} />}

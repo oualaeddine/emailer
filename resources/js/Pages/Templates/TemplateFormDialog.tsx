@@ -13,6 +13,7 @@ import {
 } from '@fluentui/react-components';
 import { RichTextEditor } from '@/Components/Composer/RichTextEditor';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 
 interface TemplateFormDialogProps {
     open: boolean;
@@ -49,7 +50,9 @@ export function TemplateFormDialog({ open, onOpenChange, onSubmit }: TemplateFor
             <DialogSurface>
                 <form onSubmit={handleSubmit}>
                     <DialogBody>
-                        <DialogTitle>{t.templates.createTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="dialog-template-form" />}>
+                            {t.templates.createTitle}
+                        </DialogTitle>
                         <DialogContent>
                             <Field label={t.templates.name} required>
                                 <Input value={name} onChange={(_, data) => setName(data.value)} />

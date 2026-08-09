@@ -14,6 +14,7 @@ import {
     Option,
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
+import { HelpButton } from '@/Components/Help/HelpButton';
 import type { CreateRecipientPayload } from '@/Lib/api/recipients';
 
 interface RecipientFormDialogProps {
@@ -60,7 +61,9 @@ export function RecipientFormDialog({ open, onOpenChange, onSubmit, errors }: Re
             <DialogSurface>
                 <form onSubmit={handleSubmit}>
                     <DialogBody>
-                        <DialogTitle>{t.recipients.createTitle}</DialogTitle>
+                        <DialogTitle action={<HelpButton topic="dialog-recipient-form" />}>
+                            {t.recipients.createTitle}
+                        </DialogTitle>
                         <DialogContent>
                             <Field
                                 label={t.recipients.email}

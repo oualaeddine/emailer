@@ -35,6 +35,7 @@ export const fr = {
         audit: "Journal d'audit",
         openMenu: 'Ouvrir le menu de navigation',
         menuTitle: 'Navigation',
+        help: 'Aide',
         groups: {
             messaging: 'Messagerie',
             campaigns: 'Campagnes',
@@ -445,6 +446,15 @@ export const fr = {
         unreadAriaLabel: 'notifications non lues',
         loading: 'Chargement des notifications…',
         loadError: 'Impossible de charger les notifications.',
+    },
+    // Libellés de l'interface d'aide. Le *contenu* de la documentation est
+    // bilingue FR/AR et vit dans resources/docs/ ; seuls ces libellés de
+    // l'application restent en français uniquement (docs/07-ui-design.md §7.12).
+    help: {
+        open: 'Aide',
+        pageHelp: 'Aide sur cette page',
+        docsCenter: 'Centre de documentation',
+        title: 'Documentation',
     },
 } as const;
 
