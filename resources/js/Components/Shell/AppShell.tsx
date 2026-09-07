@@ -1,6 +1,7 @@
-import { makeStyles, tokens } from '@fluentui/react-components';
+import { Button, MessageBar, MessageBarActions, MessageBarBody, MessageBarTitle, makeStyles, tokens } from '@fluentui/react-components';
+import { DismissRegular } from '@fluentui/react-icons';
 import type { PropsWithChildren } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 import { TopBar } from '@/Components/Shell/TopBar';
 import { NavRail } from '@/Components/Shell/NavRail';
@@ -28,6 +29,9 @@ const useStyles = makeStyles({
             padding: tokens.spacingVerticalM,
         },
     },
+    errorBanner: {
+        marginBottom: tokens.spacingVerticalM,
+    },
 });
 
 /**
@@ -41,6 +45,22 @@ export function AppShell({ children }: PropsWithChildren) {
     const styles = useStyles();
     const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [permissionError, setPermissionError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleDenied = (e: Event) => {
+            const customEvent = e as CustomEvent<{ message?: string }>;
+            setPermissionError(
+                customEvent.detail?.message ||
+                "Accès refusé : vous ne disposez pas des autorisations nécessaires pour effectuer cette action."
+            );
+        };
+
+        window.addEventListener('app:permission-denied', handleDenied);
+        return () => {
+            window.removeEventListener('app:permission-denied', handleDenied);
+        };
+    }, []);
 
     return (
         <div className={styles.root}>
@@ -48,7 +68,29 @@ export function AppShell({ children }: PropsWithChildren) {
             <PwaInstallBanner />
             <div className={styles.body}>
                 <NavRail mobileOpen={mobileNavOpen} onMobileOpenChange={setMobileNavOpen} />
-                <main className={styles.content}>{children}</main>
+                <main className={styles.content}>
+                    {permissionError && (
+                        <div className={styles.errorBanner}>
+                            <MessageBar intent="error">
+                                <MessageBarBody>
+                                    <MessageBarTitle>Accès refusé</MessageBarTitle>
+                                    {permissionError}
+                                </MessageBarBody>
+                                <MessageBarActions
+                                    containerAction={
+                                        <Button
+                                            appearance="transparent"
+                                            icon={<DismissRegular />}
+                                            onClick={() => setPermissionError(null)}
+                                            aria-label="Fermer"
+                                        />
+                                    }
+                                />
+                            </MessageBar>
+                        </div>
+                    )}
+                    {children}
+                </main>
             </div>
         </div>
     );

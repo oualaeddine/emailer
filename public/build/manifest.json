@@ -1,10 +1,10 @@
 {
-  "_DocContent-JJTg5h76.js": {
-    "file": "assets/DocContent-JJTg5h76.js",
+  "_DocContent-BRaTWb9B.js": {
+    "file": "assets/DocContent-BRaTWb9B.js",
     "name": "DocContent",
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_fluentui-Cvv7X6wT.js"
+      "_fluentui-BuOvUFt9.js"
     ],
     "dynamicImports": [
       "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
@@ -61,8 +61,8 @@
       "resources/docs/fr/pages/templates.md?raw"
     ]
   },
-  "_fluentui-Cvv7X6wT.js": {
-    "file": "assets/fluentui-Cvv7X6wT.js",
+  "_fluentui-BuOvUFt9.js": {
+    "file": "assets/fluentui-BuOvUFt9.js",
     "name": "fluentui",
     "imports": [
       "_vendor-C_7FfyOp.js"
@@ -394,43 +394,43 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-Uq45uQ-T.js",
+    "file": "assets/HelpCenter-Bw8z01L5.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_DocContent-JJTg5h76.js",
+      "_DocContent-BRaTWb9B.js",
       "resources/js/app.tsx",
-      "_fluentui-Cvv7X6wT.js"
+      "_fluentui-BuOvUFt9.js"
     ],
     "css": [
       "assets/app-D-xgxcoy.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-DTTVyCdK.js",
+    "file": "assets/HelpDialogBody-Cdbr-o60.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
       "resources/js/app.tsx",
-      "_DocContent-JJTg5h76.js",
-      "_fluentui-Cvv7X6wT.js"
+      "_DocContent-BRaTWb9B.js",
+      "_fluentui-BuOvUFt9.js"
     ],
     "css": [
       "assets/app-D-xgxcoy.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-CO0uMUYh.js",
+    "file": "assets/app-D9MquV2k.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_fluentui-Cvv7X6wT.js"
+      "_fluentui-BuOvUFt9.js"
     ],
     "dynamicImports": [
       "resources/js/Components/Help/HelpDialogBody.tsx",
