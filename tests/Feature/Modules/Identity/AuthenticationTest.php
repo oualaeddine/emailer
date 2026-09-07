@@ -31,7 +31,7 @@ class AuthenticationTest extends TestCase
 
     public function test_a_user_can_log_in_with_correct_credentials(): void
     {
-        $user = User::factory()->withRole(RoleName::Viewer)->create([
+        $user = User::factory()->withRole(RoleName::Viewer)->withoutTwoFactor()->create([
             'email' => 'user@example.com',
             'password' => Hash::make('password123'),
         ]);
@@ -111,7 +111,7 @@ class AuthenticationTest extends TestCase
         // phpunit.xml sets QUEUE_CONNECTION=sync, so the queued
         // AuditListener (docs/31-events.md §31.4) runs inline here —
         // no queue worker needed to observe its effect.
-        $user = User::factory()->withRole(RoleName::Viewer)->create([
+        $user = User::factory()->withRole(RoleName::Viewer)->withoutTwoFactor()->create([
             'email' => 'user@example.com',
             'password' => Hash::make('password123'),
         ]);
