@@ -35,7 +35,19 @@ class UserFactory extends Factory
                 ?? Role::factory(),
             'is_active' => true,
             'remember_token' => Str::random(10),
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
         ];
+    }
+
+    public function withoutTwoFactor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ]);
     }
 
     /**
@@ -60,6 +72,23 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role_id' => Role::query()->where('name', $role->value)->value('id')
                 ?? Role::factory()->state(['name' => $role->value]),
+        ]);
+    }
+
+    /**
+     * A confirmed TOTP enrolment. The default secret is a fixed, valid Base32
+     * string so tests can derive live codes from it deterministically.
+     *
+     * @param  list<string>  $recoveryCodes
+     */
+    public function withTwoFactor(
+        string $secret = 'ABCDEFGHIJKLMNOP',
+        array $recoveryCodes = ['AAAAA-BBBBB', 'CCCCC-DDDDD'],
+    ): static {
+        return $this->state(fn (array $attributes) => [
+            'two_factor_secret' => $secret,
+            'two_factor_recovery_codes' => $recoveryCodes,
+            'two_factor_confirmed_at' => now(),
         ]);
     }
 }

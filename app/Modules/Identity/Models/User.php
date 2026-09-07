@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -23,8 +24,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int $role_id
  * @property string|null $avatar_path
  * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $last_login_at
- * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property Carbon|null $last_login_at
+ * @property Carbon|null $email_verified_at
  */
 class User extends Authenticatable
 {
@@ -43,6 +44,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -61,7 +64,23 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            // docs/28-security.md §28.1 — the TOTP secret and recovery codes
+            // are encrypted at rest; only the confirmation timestamp is plain.
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * docs/28-security.md §28.1 — a proven enrolment: a secret exists and a
+     * valid code has been entered at least once. A half-finished setup (secret
+     * generated, never confirmed) is deliberately not "enabled".
+     */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_secret !== null
+            && $this->two_factor_confirmed_at !== null;
     }
 
     /**

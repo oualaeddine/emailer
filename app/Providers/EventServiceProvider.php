@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Domain\Events\SettingsUpdated;
+use App\Domain\Events\TwoFactorChallengeFailed;
+use App\Domain\Events\TwoFactorEnabled;
 use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
 use App\Domain\Events\UserLoggedIn;
@@ -41,6 +43,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserDeactivated::class => [
             [IdentityAuditListener::class, 'handleUserDeactivated'],
+        ],
+        TwoFactorEnabled::class => [
+            [IdentityAuditListener::class, 'handleTwoFactorEnabled'],
+        ],
+        TwoFactorChallengeFailed::class => [
+            [IdentityAuditListener::class, 'handleTwoFactorChallengeFailed'],
         ],
         SettingsUpdated::class => [
             ConfigCacheInvalidationListener::class,

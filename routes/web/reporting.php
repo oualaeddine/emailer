@@ -11,4 +11,6 @@ use Inertia\Inertia;
 | Required from routes/web/app.php inside the `auth` middleware group.
 */
 
-Route::get('reporting', fn () => Inertia::render('Reporting/Index'))->name('reporting.index');
+Route::get('reporting', fn () => Inertia::render('Reporting/Index'))
+    ->middleware('can:reporting.view')
+    ->name('reporting.index');

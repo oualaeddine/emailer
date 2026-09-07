@@ -50,6 +50,27 @@ export const fr = {
         rememberMe: 'Se souvenir de moi',
         submit: 'Se connecter',
         invalidCredentials: 'Identifiants incorrects ou compte désactivé.',
+        twoFactor: {
+            // docs/28-security.md §28.1 — TOTP challenge at login.
+            challengeTitle: 'Vérification en deux étapes',
+            challengeIntro: 'Saisissez le code à 6 chiffres généré par votre application d’authentification.',
+            code: 'Code de vérification',
+            useRecovery: 'Utiliser un code de récupération',
+            useAuthenticator: 'Utiliser l’application d’authentification',
+            recoveryCode: 'Code de récupération',
+            recoveryIntro: 'Saisissez l’un de vos codes de récupération à usage unique.',
+            verify: 'Vérifier',
+            // Enrolment.
+            setupTitle: 'Configurer la double authentification',
+            setupIntro:
+                'La double authentification est obligatoire. Scannez ce QR code avec votre application d’authentification (Google Authenticator, Microsoft Authenticator, Authy…), puis saisissez le code généré pour confirmer.',
+            manualKey: 'Ou saisissez cette clé manuellement :',
+            confirm: 'Activer',
+            recoveryCodesTitle: 'Codes de récupération',
+            recoveryCodesIntro:
+                'Conservez ces codes à usage unique en lieu sûr. Ils permettent de vous connecter si vous perdez l’accès à votre application d’authentification. Ils ne seront plus affichés.',
+            recoveryCodesContinue: 'J’ai enregistré mes codes — continuer',
+        },
     },
     dashboard: {
         welcome: 'Bienvenue',

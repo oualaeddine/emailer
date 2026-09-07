@@ -2,9 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Domain\Enums\RoleName;
-use App\Modules\Identity\Models\Role;
-use App\Modules\Identity\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -23,15 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(SettingsSeeder::class);
 
-        if (! User::query()->exists()) {
-            User::factory()->create([
-                'name' => 'Administrateur',
-                'email' => 'admin@pagejaunes-mailer.local',
-                'role_id' => Role::query()->where('name', RoleName::Administrator->value)->value('id'),
-                'is_active' => true,
-            ]);
-        }
-
+        $this->call(SuperAdminSeeder::class);
         $this->call(AlgeriaB2bDemoSeeder::class);
     }
 }

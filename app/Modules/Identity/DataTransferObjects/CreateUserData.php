@@ -12,8 +12,7 @@ final readonly class CreateUserData
         public string $email,
         public string $password,
         public int $roleId,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{name: string, email: string, password: string, role_id: int}  $validated

@@ -13,9 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
  */
 class NotifyUserOfRoleChange implements ShouldQueue
 {
-    public function __construct(private readonly NotificationCenterService $notificationCenter)
-    {
-    }
+    public function __construct(private readonly NotificationCenterService $notificationCenter) {}
 
     public function handle(UserRoleChanged $event): void
     {

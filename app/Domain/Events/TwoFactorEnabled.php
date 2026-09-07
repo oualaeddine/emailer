@@ -6,9 +6,10 @@ use App\Modules\Identity\Models\User;
 use Illuminate\Foundation\Events\Dispatchable;
 
 /**
- * docs/27-audit-logs.md §27.2 — Authentication: `auth.login_succeeded`.
+ * docs/27-audit-logs.md §27.2, docs/28-security.md §28.1 —
+ * `auth.two_factor_enabled`: a user confirmed TOTP enrolment.
  */
-class UserLoggedIn
+class TwoFactorEnabled
 {
     use Dispatchable;
 

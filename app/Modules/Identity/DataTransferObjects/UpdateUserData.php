@@ -12,8 +12,7 @@ final readonly class UpdateUserData
         public ?string $name = null,
         public ?int $roleId = null,
         public ?bool $isActive = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{name?: string, role_id?: int, is_active?: bool}  $validated

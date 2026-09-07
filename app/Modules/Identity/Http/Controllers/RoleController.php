@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Gate;
  */
 class RoleController extends Controller
 {
-    public function __construct(private readonly RoleService $roles)
-    {
-    }
+    public function __construct(private readonly RoleService $roles) {}
 
     public function index(): AnonymousResourceCollection
     {

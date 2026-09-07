@@ -3,6 +3,9 @@ import { Head, usePage } from '@inertiajs/react';
 import {
     Badge,
     Card,
+    MessageBar,
+    MessageBarBody,
+    MessageBarTitle,
     ProgressBar,
     Spinner,
     Text,
@@ -84,19 +87,37 @@ export default function Dashboard() {
 
     const [widgets, setWidgets] = useState<DashboardWidgets | null>(null);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
         setLoading(true);
-        void fetchDashboardWidgets().then((data) => {
-            if (!cancelled) {
-                setWidgets(data);
-            }
-        }).finally(() => {
-            if (!cancelled) {
-                setLoading(false);
-            }
-        });
+        setErrorMessage(null);
+        void fetchDashboardWidgets()
+            .then((data) => {
+                if (!cancelled) {
+                    setWidgets(data);
+                }
+            })
+            .catch((err: unknown) => {
+                if (!cancelled) {
+                    const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
+                    if (status === 403) {
+                        setErrorMessage(
+                            "Accès refusé : vous ne disposez pas des permissions nécessaires pour afficher les indicateurs du tableau de bord."
+                        );
+                    } else if (status === 401) {
+                        setErrorMessage("Session expirée. Veuillez vous reconnecter.");
+                    } else {
+                        setErrorMessage("Impossible de charger les indicateurs du tableau de bord.");
+                    }
+                }
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
 
         return () => {
             cancelled = true;
@@ -131,8 +152,21 @@ export default function Dashboard() {
                 title={`${t.dashboard.welcome}, ${props.auth.user.name}`}
             />
 
-            {loading || !widgets ? (
+            {errorMessage && (
+                <div style={{ marginBottom: tokens.spacingVerticalL }}>
+                    <MessageBar intent="error">
+                        <MessageBarBody>
+                            <MessageBarTitle>Erreur</MessageBarTitle>
+                            {errorMessage}
+                        </MessageBarBody>
+                    </MessageBar>
+                </div>
+            )}
+
+            {loading ? (
                 <Spinner label={t.common.loading} />
+            ) : !widgets ? (
+                <Text className={styles.emptyState}>Aucune donnée disponible</Text>
             ) : (
                 <div className={styles.grid}>
                     <Card className={styles.widgetCard}>

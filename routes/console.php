@@ -16,4 +16,4 @@ Artisan::command('inspire', function () {
 | docs/30-background-jobs.md §30.3 — Scheduler Configuration.
 */
 
-Schedule::job(new SyncPageJaunesCompaniesJob())->daily();
+Schedule::job(new SyncPageJaunesCompaniesJob)->daily();

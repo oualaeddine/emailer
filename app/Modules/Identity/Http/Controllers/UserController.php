@@ -9,6 +9,7 @@ use App\Modules\Identity\Http\Requests\StoreUserRequest;
 use App\Modules\Identity\Http\Requests\UpdateUserRequest;
 use App\Modules\Identity\Http\Resources\UserResource;
 use App\Modules\Identity\Models\User;
+use App\Modules\Identity\Policies\UserPolicy;
 use App\Modules\Identity\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -16,13 +17,11 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 /**
  * docs/29-api-specification.md §29.2 — GET/POST /api/v1/users, PATCH /api/v1/users/{uuid}.
  * Every action is additionally gated by the `users.manage` Policy
- * (docs/26-rbac.md §26.3) via {@see \App\Modules\Identity\Policies\UserPolicy}.
+ * (docs/26-rbac.md §26.3) via {@see UserPolicy}.
  */
 class UserController extends Controller
 {
-    public function __construct(private readonly UserService $users)
-    {
-    }
+    public function __construct(private readonly UserService $users) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {

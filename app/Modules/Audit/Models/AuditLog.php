@@ -2,6 +2,7 @@
 
 namespace App\Modules\Audit\Models;
 
+use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Identity\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * Append-only: no `updated_at` timestamp and no Application Service ever
  * updates or deletes a row (docs/27-audit-logs.md §27.8). Rows are written
- * exclusively by {@see \App\Modules\Audit\Services\AuditLogger}.
+ * exclusively by {@see AuditLogger}.
  *
  * @property int $id
  * @property int|null $user_id

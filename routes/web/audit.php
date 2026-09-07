@@ -12,4 +12,6 @@ use Inertia\Inertia;
 | group (routes/web.php).
 */
 
-Route::get('admin/audit-log', fn () => Inertia::render('Admin/AuditLog'))->name('admin.audit-log');
+Route::get('admin/audit-log', fn () => Inertia::render('Admin/AuditLog'))
+    ->middleware('can:audit.view')
+    ->name('admin.audit-log');

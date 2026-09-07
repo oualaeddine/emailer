@@ -2,6 +2,8 @@
 
 namespace App\Modules\Identity\Listeners;
 
+use App\Domain\Events\TwoFactorChallengeFailed;
+use App\Domain\Events\TwoFactorEnabled;
 use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
 use App\Domain\Events\UserLoggedIn;
@@ -21,9 +23,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
  */
 class AuditListener implements ShouldQueue
 {
-    public function __construct(private readonly AuditLogger $auditLogger)
-    {
-    }
+    public function __construct(private readonly AuditLogger $auditLogger) {}
 
     public function handleUserLoggedIn(UserLoggedIn $event): void
     {
@@ -69,5 +69,15 @@ class AuditListener implements ShouldQueue
             oldValues: ['is_active' => true],
             newValues: ['is_active' => false],
         );
+    }
+
+    public function handleTwoFactorEnabled(TwoFactorEnabled $event): void
+    {
+        $this->auditLogger->record('auth.two_factor_enabled', $event->user, $event->user);
+    }
+
+    public function handleTwoFactorChallengeFailed(TwoFactorChallengeFailed $event): void
+    {
+        $this->auditLogger->record('auth.two_factor_failed', $event->user, $event->user);
     }
 }

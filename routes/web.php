@@ -21,7 +21,17 @@ Route::middleware('guest')->group(function (): void {
     require __DIR__.'/web/auth.php';
 });
 
-Route::middleware('auth')->group(function (): void {
+/*
+ | docs/28-security.md §28.1 — the TOTP challenge sits between the two
+ | factors: the password is verified but no session has started, so it is
+ | neither a `guest` nor an `auth` route. The `two-factor.pending` guard
+ | admits only a request carrying the parked pending identity.
+ */
+Route::middleware('two-factor.pending')->group(function (): void {
+    require __DIR__.'/web/two-factor.php';
+});
+
+Route::middleware(['auth', 'two-factor.enrol'])->group(function (): void {
     require __DIR__.'/web/app.php';
 });
 

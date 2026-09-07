@@ -12,4 +12,6 @@ use Inertia\Inertia;
 | group.
 */
 
-Route::get('campaigns', fn () => Inertia::render('Campaigns/Index'))->name('campaigns.index');
+Route::get('campaigns', fn () => Inertia::render('Campaigns/Index'))
+    ->middleware('can:campaigns.view')
+    ->name('campaigns.index');

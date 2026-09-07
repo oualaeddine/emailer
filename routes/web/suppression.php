@@ -13,4 +13,6 @@ use Inertia\Inertia;
 | group (routes/web.php).
 */
 
-Route::get('suppression', fn () => Inertia::render('Suppression/Index'))->name('suppression.index');
+Route::get('suppression', fn () => Inertia::render('Suppression/Index'))
+    ->middleware('can:suppression.view')
+    ->name('suppression.index');

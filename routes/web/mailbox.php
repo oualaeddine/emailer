@@ -12,4 +12,6 @@ use Inertia\Inertia;
 | (docs/42-parallel-execution-plan.md §42.6/§42.11).
 */
 
-Route::get('mailbox', fn () => Inertia::render('Mailbox/Index'))->name('mailbox.index');
+Route::get('mailbox', fn () => Inertia::render('Mailbox/Index'))
+    ->middleware('can:mailbox.access')
+    ->name('mailbox.index');

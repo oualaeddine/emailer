@@ -19,6 +19,5 @@ class SettingsUpdated
         public readonly mixed $newValue,
         public readonly bool $isSecret,
         public readonly User $updatedBy,
-    ) {
-    }
+    ) {}
 }

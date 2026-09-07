@@ -2,11 +2,12 @@
 
 namespace App\Modules\Identity\Http\Resources;
 
+use App\Modules\Identity\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Modules\Identity\Models\Role
+ * @mixin Role
  *
  * `roles` has no `uuid` column (docs/04-database-design.md §4.2 — unlike
  * `users`, roles are a fixed reference list, not an externally-obfuscated

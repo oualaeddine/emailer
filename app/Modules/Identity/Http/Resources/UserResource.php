@@ -2,11 +2,12 @@
 
 namespace App\Modules\Identity\Http\Resources;
 
+use App\Modules\Identity\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Modules\Identity\Models\User
+ * @mixin User
  *
  * docs/04-database-design.md §4.1 — internal id never leaked; `uuid` is
  * serialized as `id`. `password`/`remember_token` are already hidden on

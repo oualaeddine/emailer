@@ -43,5 +43,8 @@ class AuthServiceProvider extends ServiceProvider
         foreach (PermissionName::cases() as $permission) {
             Gate::define($permission->value, fn (User $user): bool => $user->hasPermission($permission->value));
         }
+
+        Gate::define('mailbox.access', fn (User $user): bool => $user->hasPermission(PermissionName::MailboxViewOwn->value) || $user->hasPermission(PermissionName::MailboxViewAll->value));
+        Gate::define('settings.branding.access', fn (User $user): bool => $user->hasPermission(PermissionName::SettingsBrandingOnly->value) || $user->hasPermission(PermissionName::SettingsManage->value));
     }
 }

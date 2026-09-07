@@ -2,6 +2,7 @@
 
 namespace App\Modules\Audit\Http\Resources;
 
+use App\Modules\Audit\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,7 +21,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * admin-only, list-and-export resource was judged not worth the migration
  * for this work package.
  *
- * @mixin \App\Modules\Audit\Models\AuditLog
+ * @mixin AuditLog
  */
 class AuditLogResource extends JsonResource
 {

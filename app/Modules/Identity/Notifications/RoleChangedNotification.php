@@ -15,9 +15,7 @@ class RoleChangedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly Role $oldRole, private readonly Role $newRole)
-    {
-    }
+    public function __construct(private readonly Role $oldRole, private readonly Role $newRole) {}
 
     /**
      * @return list<string>

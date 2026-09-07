@@ -26,11 +26,11 @@ class AuditLogger
         'password_encrypted',
         'remember_token',
         'token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
-    public function __construct(private readonly Request $request)
-    {
-    }
+    public function __construct(private readonly Request $request) {}
 
     /**
      * @param  array<string, mixed>|null  $oldValues

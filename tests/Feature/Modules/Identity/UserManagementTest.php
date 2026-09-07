@@ -25,7 +25,7 @@ class UserManagementTest extends TestCase
 
     public function test_administrator_can_list_users(): void
     {
-        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+        $admin = User::factory()->withRole(RoleName::Administrator)->withTwoFactor()->create();
         User::factory()->count(3)->withRole(RoleName::Viewer)->create();
 
         $response = $this->actingAs($admin)->getJson('/api/v1/users');
@@ -43,7 +43,7 @@ class UserManagementTest extends TestCase
 
     public function test_administrator_can_create_a_user(): void
     {
-        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+        $admin = User::factory()->withRole(RoleName::Administrator)->withTwoFactor()->create();
         $role = Role::query()->where('name', RoleName::MarketingOperator->value)->firstOrFail();
 
         $response = $this->actingAs($admin)->postJson('/api/v1/users', [
@@ -60,7 +60,7 @@ class UserManagementTest extends TestCase
 
     public function test_creating_a_user_with_a_duplicate_email_fails_validation(): void
     {
-        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+        $admin = User::factory()->withRole(RoleName::Administrator)->withTwoFactor()->create();
         $existing = User::factory()->withRole(RoleName::Viewer)->create(['email' => 'taken@example.com']);
         $role = Role::query()->where('name', RoleName::Viewer->value)->firstOrFail();
 
@@ -92,7 +92,7 @@ class UserManagementTest extends TestCase
 
     public function test_changing_a_users_role_fires_the_documented_side_effects(): void
     {
-        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+        $admin = User::factory()->withRole(RoleName::Administrator)->withTwoFactor()->create();
         $target = User::factory()->withRole(RoleName::Viewer)->create();
         $newRole = Role::query()->where('name', RoleName::MarketingOperator->value)->firstOrFail();
 
@@ -118,7 +118,7 @@ class UserManagementTest extends TestCase
 
     public function test_deactivating_a_user_fires_the_documented_audit_event(): void
     {
-        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+        $admin = User::factory()->withRole(RoleName::Administrator)->withTwoFactor()->create();
         $target = User::factory()->withRole(RoleName::Viewer)->create(['is_active' => true]);
 
         $response = $this->actingAs($admin)->patchJson("/api/v1/users/{$target->uuid}", [

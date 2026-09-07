@@ -19,6 +19,5 @@ class UserRoleChanged
         public readonly Role $oldRole,
         public readonly Role $newRole,
         public readonly User $changedBy,
-    ) {
-    }
+    ) {}
 }
