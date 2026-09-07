@@ -46,9 +46,15 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
         overflowX: 'auto',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     gridScroll: {
+        width: '100%',
         minWidth: '640px',
+    },
+    dataGrid: {
+        width: '100%',
     },
     bannerWrapper: {
         marginBottom: tokens.spacingVerticalM,
@@ -303,7 +309,13 @@ export default function SmtpIndex() {
 
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
-                    <DataGrid items={accounts} columns={columns} getRowId={(a) => a.id} resizableColumns>
+                    <DataGrid
+                        items={accounts}
+                        columns={columns}
+                        getRowId={(a) => a.id}
+                        className={styles.dataGrid}
+                        style={{ width: '100%' }}
+                    >
                         <DataGridHeader>
                             <DataGridRow>
                                 {({ renderHeaderCell }) => <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>}

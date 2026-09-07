@@ -13,11 +13,16 @@ import {
     DrawerBody,
     DrawerHeader,
     DrawerHeaderTitle,
+    MessageBar,
+    MessageBarActions,
+    MessageBarBody,
+    MessageBarTitle,
+    Spinner,
     makeStyles,
     tokens,
     type SelectTabData,
 } from '@fluentui/react-components';
-import { HistoryRegular, DesktopRegular, TabletRegular, PhoneRegular } from '@fluentui/react-icons';
+import { HistoryRegular, DesktopRegular, TabletRegular, PhoneRegular, DismissRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { RichTextEditor } from '@/Components/Composer/RichTextEditor';
 import { useText } from '@/Hooks/useText';
@@ -38,7 +43,32 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalM,
-        maxWidth: '900px',
+        width: '100%',
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 0.9fr)',
+        gap: tokens.spacingHorizontalXL,
+        alignItems: 'start',
+        width: '100%',
+        '@media (max-width: 1080px)': {
+            gridTemplateColumns: '1fr',
+            gap: tokens.spacingVerticalL,
+        },
+    },
+    editorColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacingVerticalM,
+        minWidth: 0,
+    },
+    previewColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacingVerticalM,
+        minWidth: 0,
+        position: 'sticky',
+        top: tokens.spacingVerticalM,
     },
     toolbarRow: {
         display: 'flex',
@@ -57,6 +87,15 @@ const useStyles = makeStyles({
         width: '100%',
         boxSizing: 'border-box',
         transition: 'max-width 0.2s ease, width 0.2s ease',
+        boxShadow: tokens.shadow4,
+    },
+    previewIframe: {
+        width: '100%',
+        minHeight: '480px',
+        height: 'calc(100vh - 280px)',
+        border: 'none',
+        backgroundColor: '#ffffff',
+        borderRadius: tokens.borderRadiusSmall,
     },
     versionItem: {
         display: 'flex',
@@ -70,10 +109,11 @@ const useStyles = makeStyles({
 });
 
 const PREVIEW_WIDTHS: Record<'desktop' | 'tablet' | 'mobile', string> = {
-    desktop: '640px',
+    desktop: '100%',
     tablet: '480px',
     mobile: '375px',
 };
+
 
 const AUTOSAVE_DEBOUNCE_MS = 3000;
 
@@ -97,6 +137,13 @@ export default function ComposerIndex() {
     const [versionsOpen, setVersionsOpen] = useState(false);
     const [versions, setVersions] = useState<DraftVersion[]>([]);
     const [savingState, setSavingState] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+    const [savingVersion, setSavingVersion] = useState(false);
+    const [versionMessage, setVersionMessage] = useState<{
+        intent: 'success' | 'error';
+        title: string;
+        body?: string;
+    } | null>(null);
 
     const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const draftRef = useRef<Draft | null>(null);
@@ -154,8 +201,37 @@ export default function ComposerIndex() {
     }
 
     async function handleSaveVersion() {
-        const current = await ensureDraft();
-        await saveDraftVersion(current.id);
+        setSavingVersion(true);
+        setVersionMessage(null);
+        try {
+            if (autosaveTimer.current) {
+                clearTimeout(autosaveTimer.current);
+            }
+            const current = await ensureDraft();
+            // Sync current editor inputs to draft before snapshotting
+            const updated = await autosaveDraft(current.id, {
+                subject,
+                html_body: htmlBody,
+                signature_id: signatureId,
+            });
+            draftRef.current = updated;
+            setDraft(updated);
+            setSavingState('saved');
+
+            const newVersion = await saveDraftVersion(current.id);
+            setVersionMessage({
+                intent: 'success',
+                title: t.composer.saveVersionSuccess.replace('%d', String(newVersion.version_number)),
+                body: t.composer.saveVersionSuccessDetail.replace('%d', String(newVersion.version_number)),
+            });
+        } catch {
+            setVersionMessage({
+                intent: 'error',
+                title: t.composer.saveVersionError,
+            });
+        } finally {
+            setSavingVersion(false);
+        }
     }
 
     async function openVersionHistory() {
@@ -198,78 +274,118 @@ export default function ComposerIndex() {
                             <Button icon={<HistoryRegular />} onClick={openVersionHistory}>
                                 {t.composer.versionHistory}
                             </Button>
-                            <Button appearance="primary" onClick={handleSaveVersion}>
-                                {t.composer.saveVersion}
+                            <Button
+                                appearance="primary"
+                                icon={savingVersion ? <Spinner size="tiny" /> : undefined}
+                                disabled={savingVersion}
+                                onClick={handleSaveVersion}
+                            >
+                                {savingVersion ? t.composer.savingVersion : t.composer.saveVersion}
                             </Button>
                         </div>
                     }
                 />
 
-                <Field label={t.composer.subject}>
-                    <Input value={subject} onChange={(_, data) => handleSubjectChange(data.value)} />
-                </Field>
-
-                <Field label={t.composer.signature}>
-                    <Dropdown
-                        value={signatures.find((s) => s.id === signatureId)?.name ?? t.composer.noSignature}
-                        onOptionSelect={(_, data) => setSignatureId(data.optionValue ?? null)}
+                {versionMessage && (
+                    <MessageBar
+                        intent={versionMessage.intent}
+                        actions={
+                            <MessageBarActions
+                                containerAction={
+                                    <Button
+                                        appearance="transparent"
+                                        icon={<DismissRegular />}
+                                        aria-label={t.common.close}
+                                        onClick={() => setVersionMessage(null)}
+                                    />
+                                }
+                            />
+                        }
                     >
-                        <Option value="">{t.composer.noSignature}</Option>
-                        {signatures.map((s) => (
-                            <Option key={s.id} value={s.id}>
-                                {s.name}
-                            </Option>
-                        ))}
-                    </Dropdown>
-                </Field>
-
-                <TabList
-                    selectedValue={mode}
-                    onTabSelect={(_, data: SelectTabData) => setMode(data.value as 'rich' | 'html')}
-                >
-                    <Tab value="rich">{t.composer.richText}</Tab>
-                    <Tab value="html">{t.composer.htmlSource}</Tab>
-                </TabList>
-
-                {mode === 'rich' ? (
-                    <RichTextEditor value={htmlBody} onChange={handleBodyChange} />
-                ) : (
-                    <textarea
-                        value={htmlBody}
-                        onChange={(e) => handleBodyChange(e.target.value)}
-                        rows={16}
-                        style={{ fontFamily: 'monospace', width: '100%', padding: tokens.spacingVerticalM }}
-                    />
+                        <MessageBarBody>
+                            <MessageBarTitle>{versionMessage.title}</MessageBarTitle>
+                            {versionMessage.body}
+                        </MessageBarBody>
+                    </MessageBar>
                 )}
 
-                <div className={styles.toolbarRow}>
-                    <Text weight="semibold">Aperçu</Text>
-                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalXS }}>
-                        <Button
-                            icon={<DesktopRegular />}
-                            appearance={preview === 'desktop' ? 'primary' : 'subtle'}
-                            onClick={() => setPreview('desktop')}
-                            aria-label={t.composer.previewDesktop}
-                        />
-                        <Button
-                            icon={<TabletRegular />}
-                            appearance={preview === 'tablet' ? 'primary' : 'subtle'}
-                            onClick={() => setPreview('tablet')}
-                            aria-label={t.composer.previewTablet}
-                        />
-                        <Button
-                            icon={<PhoneRegular />}
-                            appearance={preview === 'mobile' ? 'primary' : 'subtle'}
-                            onClick={() => setPreview('mobile')}
-                            aria-label={t.composer.previewMobile}
-                        />
+                <div className={styles.grid}>
+                    <div className={styles.editorColumn}>
+                        <Field label={t.composer.subject}>
+                            <Input value={subject} onChange={(_, data) => handleSubjectChange(data.value)} />
+                        </Field>
+
+                        <Field label={t.composer.signature}>
+                            <Dropdown
+                                value={signatures.find((s) => s.id === signatureId)?.name ?? t.composer.noSignature}
+                                onOptionSelect={(_, data) => setSignatureId(data.optionValue ?? null)}
+                            >
+                                <Option value="">{t.composer.noSignature}</Option>
+                                {signatures.map((s) => (
+                                    <Option key={s.id} value={s.id}>
+                                        {s.name}
+                                    </Option>
+                                ))}
+                            </Dropdown>
+                        </Field>
+
+                        <TabList
+                            selectedValue={mode}
+                            onTabSelect={(_, data: SelectTabData) => setMode(data.value as 'rich' | 'html')}
+                        >
+                            <Tab value="rich">{t.composer.richText}</Tab>
+                            <Tab value="html">{t.composer.htmlSource}</Tab>
+                        </TabList>
+
+                        {mode === 'rich' ? (
+                            <RichTextEditor value={htmlBody} onChange={handleBodyChange} />
+                        ) : (
+                            <textarea
+                                value={htmlBody}
+                                onChange={(e) => handleBodyChange(e.target.value)}
+                                rows={20}
+                                style={{
+                                    fontFamily: 'monospace',
+                                    width: '100%',
+                                    minHeight: '340px',
+                                    padding: tokens.spacingVerticalM,
+                                    borderRadius: tokens.borderRadiusMedium,
+                                    border: `1px solid ${tokens.colorNeutralStroke1}`,
+                                    boxSizing: 'border-box',
+                                }}
+                            />
+                        )}
                     </div>
-                </div>
-                <div className={styles.previewFrame} style={{ width: '100%', maxWidth: PREVIEW_WIDTHS[preview] }}>
-                    <iframe
-                        title="Aperçu de l'e-mail"
-                        sandbox=""
-                        srcDoc={`<!DOCTYPE html>
+
+                    <div className={styles.previewColumn}>
+                        <div className={styles.toolbarRow}>
+                            <Text weight="semibold" size={400}>Aperçu</Text>
+                            <div style={{ display: 'flex', gap: tokens.spacingHorizontalXS }}>
+                                <Button
+                                    icon={<DesktopRegular />}
+                                    appearance={preview === 'desktop' ? 'primary' : 'subtle'}
+                                    onClick={() => setPreview('desktop')}
+                                    aria-label={t.composer.previewDesktop}
+                                />
+                                <Button
+                                    icon={<TabletRegular />}
+                                    appearance={preview === 'tablet' ? 'primary' : 'subtle'}
+                                    onClick={() => setPreview('tablet')}
+                                    aria-label={t.composer.previewTablet}
+                                />
+                                <Button
+                                    icon={<PhoneRegular />}
+                                    appearance={preview === 'mobile' ? 'primary' : 'subtle'}
+                                    onClick={() => setPreview('mobile')}
+                                    aria-label={t.composer.previewMobile}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.previewFrame} style={{ width: '100%', maxWidth: PREVIEW_WIDTHS[preview] }}>
+                            <iframe
+                                title="Aperçu de l'e-mail"
+                                sandbox=""
+                                srcDoc={`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -290,8 +406,10 @@ export default function ComposerIndex() {
   ${htmlBody}${signatureHtml}
 </body>
 </html>`}
-                        style={{ width: '100%', height: '400px', border: 'none' }}
-                    />
+                                className={styles.previewIframe}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 

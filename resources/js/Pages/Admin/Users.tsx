@@ -36,9 +36,15 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
         overflowX: 'auto',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     gridScroll: {
+        width: '100%',
         minWidth: '760px',
+    },
+    dataGrid: {
+        width: '100%',
     },
     truncatedCell: {
         overflow: 'hidden',
@@ -176,7 +182,13 @@ export default function Users() {
             />
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
-                <DataGrid items={users} columns={columns} getRowId={(user) => user.id} resizableColumns>
+                <DataGrid
+                    items={users}
+                    columns={columns}
+                    getRowId={(user) => user.id}
+                    className={styles.dataGrid}
+                    style={{ width: '100%' }}
+                >
                     <DataGridHeader>
                         <DataGridRow>
                             {({ renderHeaderCell }) => (

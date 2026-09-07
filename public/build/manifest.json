@@ -73,7 +73,7 @@
     "name": "vendor"
   },
   "resources/css/app.css": {
-    "file": "assets/app-8AqHNJtC.css",
+    "file": "assets/app-VfS0W6Ou.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -394,7 +394,7 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-B3UL6rop.js",
+    "file": "assets/HelpCenter-CBhq07ve.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
@@ -405,11 +405,11 @@
       "_fluentui-D_u9iJm4.js"
     ],
     "css": [
-      "assets/app-8AqHNJtC.css"
+      "assets/app-VfS0W6Ou.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody--1uZNbQA.js",
+    "file": "assets/HelpDialogBody-DxEFkXkp.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
@@ -420,11 +420,11 @@
       "_fluentui-D_u9iJm4.js"
     ],
     "css": [
-      "assets/app-8AqHNJtC.css"
+      "assets/app-VfS0W6Ou.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-DDmgTMMz.js",
+    "file": "assets/app-DgQneBZh.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -437,7 +437,7 @@
       "resources/js/Components/Help/HelpCenter.tsx"
     ],
     "css": [
-      "assets/app-8AqHNJtC.css"
+      "assets/app-VfS0W6Ou.css"
     ]
   }
 }

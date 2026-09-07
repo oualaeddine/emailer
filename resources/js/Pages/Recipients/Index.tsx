@@ -40,9 +40,15 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
         overflowX: 'auto',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     gridScroll: {
+        width: '100%',
         minWidth: '680px',
+    },
+    dataGrid: {
+        width: '100%',
     },
 });
 
@@ -153,7 +159,8 @@ export default function Index() {
                         items={recipients}
                         columns={columns}
                         getRowId={(r) => r.id}
-                        resizableColumns
+                        className={styles.dataGrid}
+                        style={{ width: '100%' }}
                     >
                         <DataGridHeader>
                             <DataGridRow>

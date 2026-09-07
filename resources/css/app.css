@@ -10,3 +10,17 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Ensure FluentUI DataGrids, Tables, and rows always span 100% width and do not shrink */
+.fui-DataGrid,
+.fui-Table {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.fui-DataGridRow,
+.fui-TableRow {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+

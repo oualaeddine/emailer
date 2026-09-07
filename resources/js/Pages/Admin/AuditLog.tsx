@@ -52,9 +52,15 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
         overflowX: 'auto',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     gridScroll: {
+        width: '100%',
         minWidth: '680px',
+    },
+    dataGrid: {
+        width: '100%',
     },
     truncatedCell: {
         overflow: 'hidden',
@@ -274,7 +280,13 @@ export default function AuditLog() {
                     <Text>{t.audit.noResults}</Text>
                 ) : (
                     <div className={styles.gridScroll}>
-                    <DataGrid items={rows} columns={columns} getRowId={(row) => row.id} resizableColumns>
+                    <DataGrid
+                        items={rows}
+                        columns={columns}
+                        getRowId={(row) => row.id}
+                        className={styles.dataGrid}
+                        style={{ width: '100%' }}
+                    >
                         <DataGridHeader>
                             <DataGridRow>
                                 {({ renderHeaderCell }) => (

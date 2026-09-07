@@ -67,9 +67,15 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         padding: tokens.spacingVerticalM,
         overflowX: 'auto',
+        width: '100%',
+        boxSizing: 'border-box',
     },
     gridScroll: {
+        width: '100%',
         minWidth: '560px',
+    },
+    dataGrid: {
+        width: '100%',
     },
 });
 
@@ -216,7 +222,13 @@ export default function SuppressionIndex() {
                     <EmptyState icon={ShieldProhibitedRegular} title={t.suppression.noResults} />
                 ) : (
                     <div className={styles.gridScroll}>
-                    <DataGrid items={entries} columns={columns} getRowId={(entry) => entry.id} resizableColumns>
+                    <DataGrid
+                        items={entries}
+                        columns={columns}
+                        getRowId={(entry) => entry.id}
+                        className={styles.dataGrid}
+                        style={{ width: '100%' }}
+                    >
                         <DataGridHeader>
                             <DataGridRow>
                                 {({ renderHeaderCell }) => <DataGridHeaderCell>{renderHeaderCell()}</DataGridHeaderCell>}
