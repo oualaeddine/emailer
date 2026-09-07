@@ -21,6 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SettingsSeeder::class);
 
         $this->call(SuperAdminSeeder::class);
-        $this->call(AlgeriaB2bDemoSeeder::class);
+      //  $this->call(AlgeriaB2bDemoSeeder::class);
     }
 }
