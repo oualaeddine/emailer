@@ -1,0 +1,423 @@
+{
+  "_DocContent-C-19l_09.js": {
+    "file": "assets/DocContent-C-19l_09.js",
+    "name": "DocContent",
+    "imports": [
+      "resources/js/app.tsx"
+    ],
+    "dynamicImports": [
+      "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
+      "resources/docs/ar/dialogs/dialog-recipient-form.md?raw",
+      "resources/docs/ar/dialogs/dialog-smtp-account-form.md?raw",
+      "resources/docs/ar/dialogs/dialog-suppression-entry-form.md?raw",
+      "resources/docs/ar/dialogs/dialog-template-form.md?raw",
+      "resources/docs/ar/dialogs/dialog-user-form.md?raw",
+      "resources/docs/ar/flows/flow-analyze-results.md?raw",
+      "resources/docs/ar/flows/flow-compose-send-email.md?raw",
+      "resources/docs/ar/flows/flow-create-send-campaign.md?raw",
+      "resources/docs/ar/flows/flow-import-recipients-csv.md?raw",
+      "resources/docs/ar/flows/flow-source-pagejaunes.md?raw",
+      "resources/docs/ar/pages/admin-users.md?raw",
+      "resources/docs/ar/pages/audit-log.md?raw",
+      "resources/docs/ar/pages/campaigns.md?raw",
+      "resources/docs/ar/pages/composer.md?raw",
+      "resources/docs/ar/pages/dashboard.md?raw",
+      "resources/docs/ar/pages/login.md?raw",
+      "resources/docs/ar/pages/mailbox.md?raw",
+      "resources/docs/ar/pages/pagejaunes-search.md?raw",
+      "resources/docs/ar/pages/recipients-import.md?raw",
+      "resources/docs/ar/pages/recipients.md?raw",
+      "resources/docs/ar/pages/reporting.md?raw",
+      "resources/docs/ar/pages/settings-branding.md?raw",
+      "resources/docs/ar/pages/smtp.md?raw",
+      "resources/docs/ar/pages/suppression.md?raw",
+      "resources/docs/ar/pages/templates.md?raw",
+      "resources/docs/fr/dialogs/dialog-campaign-wizard.md?raw",
+      "resources/docs/fr/dialogs/dialog-recipient-form.md?raw",
+      "resources/docs/fr/dialogs/dialog-smtp-account-form.md?raw",
+      "resources/docs/fr/dialogs/dialog-suppression-entry-form.md?raw",
+      "resources/docs/fr/dialogs/dialog-template-form.md?raw",
+      "resources/docs/fr/dialogs/dialog-user-form.md?raw",
+      "resources/docs/fr/flows/flow-analyze-results.md?raw",
+      "resources/docs/fr/flows/flow-compose-send-email.md?raw",
+      "resources/docs/fr/flows/flow-create-send-campaign.md?raw",
+      "resources/docs/fr/flows/flow-import-recipients-csv.md?raw",
+      "resources/docs/fr/flows/flow-source-pagejaunes.md?raw",
+      "resources/docs/fr/pages/admin-users.md?raw",
+      "resources/docs/fr/pages/audit-log.md?raw",
+      "resources/docs/fr/pages/campaigns.md?raw",
+      "resources/docs/fr/pages/composer.md?raw",
+      "resources/docs/fr/pages/dashboard.md?raw",
+      "resources/docs/fr/pages/login.md?raw",
+      "resources/docs/fr/pages/mailbox.md?raw",
+      "resources/docs/fr/pages/pagejaunes-search.md?raw",
+      "resources/docs/fr/pages/recipients-import.md?raw",
+      "resources/docs/fr/pages/recipients.md?raw",
+      "resources/docs/fr/pages/reporting.md?raw",
+      "resources/docs/fr/pages/settings-branding.md?raw",
+      "resources/docs/fr/pages/smtp.md?raw",
+      "resources/docs/fr/pages/suppression.md?raw",
+      "resources/docs/fr/pages/templates.md?raw"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-11tNch4D.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw": {
+    "file": "assets/dialog-campaign-wizard-BKhtzRFb.js",
+    "name": "dialog-campaign-wizard",
+    "src": "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/dialogs/dialog-recipient-form.md?raw": {
+    "file": "assets/dialog-recipient-form-Dug_FQ_B.js",
+    "name": "dialog-recipient-form",
+    "src": "resources/docs/ar/dialogs/dialog-recipient-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/dialogs/dialog-smtp-account-form.md?raw": {
+    "file": "assets/dialog-smtp-account-form-BrHFSi5w.js",
+    "name": "dialog-smtp-account-form",
+    "src": "resources/docs/ar/dialogs/dialog-smtp-account-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/dialogs/dialog-suppression-entry-form.md?raw": {
+    "file": "assets/dialog-suppression-entry-form-BvMkhAyg.js",
+    "name": "dialog-suppression-entry-form",
+    "src": "resources/docs/ar/dialogs/dialog-suppression-entry-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/dialogs/dialog-template-form.md?raw": {
+    "file": "assets/dialog-template-form-CUyexAbs.js",
+    "name": "dialog-template-form",
+    "src": "resources/docs/ar/dialogs/dialog-template-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/dialogs/dialog-user-form.md?raw": {
+    "file": "assets/dialog-user-form-CCh7bVuq.js",
+    "name": "dialog-user-form",
+    "src": "resources/docs/ar/dialogs/dialog-user-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/flows/flow-analyze-results.md?raw": {
+    "file": "assets/flow-analyze-results-BpufjTxv.js",
+    "name": "flow-analyze-results",
+    "src": "resources/docs/ar/flows/flow-analyze-results.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/flows/flow-compose-send-email.md?raw": {
+    "file": "assets/flow-compose-send-email-DLxztD6h.js",
+    "name": "flow-compose-send-email",
+    "src": "resources/docs/ar/flows/flow-compose-send-email.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/flows/flow-create-send-campaign.md?raw": {
+    "file": "assets/flow-create-send-campaign-BZJ9pz6I.js",
+    "name": "flow-create-send-campaign",
+    "src": "resources/docs/ar/flows/flow-create-send-campaign.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/flows/flow-import-recipients-csv.md?raw": {
+    "file": "assets/flow-import-recipients-csv-DxDqgLjg.js",
+    "name": "flow-import-recipients-csv",
+    "src": "resources/docs/ar/flows/flow-import-recipients-csv.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/flows/flow-source-pagejaunes.md?raw": {
+    "file": "assets/flow-source-pagejaunes-Cnk4ElkW.js",
+    "name": "flow-source-pagejaunes",
+    "src": "resources/docs/ar/flows/flow-source-pagejaunes.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/admin-users.md?raw": {
+    "file": "assets/admin-users-D3n6Iy8i.js",
+    "name": "admin-users",
+    "src": "resources/docs/ar/pages/admin-users.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/audit-log.md?raw": {
+    "file": "assets/audit-log-CC0qb3b_.js",
+    "name": "audit-log",
+    "src": "resources/docs/ar/pages/audit-log.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/campaigns.md?raw": {
+    "file": "assets/campaigns-H4HnDH6k.js",
+    "name": "campaigns",
+    "src": "resources/docs/ar/pages/campaigns.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/composer.md?raw": {
+    "file": "assets/composer-zVKr04N7.js",
+    "name": "composer",
+    "src": "resources/docs/ar/pages/composer.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/dashboard.md?raw": {
+    "file": "assets/dashboard-BwG9np9o.js",
+    "name": "dashboard",
+    "src": "resources/docs/ar/pages/dashboard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/login.md?raw": {
+    "file": "assets/login-BY16dD-_.js",
+    "name": "login",
+    "src": "resources/docs/ar/pages/login.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/mailbox.md?raw": {
+    "file": "assets/mailbox-xBf-XWwp.js",
+    "name": "mailbox",
+    "src": "resources/docs/ar/pages/mailbox.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/pagejaunes-search.md?raw": {
+    "file": "assets/pagejaunes-search-BnrBUUKZ.js",
+    "name": "pagejaunes-search",
+    "src": "resources/docs/ar/pages/pagejaunes-search.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/recipients-import.md?raw": {
+    "file": "assets/recipients-import-DfUd_WE-.js",
+    "name": "recipients-import",
+    "src": "resources/docs/ar/pages/recipients-import.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/recipients.md?raw": {
+    "file": "assets/recipients-Bs6GDNw4.js",
+    "name": "recipients",
+    "src": "resources/docs/ar/pages/recipients.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/reporting.md?raw": {
+    "file": "assets/reporting-BX_Ce_f9.js",
+    "name": "reporting",
+    "src": "resources/docs/ar/pages/reporting.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/settings-branding.md?raw": {
+    "file": "assets/settings-branding-BIm-txDb.js",
+    "name": "settings-branding",
+    "src": "resources/docs/ar/pages/settings-branding.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/smtp.md?raw": {
+    "file": "assets/smtp-DCXbd2qO.js",
+    "name": "smtp",
+    "src": "resources/docs/ar/pages/smtp.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/suppression.md?raw": {
+    "file": "assets/suppression-agTV9YmJ.js",
+    "name": "suppression",
+    "src": "resources/docs/ar/pages/suppression.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/templates.md?raw": {
+    "file": "assets/templates-byR5b1EX.js",
+    "name": "templates",
+    "src": "resources/docs/ar/pages/templates.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-campaign-wizard.md?raw": {
+    "file": "assets/dialog-campaign-wizard-Bx7i4EQS.js",
+    "name": "dialog-campaign-wizard",
+    "src": "resources/docs/fr/dialogs/dialog-campaign-wizard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-recipient-form.md?raw": {
+    "file": "assets/dialog-recipient-form-C0chVHIR.js",
+    "name": "dialog-recipient-form",
+    "src": "resources/docs/fr/dialogs/dialog-recipient-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-smtp-account-form.md?raw": {
+    "file": "assets/dialog-smtp-account-form-r1U7W2e2.js",
+    "name": "dialog-smtp-account-form",
+    "src": "resources/docs/fr/dialogs/dialog-smtp-account-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-suppression-entry-form.md?raw": {
+    "file": "assets/dialog-suppression-entry-form-DNOWcIRA.js",
+    "name": "dialog-suppression-entry-form",
+    "src": "resources/docs/fr/dialogs/dialog-suppression-entry-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-template-form.md?raw": {
+    "file": "assets/dialog-template-form-CtMIBKgh.js",
+    "name": "dialog-template-form",
+    "src": "resources/docs/fr/dialogs/dialog-template-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/dialogs/dialog-user-form.md?raw": {
+    "file": "assets/dialog-user-form-DdkDkZFf.js",
+    "name": "dialog-user-form",
+    "src": "resources/docs/fr/dialogs/dialog-user-form.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/flows/flow-analyze-results.md?raw": {
+    "file": "assets/flow-analyze-results-Dj2LmH_5.js",
+    "name": "flow-analyze-results",
+    "src": "resources/docs/fr/flows/flow-analyze-results.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/flows/flow-compose-send-email.md?raw": {
+    "file": "assets/flow-compose-send-email-Bu3_yqYj.js",
+    "name": "flow-compose-send-email",
+    "src": "resources/docs/fr/flows/flow-compose-send-email.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/flows/flow-create-send-campaign.md?raw": {
+    "file": "assets/flow-create-send-campaign-Dw8nTzL7.js",
+    "name": "flow-create-send-campaign",
+    "src": "resources/docs/fr/flows/flow-create-send-campaign.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/flows/flow-import-recipients-csv.md?raw": {
+    "file": "assets/flow-import-recipients-csv-BOBhy8b7.js",
+    "name": "flow-import-recipients-csv",
+    "src": "resources/docs/fr/flows/flow-import-recipients-csv.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/flows/flow-source-pagejaunes.md?raw": {
+    "file": "assets/flow-source-pagejaunes-CdgTxJyY.js",
+    "name": "flow-source-pagejaunes",
+    "src": "resources/docs/fr/flows/flow-source-pagejaunes.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/admin-users.md?raw": {
+    "file": "assets/admin-users-DdK3uwoy.js",
+    "name": "admin-users",
+    "src": "resources/docs/fr/pages/admin-users.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/audit-log.md?raw": {
+    "file": "assets/audit-log-DiG8k7hl.js",
+    "name": "audit-log",
+    "src": "resources/docs/fr/pages/audit-log.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/campaigns.md?raw": {
+    "file": "assets/campaigns-DVrMVF_M.js",
+    "name": "campaigns",
+    "src": "resources/docs/fr/pages/campaigns.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/composer.md?raw": {
+    "file": "assets/composer-C-Zt7-_L.js",
+    "name": "composer",
+    "src": "resources/docs/fr/pages/composer.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/dashboard.md?raw": {
+    "file": "assets/dashboard-BbQNozky.js",
+    "name": "dashboard",
+    "src": "resources/docs/fr/pages/dashboard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/login.md?raw": {
+    "file": "assets/login-DBs32Mv7.js",
+    "name": "login",
+    "src": "resources/docs/fr/pages/login.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/mailbox.md?raw": {
+    "file": "assets/mailbox-BFlWwaDR.js",
+    "name": "mailbox",
+    "src": "resources/docs/fr/pages/mailbox.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/pagejaunes-search.md?raw": {
+    "file": "assets/pagejaunes-search-8eDZsx8W.js",
+    "name": "pagejaunes-search",
+    "src": "resources/docs/fr/pages/pagejaunes-search.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/recipients-import.md?raw": {
+    "file": "assets/recipients-import-BZrgZpCM.js",
+    "name": "recipients-import",
+    "src": "resources/docs/fr/pages/recipients-import.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/recipients.md?raw": {
+    "file": "assets/recipients-Cyyx_RXX.js",
+    "name": "recipients",
+    "src": "resources/docs/fr/pages/recipients.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/reporting.md?raw": {
+    "file": "assets/reporting-BRQKDThV.js",
+    "name": "reporting",
+    "src": "resources/docs/fr/pages/reporting.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/settings-branding.md?raw": {
+    "file": "assets/settings-branding-DkISHZi1.js",
+    "name": "settings-branding",
+    "src": "resources/docs/fr/pages/settings-branding.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/smtp.md?raw": {
+    "file": "assets/smtp-BpNV76ZN.js",
+    "name": "smtp",
+    "src": "resources/docs/fr/pages/smtp.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/suppression.md?raw": {
+    "file": "assets/suppression-RTBugiE9.js",
+    "name": "suppression",
+    "src": "resources/docs/fr/pages/suppression.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/templates.md?raw": {
+    "file": "assets/templates-Dlvm_zXi.js",
+    "name": "templates",
+    "src": "resources/docs/fr/pages/templates.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/js/Components/Help/HelpCenter.tsx": {
+    "file": "assets/HelpCenter-C3SkSRdJ.js",
+    "name": "HelpCenter",
+    "src": "resources/js/Components/Help/HelpCenter.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_DocContent-C-19l_09.js"
+    ],
+    "css": [
+      "assets/app-11tNch4D.css"
+    ]
+  },
+  "resources/js/Components/Help/HelpDialogBody.tsx": {
+    "file": "assets/HelpDialogBody-DIKuJBtU.js",
+    "name": "HelpDialogBody",
+    "src": "resources/js/Components/Help/HelpDialogBody.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_DocContent-C-19l_09.js"
+    ],
+    "css": [
+      "assets/app-11tNch4D.css"
+    ]
+  },
+  "resources/js/app.tsx": {
+    "file": "assets/app-26279WM_.js",
+    "name": "app",
+    "src": "resources/js/app.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/Components/Help/HelpDialogBody.tsx",
+      "resources/js/Components/Help/HelpCenter.tsx"
+    ],
+    "css": [
+      "assets/app-11tNch4D.css"
+    ]
+  }
+}
