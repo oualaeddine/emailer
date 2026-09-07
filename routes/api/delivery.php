@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('smtp-accounts', [SmtpAccountController::class, 'index']);
 Route::post('smtp-accounts', [SmtpAccountController::class, 'store']);
+Route::post('smtp-accounts/test-configuration', [SmtpAccountController::class, 'testConfiguration']);
 Route::patch('smtp-accounts/{account}', [SmtpAccountController::class, 'update']);
 Route::delete('smtp-accounts/{account}', [SmtpAccountController::class, 'destroy']);
 Route::post('smtp-accounts/{account}/test', [SmtpAccountController::class, 'test']);

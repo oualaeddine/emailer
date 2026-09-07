@@ -41,6 +41,36 @@ export async function testSmtpAccount(id: string, testEmail?: string): Promise<{
     return response.data;
 }
 
+export interface TestSmtpConfigurationPayload {
+    name?: string;
+    provider?: string;
+    host: string;
+    port: number;
+    encryption: string;
+    username: string;
+    password: string;
+    from_email: string;
+    from_name?: string;
+    test_email?: string;
+}
+
+export async function testSmtpConfiguration(
+    payload: TestSmtpConfigurationPayload,
+): Promise<{ success: boolean; raw_response: string }> {
+    const response = await axios.post<{ success: boolean; raw_response: string }>(
+        '/api/v1/smtp-accounts/test-configuration',
+        payload,
+    );
+
+    return response.data;
+}
+
+export async function updateSmtpAccount(id: string, payload: Partial<CreateSmtpAccountPayload>): Promise<SmtpAccount> {
+    const response = await axios.patch<{ data: SmtpAccount }>(`/api/v1/smtp-accounts/${id}`, payload);
+
+    return response.data.data;
+}
+
 export async function deleteSmtpAccount(id: string): Promise<void> {
     await axios.delete(`/api/v1/smtp-accounts/${id}`);
 }

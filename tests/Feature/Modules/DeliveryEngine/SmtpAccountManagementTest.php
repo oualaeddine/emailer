@@ -110,6 +110,39 @@ class SmtpAccountManagementTest extends TestCase
         $response->assertJsonPath('success', false);
     }
 
+    public function test_administrator_can_test_smtp_configuration_before_saving(): void
+    {
+        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/smtp-accounts/test-configuration', $this->payload());
+
+        $response->assertOk();
+        $response->assertJsonPath('success', true);
+        $response->assertJsonPath('raw_response', '250 OK (fake)');
+        $this->assertSame(0, SmtpAccount::query()->count());
+    }
+
+    public function test_failed_test_smtp_configuration_before_saving_is_reported(): void
+    {
+        FakeSmtpConnectionTester::$shouldSucceed = false;
+        $admin = User::factory()->withRole(RoleName::Administrator)->create();
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/smtp-accounts/test-configuration', $this->payload());
+
+        $response->assertOk();
+        $response->assertJsonPath('success', false);
+        $this->assertSame(0, SmtpAccount::query()->count());
+    }
+
+    public function test_user_without_smtp_test_permission_cannot_test_configuration(): void
+    {
+        $viewer = User::factory()->withRole(RoleName::Viewer)->create();
+
+        $this->actingAs($viewer)
+            ->postJson('/api/v1/smtp-accounts/test-configuration', $this->payload())
+            ->assertForbidden();
+    }
+
     public function test_an_account_referenced_by_send_attempts_cannot_be_hard_deleted(): void
     {
         $admin = User::factory()->withRole(RoleName::Administrator)->create();

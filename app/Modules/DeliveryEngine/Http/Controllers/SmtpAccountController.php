@@ -81,4 +81,41 @@ class SmtpAccountController extends Controller
 
         return ['success' => $result->success, 'raw_response' => $result->rawResponse];
     }
+
+    public function testConfiguration(Request $request, SmtpConnectionTesterContract $tester): array
+    {
+        Gate::authorize(PermissionName::SmtpTest->value);
+
+        $data = $request->validate([
+            'host' => ['required', 'string', 'max:255'],
+            'port' => ['required', 'integer', 'min:1', 'max:65535'],
+            'encryption' => ['required', new \Illuminate\Validation\Rules\Enum(\App\Domain\Enums\SmtpEncryption::class)],
+            'username' => ['required', 'string', 'max:255'],
+            'password' => ['required', 'string'],
+            'from_email' => ['required', 'email', 'max:191'],
+            'from_name' => ['nullable', 'string', 'max:150'],
+            'name' => ['nullable', 'string', 'max:150'],
+            'provider' => ['nullable', 'string', 'max:50'],
+            'test_email' => ['nullable', 'email'],
+        ]);
+
+        $account = new SmtpAccount();
+        $account->name = $data['name'] ?? 'Configuration test';
+        $account->provider = $data['provider'] ?? 'custom';
+        $account->host = $data['host'];
+        $account->port = (int) $data['port'];
+        $account->encryption = $data['encryption'];
+        $account->username = $data['username'];
+        $account->password_encrypted = $data['password'];
+        $account->from_email = $data['from_email'];
+        $account->from_name = $data['from_name'] ?? null;
+
+        $testEmail = $data['test_email'] ?? null;
+
+        $result = $testEmail !== null
+            ? $tester->sendTestEmail($account, $testEmail)
+            : $tester->testConnection($account);
+
+        return ['success' => $result->success, 'raw_response' => $result->rawResponse];
+    }
 }
