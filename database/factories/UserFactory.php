@@ -35,9 +35,9 @@ class UserFactory extends Factory
                 ?? Role::factory(),
             'is_active' => true,
             'remember_token' => Str::random(10),
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
-            'two_factor_confirmed_at' => null,
+            'two_factor_secret' => 'ABCDEFGHIJKLMNOP',
+            'two_factor_recovery_codes' => ['AAAAA-BBBBB', 'CCCCC-DDDDD'],
+            'two_factor_confirmed_at' => now(),
         ];
     }
 

@@ -394,7 +394,7 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-Bw8z01L5.js",
+    "file": "assets/HelpCenter-BkQlqafk.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
@@ -409,7 +409,7 @@
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-Cdbr-o60.js",
+    "file": "assets/HelpDialogBody-BWjykbwS.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
@@ -424,7 +424,7 @@
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-D9MquV2k.js",
+    "file": "assets/app-DyxfMR_j.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
