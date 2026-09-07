@@ -9,6 +9,7 @@ import {
     tokens,
     type SelectTabData,
 } from '@fluentui/react-components';
+import { HtmlPreview } from '@/Components/Common/HtmlPreview';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaign, fetchCampaignAnalytics, fetchCampaignRecipients } from '@/Lib/api/campaigns';
 import { fetchTemplates } from '@/Lib/api/templates';
@@ -207,7 +208,7 @@ export function CampaignDetail({ campaignId }: CampaignDetailProps) {
             {tab === 'content' && (
                 <div className={styles.preview}>
                     {detail.html_body ? (
-                        <div dangerouslySetInnerHTML={{ __html: detail.html_body }} />
+                        <HtmlPreview html={detail.html_body} style={{ minHeight: '420px' }} />
                     ) : (
                         <Text>{t.campaigns.noContentPreview}</Text>
                     )}

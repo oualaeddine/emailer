@@ -19,6 +19,7 @@ import { AddRegular, DocumentRegular, MoreHorizontalRegular, ArchiveRegular, Del
 import { AppShell } from '@/Components/Shell/AppShell';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { EmptyState } from '@/Components/Shell/EmptyState';
+import { HtmlPreview } from '@/Components/Common/HtmlPreview';
 import { useText } from '@/Hooks/useText';
 import { archiveTemplate, createTemplate, deleteTemplate, fetchTemplates } from '@/Lib/api/templates';
 import type { Template } from '@/Lib/types/templates';
@@ -146,9 +147,10 @@ export default function TemplatesIndex() {
                             </Menu>
                         </div>
                         <CardPreview className={styles.preview}>
-                            <div
-                                style={{ padding: tokens.spacingVerticalS, fontSize: '10px', overflow: 'hidden' }}
-                                dangerouslySetInnerHTML={{ __html: template.html_content }}
+                            <HtmlPreview
+                                html={template.html_content}
+                                title={template.name}
+                                style={{ height: '120px', overflow: 'hidden' }}
                             />
                         </CardPreview>
                         <Text size={200}>{t.templates.usage.replace('%d', String(template.usage_count))}</Text>
