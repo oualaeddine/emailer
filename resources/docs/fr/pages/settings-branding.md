@@ -12,7 +12,7 @@ Ce nom apparaît dans l'en-tête de navigation et sert de signature par défaut 
 
 ## Couleur de marque
 
-Le champ **Couleur de marque** accepte un code hexadécimal à six caractères précédé du dièse, par exemple `#DF0A0A`. Le petit carré à droite du champ ouvre le sélecteur de couleur de votre système si vous préférez choisir visuellement.
+Le champ **Couleur de marque** accepte un code hexadécimal à six caractères précédé du dièse, par exemple `#FFD400` (le jaune officiel Pages Jaunes DZ). Le petit carré à droite du champ ouvre le sélecteur de couleur de votre système si vous préférez choisir visuellement.
 
 Cette unique couleur suffit : l'application en dérive automatiquement toute une gamme de nuances, utilisée pour les boutons principaux, la rubrique active du menu et les liens, en version claire comme en version sombre.
 
@@ -46,7 +46,7 @@ Les rôles **Administrateur** et **Responsable marketing** ont accès à l'ident
 
 ## En cas de problème
 
-- **Le bandeau de confirmation n'apparaît pas** : l'enregistrement a échoué, souvent parce que la couleur n'est pas un code hexadécimal valide. Elle doit s'écrire `#DF0A0A` — un dièse suivi de six caractères.
+- **Le bandeau de confirmation n'apparaît pas** : l'enregistrement a échoué, souvent parce que la couleur n'est pas un code hexadécimal valide. Elle doit s'écrire `#FFD400` — un dièse suivi de six caractères.
 - **La couleur a changé mais l'interface reste identique** : rechargez la page. Les onglets déjà ouverts conservent l'ancienne palette jusqu'à leur rafraîchissement.
 - **Le texte des boutons devient illisible** : la couleur choisie est trop claire. Prenez une teinte plus soutenue de la même famille.
 - **Un collègue ne voit pas le thème que j'ai défini** : il a probablement choisi lui-même un thème sur son poste, ou son système est réglé différemment si vous avez retenu le mode Système.

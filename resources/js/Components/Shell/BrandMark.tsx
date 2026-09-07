@@ -18,7 +18,7 @@ interface BrandMarkProps {
     className?: string;
 }
 
-/** Small branded app mark — a rounded red square with a mail glyph, used in the top bar and on the login screen. */
+/** Small branded app mark — a rounded Pages Jaunes DZ yellow square with a dark mail glyph, used in the top bar and on the login screen. */
 export function BrandMark({ size = 32, className }: BrandMarkProps) {
     const styles = useStyles();
 

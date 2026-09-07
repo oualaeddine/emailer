@@ -675,7 +675,7 @@ class AlgeriaB2bDemoSeeder extends Seeder
 
         return <<<HTML
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2933;">
-            <h1 style="color: #DF0A0A;">{$subject}</h1>
+            <h1 style="color: #111111; border-left: 4px solid #FFD400; padding-left: 12px;">{$subject}</h1>
             <p>Bonjour {{first_name}},</p>
             <p>
                 Nous accompagnons les entreprises algériennes — du BTP à l'industrie
@@ -685,7 +685,7 @@ class AlgeriaB2bDemoSeeder extends Seeder
             <p><strong>{{company_name}}</strong>, découvrez comment nous pouvons vous aider
             à générer plus de leads qualifiés partout en Algérie.</p>
             <p style="text-align: center; margin: 32px 0;">
-                <a href="#" style="background: #DF0A0A; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none;">{$cta}</a>
+                <a href="#" style="background: #FFD400; color: #111111; font-weight: bold; padding: 12px 24px; border-radius: 6px; text-decoration: none;">{$cta}</a>
             </p>
             <p>Cordialement,<br>L'équipe commerciale</p>
         </div>

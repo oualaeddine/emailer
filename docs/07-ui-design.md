@@ -8,19 +8,19 @@ The application uses **Fluent UI v9** (`@fluentui/react-components`) as its comp
 
 | Token Category | Source | Notes |
 |---|---|---|
-| Color | Fluent `webLightTheme` / `webDarkTheme`, customized brand ramp | Brand primary mapped to organization's brand color (configurable in Settings → Branding) |
+| Color | Fluent `webLightTheme` / `webDarkTheme`, customized brand ramp | Brand primary mapped to Pages Jaunes DZ (#FFD400 yellow, #111111 dark contrast; configurable in Settings → Branding) |
 | Typography | Fluent type ramp (`caption1`…`title1`) | Base font: Segoe UI Variable stack with system fallback |
 | Spacing | Fluent spacing scale (4px base unit) | Tailwind `spacing` config aliased to same scale |
 | Elevation | Fluent shadow tokens (`shadow2`,`shadow4`,`shadow8`,`shadow16`,`shadow28`) | Used for panels, dialogs, flyouts |
 | Radius | Fluent corner radius tokens (`small`,`medium`,`large`) | Consistent 4/6/8px radii |
 | Motion | Fluent duration/easing tokens | Standard 150–250ms transitions, respects `prefers-reduced-motion` |
 
-Both `webLightTheme` and `webDarkTheme` are extended via `createLightTheme`/`createDarkTheme` from a single brand ramp generator, so light/dark stay in sync from one brand color input.
+Both `webLightTheme` and `webDarkTheme` are extended via `createLightTheme`/`createDarkTheme` from the Pages Jaunes DZ brand ramp, with high-contrast text tokens (`colorNeutralForegroundOnBrand` = `#111111`, ensuring 13.2:1 WCAG AAA contrast on yellow) so light/dark stay in sync.
 
 ## 7.3 Color System
 
 - **Neutral palette**: Fluent neutral ramp for backgrounds, borders, text — ensures WCAG AA contrast by default.
-- **Brand palette**: single configurable brand color (Settings → Branding) generates a 16-step ramp via Fluent's ramp generator; used for primary actions, active nav state, links.
+- **Brand palette**: Pages Jaunes DZ brand palette (#FFD400 yellow primary, #111111 charcoal text, #5ECFB1 mint/teal accent, #1B2A4A deep navy) generates a 16-step ramp via Fluent's theme system; used for primary actions, active nav state, badges, links.
 - **Semantic colors**: Fluent status palette mapped to domain status meanings:
   - Success/green → `delivered`, `completed`, `healthy`
   - Warning/yellow → `soft_bounced`, `degraded`, `paused`, `waiting_for_quota`

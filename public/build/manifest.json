@@ -1,6 +1,6 @@
 {
-  "_DocContent-C-19l_09.js": {
-    "file": "assets/DocContent-C-19l_09.js",
+  "_DocContent-DY-v3YZ2.js": {
+    "file": "assets/DocContent-DY-v3YZ2.js",
     "name": "DocContent",
     "imports": [
       "resources/js/app.tsx"
@@ -61,7 +61,7 @@
     ]
   },
   "resources/css/app.css": {
-    "file": "assets/app-11tNch4D.css",
+    "file": "assets/app-D3Mccs5r.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -202,7 +202,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/settings-branding.md?raw": {
-    "file": "assets/settings-branding-BIm-txDb.js",
+    "file": "assets/settings-branding-DSVQ8uHy.js",
     "name": "settings-branding",
     "src": "resources/docs/ar/pages/settings-branding.md?raw",
     "isDynamicEntry": true
@@ -358,7 +358,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/settings-branding.md?raw": {
-    "file": "assets/settings-branding-DkISHZi1.js",
+    "file": "assets/settings-branding-DiOnRvDD.js",
     "name": "settings-branding",
     "src": "resources/docs/fr/pages/settings-branding.md?raw",
     "isDynamicEntry": true
@@ -382,33 +382,33 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-C3SkSRdJ.js",
+    "file": "assets/HelpCenter-SGp7hH-O.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_DocContent-C-19l_09.js"
+      "_DocContent-DY-v3YZ2.js"
     ],
     "css": [
-      "assets/app-11tNch4D.css"
+      "assets/app-D3Mccs5r.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-DIKuJBtU.js",
+    "file": "assets/HelpDialogBody-Bjt9d5l4.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_DocContent-C-19l_09.js"
+      "_DocContent-DY-v3YZ2.js"
     ],
     "css": [
-      "assets/app-11tNch4D.css"
+      "assets/app-D3Mccs5r.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-26279WM_.js",
+    "file": "assets/app-BSCKxjiW.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
@@ -417,7 +417,7 @@
       "resources/js/Components/Help/HelpCenter.tsx"
     ],
     "css": [
-      "assets/app-11tNch4D.css"
+      "assets/app-D3Mccs5r.css"
     ]
   }
 }
