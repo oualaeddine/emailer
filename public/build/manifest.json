@@ -1,6 +1,6 @@
 {
-  "_DocContent-DY-v3YZ2.js": {
-    "file": "assets/DocContent-DY-v3YZ2.js",
+  "_DocContent-CCTamshR.js": {
+    "file": "assets/DocContent-CCTamshR.js",
     "name": "DocContent",
     "imports": [
       "resources/js/app.tsx"
@@ -382,33 +382,33 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-SGp7hH-O.js",
+    "file": "assets/HelpCenter-huv-r0Az.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_DocContent-DY-v3YZ2.js"
+      "_DocContent-CCTamshR.js"
     ],
     "css": [
       "assets/app-D3Mccs5r.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-Bjt9d5l4.js",
+    "file": "assets/HelpDialogBody-EdW-RDoz.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
-      "_DocContent-DY-v3YZ2.js"
+      "_DocContent-CCTamshR.js"
     ],
     "css": [
       "assets/app-D3Mccs5r.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-BSCKxjiW.js",
+    "file": "assets/app-CU70iube.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,

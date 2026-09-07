@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import { TopBar } from '@/Components/Shell/TopBar';
 import { NavRail } from '@/Components/Shell/NavRail';
+import { PwaInstallBanner } from '@/Components/Shell/PwaInstallBanner';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 
 const useStyles = makeStyles({
@@ -44,6 +45,7 @@ export function AppShell({ children }: PropsWithChildren) {
     return (
         <div className={styles.root}>
             <TopBar user={props.auth.user} onToggleNav={() => setMobileNavOpen((open) => !open)} />
+            <PwaInstallBanner />
             <div className={styles.body}>
                 <NavRail mobileOpen={mobileNavOpen} onMobileOpenChange={setMobileNavOpen} />
                 <main className={styles.content}>{children}</main>

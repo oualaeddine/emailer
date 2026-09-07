@@ -10,10 +10,11 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
-import { NavigationRegular, SignOutRegular } from '@fluentui/react-icons';
+import { NavigationRegular, SignOutRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import { router } from '@inertiajs/react';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import { useText } from '@/Hooks/useText';
+import { usePwaInstall } from '@/Hooks/usePwaInstall';
 import { NotificationBell } from '@/Components/Shell/NotificationBell';
 import { HelpMenuButton } from '@/Components/Help/HelpMenuButton';
 import { BrandMark } from '@/Components/Shell/BrandMark';
@@ -68,6 +69,7 @@ interface TopBarProps {
 export function TopBar({ user, onToggleNav }: TopBarProps) {
     const styles = useStyles();
     const t = useText();
+    const { isInstallable, install } = usePwaInstall();
 
     function handleLogout() {
         router.post('/logout');
@@ -86,6 +88,14 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                 <span className={styles.brand}>PageJaunes Mailer</span>
             </span>
             <Toolbar>
+                {isInstallable && (
+                    <ToolbarButton
+                        icon={<ArrowDownloadRegular />}
+                        aria-label={t.pwa.installTitle}
+                        title={t.pwa.installTitle}
+                        onClick={() => void install()}
+                    />
+                )}
                 <HelpMenuButton />
                 <NotificationBell />
                 <Menu>

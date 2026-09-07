@@ -456,6 +456,15 @@ export const fr = {
         docsCenter: 'Centre de documentation',
         title: 'Documentation',
     },
+    pwa: {
+        installTitle: "Installer l'application",
+        installPrompt: 'Installez PageJaunes Mailer pour un accès direct depuis votre bureau et une utilisation fluide hors-ligne.',
+        installButton: 'Installer',
+        dismissButton: 'Plus tard',
+        installSuccess: 'Application installée avec succès !',
+        alreadyInstalled: 'Application installée',
+        offlineNotice: 'Vous êtes actuellement hors-ligne.',
+    },
 } as const;
 
 export type TranslationDictionary = typeof fr;
