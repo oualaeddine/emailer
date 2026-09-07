@@ -4,8 +4,6 @@ import {
     Badge,
     Button,
     Input,
-    Title1,
-    Toolbar,
     DataGrid,
     DataGridBody,
     DataGridCell,
@@ -19,6 +17,7 @@ import {
 } from '@fluentui/react-components';
 import { AddRegular, ContactCardRegular, SearchRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import { createRecipient, fetchRecipients, type CreateRecipientPayload } from '@/Lib/api/recipients';
@@ -126,14 +125,15 @@ export default function Index() {
     return (
         <AppShell>
             <Head title={t.recipients.title} />
-            <div className={styles.header}>
-                <Title1>{t.recipients.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="recipients"
+                title={t.recipients.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={() => setDialogOpen(true)}>
                         {t.recipients.newRecipient}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <Input
                 className={styles.searchBar}
                 contentBefore={<SearchRegular />}

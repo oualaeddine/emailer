@@ -12,8 +12,6 @@ import {
     MenuList,
     MenuPopover,
     MenuTrigger,
-    Title1,
-    Toolbar,
     DataGrid,
     DataGridBody,
     DataGridCell,
@@ -35,6 +33,7 @@ import {
 } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { HelpButton } from '@/Components/Help/HelpButton';
 import { cancelCampaign, cloneCampaign, fetchCampaigns, pauseCampaign, resumeCampaign } from '@/Lib/api/campaigns';
 import { fetchTemplates } from '@/Lib/api/templates';
@@ -218,14 +217,15 @@ export default function CampaignsIndex() {
     return (
         <AppShell>
             <Head title={t.campaigns.title} />
-            <div className={styles.header}>
-                <Title1>{t.campaigns.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="campaigns"
+                title={t.campaigns.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={() => setWizardOpen(true)}>
                         {t.campaigns.newCampaign}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
                 <DataGrid items={campaigns} columns={columns} getRowId={(c) => c.id} resizableColumns>

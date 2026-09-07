@@ -93,7 +93,7 @@ const useStyles = makeStyles({
         padding: tokens.spacingVerticalS,
         backgroundColor: tokens.colorNeutralBackground2,
         borderRadius: tokens.borderRadiusMedium,
-        borderLeftWidth: tokens.strokeWidthMedium,
+        borderLeftWidth: tokens.strokeWidthThick,
         borderLeftStyle: 'solid',
         borderLeftColor: tokens.colorBrandStroke1,
     },
@@ -135,6 +135,7 @@ export interface PageHelpProps {
     customSteps?: PageGuideStep[];
     actions?: ReactNode;
     children?: ReactNode;
+    hideHeaderRow?: boolean;
 }
 
 export function PageHelp({
@@ -144,6 +145,7 @@ export function PageHelp({
     customSteps,
     actions,
     children,
+    hideHeaderRow = false,
 }: PageHelpProps) {
     const styles = useStyles();
     const t = useText();
@@ -175,21 +177,23 @@ export function PageHelp({
     return (
         <div className={styles.root}>
             {/* Page Header Row */}
-            <div className={styles.headerRow}>
-                <div className={styles.titleGroup}>
-                    <Title1>{displayTitle}</Title1>
+            {!hideHeaderRow && (
+                <div className={styles.headerRow}>
+                    <div className={styles.titleGroup}>
+                        <Title1>{displayTitle}</Title1>
+                    </div>
+                    <div className={styles.actionsGroup}>
+                        {actions}
+                        <Button
+                            appearance="subtle"
+                            icon={<QuestionCircleRegular />}
+                            onClick={() => setIsDocOpen(true)}
+                        >
+                            {t.help.open}
+                        </Button>
+                    </div>
                 </div>
-                <div className={styles.actionsGroup}>
-                    {actions}
-                    <Button
-                        appearance="subtle"
-                        icon={<QuestionCircleRegular />}
-                        onClick={() => setIsDocOpen(true)}
-                    >
-                        {t.help.open}
-                    </Button>
-                </div>
-            </div>
+            )}
 
             {/* Explanatory Help Card */}
             {purpose && (

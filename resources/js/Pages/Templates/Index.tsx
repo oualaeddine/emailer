@@ -12,13 +12,12 @@ import {
     MenuPopover,
     MenuTrigger,
     Text,
-    Title1,
-    Toolbar,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, DocumentRegular, MoreHorizontalRegular, ArchiveRegular, DeleteRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import { archiveTemplate, createTemplate, deleteTemplate, fetchTemplates } from '@/Lib/api/templates';
@@ -104,14 +103,15 @@ export default function TemplatesIndex() {
     return (
         <AppShell>
             <Head title={t.templates.title} />
-            <div className={styles.header}>
-                <Title1>{t.templates.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="templates"
+                title={t.templates.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={() => setDialogOpen(true)}>
                         {t.templates.newTemplate}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             {templates.length === 0 ? (
                 <EmptyState icon={DocumentRegular} title={t.templates.emptyTitle} body={t.templates.emptyBody} />
             ) : (

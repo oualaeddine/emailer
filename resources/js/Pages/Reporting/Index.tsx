@@ -7,14 +7,13 @@ import {
     Option,
     Spinner,
     Text,
-    Title1,
     Title2,
-    Toolbar,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { hasPermission } from '@/Lib/permissions';
 import { fetchCampaigns } from '@/Lib/api/campaigns';
@@ -173,10 +172,11 @@ export default function ReportingIndex() {
     return (
         <AppShell>
             <Head title={t.reporting.title} />
-            <div className={styles.header}>
-                <Title1>{t.reporting.title}</Title1>
-                <Toolbar>
-                    {canExport && (
+            <PageHelp
+                topic="reporting"
+                title={t.reporting.title}
+                actions={
+                    canExport ? (
                         <Button
                             as="a"
                             href={reportingExportUrl(filters)}
@@ -185,9 +185,9 @@ export default function ReportingIndex() {
                         >
                             {t.reporting.export}
                         </Button>
-                    )}
-                </Toolbar>
-            </div>
+                    ) : undefined
+                }
+            />
             <Text className={styles.subtitle}>{t.reporting.subtitle}</Text>
 
             <div className={styles.filters}>

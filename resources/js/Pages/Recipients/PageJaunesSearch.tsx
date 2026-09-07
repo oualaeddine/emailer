@@ -7,13 +7,13 @@ import {
     Input,
     Spinner,
     Text,
-    Title1,
     Title3,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { SearchRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { searchPageJaunesCompanies } from '@/Lib/api/pagejaunes';
 import type { PageJaunesCompany } from '@/Lib/types/pagejaunes';
@@ -80,7 +80,7 @@ export default function PageJaunesSearch() {
     return (
         <AppShell>
             <Head title={t.pagejaunes.title} />
-            <Title1>{t.pagejaunes.title}</Title1>
+            <PageHelp topic="pagejaunes-search" title={t.pagejaunes.title} />
             <form className={styles.searchBar} onSubmit={handleSearch}>
                 <Input
                     contentBefore={<SearchRegular />}

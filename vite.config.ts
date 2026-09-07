@@ -17,4 +17,23 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
+    build: {
+        chunkSizeWarningLimit: 1000,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/@fluentui/') || id.includes('node_modules/@griffel/')) {
+                        return 'fluentui';
+                    }
+                    if (
+                        id.includes('node_modules/react/') ||
+                        id.includes('node_modules/react-dom/') ||
+                        id.includes('node_modules/@inertiajs/')
+                    ) {
+                        return 'vendor';
+                    }
+                },
+            },
+        },
+    },
 });

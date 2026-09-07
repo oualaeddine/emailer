@@ -9,7 +9,6 @@ import {
     Spinner,
     Switch,
     Text,
-    Title1,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
@@ -24,6 +23,7 @@ import {
 import type { ComponentType } from 'react';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
 import { hasPermission } from '@/Lib/permissions';
@@ -295,12 +295,15 @@ export default function MailboxIndex() {
     return (
         <AppShell>
             <Head title={t.mailbox.title} />
-            <div className={styles.header}>
-                <Title1>{t.mailbox.title}</Title1>
-                <Button appearance="primary" onClick={() => router.visit('/compose')}>
-                    {t.mailbox.startNewEmail}
-                </Button>
-            </div>
+            <PageHelp
+                topic="mailbox"
+                title={t.mailbox.title}
+                actions={
+                    <Button appearance="primary" onClick={() => router.visit('/compose')}>
+                        {t.mailbox.startNewEmail}
+                    </Button>
+                }
+            />
 
             <Card className={styles.layout}>
                 <nav className={styles.folderPane}>

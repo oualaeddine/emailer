@@ -8,13 +8,13 @@ import {
     Option,
     Spinner,
     Text,
-    Title1,
     Title3,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { ArrowUploadRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { commitImport, fetchImportRows, submitColumnMapping, uploadImportFile } from '@/Lib/api/imports';
 import type { ImportJob, ImportRow } from '@/Lib/types/imports';
@@ -119,7 +119,7 @@ export default function Import() {
     return (
         <AppShell>
             <Head title={t.imports.title} />
-            <Title1>{t.imports.title}</Title1>
+            <PageHelp topic="recipients-import" title={t.imports.title} />
 
             {step === 'upload' && (
                 <Card className={styles.card}>

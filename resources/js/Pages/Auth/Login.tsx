@@ -13,6 +13,7 @@ import {
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
 import { BrandMark } from '@/Components/Shell/BrandMark';
+import { PageHelp } from '@/Components/Help/PageHelp';
 
 const useStyles = makeStyles({
     page: {
@@ -119,6 +120,9 @@ export default function Login() {
                     </Button>
                 </form>
             </Card>
+            <div style={{ width: '100%', maxWidth: '480px' }}>
+                <PageHelp topic="login" hideHeaderRow />
+            </div>
         </div>
     );
 }

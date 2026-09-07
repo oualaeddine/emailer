@@ -9,7 +9,6 @@ import {
     Tab,
     TabList,
     Text,
-    Title1,
     Drawer,
     DrawerBody,
     DrawerHeader,
@@ -22,6 +21,7 @@ import { HistoryRegular, DesktopRegular, TabletRegular, PhoneRegular } from '@fl
 import { AppShell } from '@/Components/Shell/AppShell';
 import { RichTextEditor } from '@/Components/Composer/RichTextEditor';
 import { useText } from '@/Hooks/useText';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { HelpButton } from '@/Components/Help/HelpButton';
 import {
     autosaveDraft,
@@ -184,23 +184,26 @@ export default function ComposerIndex() {
         <AppShell>
             <Head title={t.composer.title} />
             <div className={styles.layout}>
-                <div className={styles.toolbarRow}>
-                    <Title1>{t.composer.title}</Title1>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalS, alignItems: 'center' }}>
-                        {savingState === 'saving' && <Text size={200}>{t.composer.saving}</Text>}
-                        {savingState === 'saved' && draft && (
-                            <Text size={200}>
-                                {t.composer.savedAt} {new Date(draft.updated_at ?? '').toLocaleTimeString('fr-FR')}
-                            </Text>
-                        )}
-                        <Button icon={<HistoryRegular />} onClick={openVersionHistory}>
-                            {t.composer.versionHistory}
-                        </Button>
-                        <Button appearance="primary" onClick={handleSaveVersion}>
-                            {t.composer.saveVersion}
-                        </Button>
-                    </div>
-                </div>
+                <PageHelp
+                    topic="composer"
+                    title={t.composer.title}
+                    actions={
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalS, alignItems: 'center' }}>
+                            {savingState === 'saving' && <Text size={200}>{t.composer.saving}</Text>}
+                            {savingState === 'saved' && draft && (
+                                <Text size={200}>
+                                    {t.composer.savedAt} {new Date(draft.updated_at ?? '').toLocaleTimeString('fr-FR')}
+                                </Text>
+                            )}
+                            <Button icon={<HistoryRegular />} onClick={openVersionHistory}>
+                                {t.composer.versionHistory}
+                            </Button>
+                            <Button appearance="primary" onClick={handleSaveVersion}>
+                                {t.composer.saveVersion}
+                            </Button>
+                        </div>
+                    }
+                />
 
                 <Field label={t.composer.subject}>
                     <Input value={subject} onChange={(_, data) => handleSubjectChange(data.value)} />

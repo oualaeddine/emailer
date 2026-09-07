@@ -6,13 +6,13 @@ import {
     ProgressBar,
     Spinner,
     Text,
-    Title1,
     Title3,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { fetchDashboardWidgets } from '@/Lib/api/dashboard';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import type { CampaignStatus } from '@/Lib/types/campaigns';
@@ -126,12 +126,10 @@ export default function Dashboard() {
     return (
         <AppShell>
             <Head title={t.nav.dashboard} />
-            <Card className={styles.welcomeCard}>
-                <Title1>
-                    {t.dashboard.welcome}, {props.auth.user.name}
-                </Title1>
-                <Text block>{t.dashboard.placeholder}</Text>
-            </Card>
+            <PageHelp
+                topic="dashboard"
+                title={`${t.dashboard.welcome}, ${props.auth.user.name}`}
+            />
 
             {loading || !widgets ? (
                 <Spinner label={t.common.loading} />

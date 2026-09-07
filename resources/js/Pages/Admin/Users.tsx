@@ -10,8 +10,6 @@ import {
     DataGridHeaderCell,
     DataGridRow,
     Text,
-    Title1,
-    Toolbar,
     Tooltip,
     createTableColumn,
     makeStyles,
@@ -20,6 +18,7 @@ import {
 } from '@fluentui/react-components';
 import { AddRegular, EditRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { createUser, fetchRoles, fetchUsers, updateUser, type CreateUserPayload } from '@/Lib/api/identity';
 import type { Role, User } from '@/Lib/types/identity';
@@ -166,14 +165,15 @@ export default function Users() {
     return (
         <AppShell>
             <Head title={t.users.title} />
-            <div className={styles.header}>
-                <Title1>{t.users.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="admin-users"
+                title={t.users.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={openCreateDialog}>
                         {t.users.newUser}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
                 <DataGrid items={users} columns={columns} getRowId={(user) => user.id} resizableColumns>

@@ -3,8 +3,6 @@ import { Head } from '@inertiajs/react';
 import {
     Badge,
     Button,
-    Toolbar,
-    Title1,
     DataGrid,
     DataGridBody,
     DataGridCell,
@@ -18,6 +16,7 @@ import {
 } from '@fluentui/react-components';
 import { AddRegular, PlugConnectedRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { createSmtpAccount, fetchSmtpAccounts, testSmtpAccount, type CreateSmtpAccountPayload } from '@/Lib/api/smtp';
 import type { SmtpAccount } from '@/Lib/types/smtp';
@@ -122,14 +121,15 @@ export default function SmtpIndex() {
     return (
         <AppShell>
             <Head title={t.smtp.title} />
-            <div className={styles.header}>
-                <Title1>{t.smtp.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="smtp"
+                title={t.smtp.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={() => setDialogOpen(true)}>
                         {t.smtp.newAccount}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
                 <DataGrid items={accounts} columns={columns} getRowId={(a) => a.id} resizableColumns>

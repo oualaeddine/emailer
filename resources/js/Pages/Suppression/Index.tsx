@@ -13,8 +13,6 @@ import {
     Dropdown,
     Input,
     Option,
-    Title1,
-    Toolbar,
     DataGrid,
     DataGridBody,
     DataGridCell,
@@ -28,6 +26,7 @@ import {
 } from '@fluentui/react-components';
 import { AddRegular, DeleteRegular, SearchRegular, ShieldProhibitedRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
 import {
@@ -175,14 +174,15 @@ export default function SuppressionIndex() {
     return (
         <AppShell>
             <Head title={t.suppression.title} />
-            <div className={styles.header}>
-                <Title1>{t.suppression.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="suppression"
+                title={t.suppression.title}
+                actions={
                     <Button appearance="primary" icon={<AddRegular />} onClick={() => setDialogOpen(true)}>
                         {t.suppression.newEntry}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <div className={styles.filters}>
                 <Input
                     className={styles.search}

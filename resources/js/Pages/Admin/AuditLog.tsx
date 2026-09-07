@@ -19,8 +19,6 @@ import {
     Input,
     Spinner,
     Text,
-    Title1,
-    Toolbar,
     Tooltip,
     createTableColumn,
     makeStyles,
@@ -30,6 +28,7 @@ import {
 import { ArrowDownloadRegular, EyeRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { HelpButton } from '@/Components/Help/HelpButton';
 import { exportAuditLogs, fetchAuditLogs } from '@/Lib/api/audit';
 import type { AuditLog as AuditLogRow, AuditLogFilters } from '@/Lib/types/audit';
@@ -206,9 +205,10 @@ export default function AuditLog() {
     return (
         <AppShell>
             <Head title={t.audit.title} />
-            <div className={styles.header}>
-                <Title1>{t.audit.title}</Title1>
-                <Toolbar>
+            <PageHelp
+                topic="audit-log"
+                title={t.audit.title}
+                actions={
                     <Button
                         appearance="primary"
                         icon={<ArrowDownloadRegular />}
@@ -217,8 +217,8 @@ export default function AuditLog() {
                     >
                         {t.audit.export}
                     </Button>
-                </Toolbar>
-            </div>
+                }
+            />
             <div className={styles.filters}>
                 <Field label={t.audit.userIdFilter}>
                     <Input

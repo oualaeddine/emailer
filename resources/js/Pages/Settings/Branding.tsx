@@ -9,11 +9,11 @@ import {
     MessageBar,
     MessageBarBody,
     Option,
-    Title1,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { AppShell } from '@/Components/Shell/AppShell';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { fetchSettings, updateSettings } from '@/Lib/api/settings';
 
@@ -71,7 +71,7 @@ export default function Branding() {
     return (
         <AppShell>
             <Head title={t.settings.title} />
-            <Title1>{t.settings.title}</Title1>
+            <PageHelp topic="settings-branding" title={t.settings.title} />
             <Card className={styles.card}>
                 {saved && (
                     <MessageBar intent="success">
