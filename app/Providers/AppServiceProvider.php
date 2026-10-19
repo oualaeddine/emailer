@@ -54,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CampaignChecklistContract::class, CampaignChecklistService::class);
         $this->app->bind(CampaignChecklistService::class);
         $this->app->scoped(\App\Modules\Campaigns\Support\ExternalReferences::class);
+        // docs/45-brevo-api-contracts.md §45.9 — WP-54 rule-tree compiler (SegmentCompilerContract resolves via #[Bind]).
+        $this->app->bind(\App\Modules\Recipients\Segments\Contracts\RuleTreeCompiler::class, \App\Modules\Recipients\Segments\Services\RuleTreeCompiler::class);
     }
 
     /**
