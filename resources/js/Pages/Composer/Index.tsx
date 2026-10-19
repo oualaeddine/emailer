@@ -287,25 +287,21 @@ export default function ComposerIndex() {
                 />
 
                 {versionMessage && (
-                    <MessageBar
-                        intent={versionMessage.intent}
-                        actions={
-                            <MessageBarActions
-                                containerAction={
-                                    <Button
-                                        appearance="transparent"
-                                        icon={<DismissRegular />}
-                                        aria-label={t.common.close}
-                                        onClick={() => setVersionMessage(null)}
-                                    />
-                                }
-                            />
-                        }
-                    >
+                    <MessageBar intent={versionMessage.intent}>
                         <MessageBarBody>
                             <MessageBarTitle>{versionMessage.title}</MessageBarTitle>
                             {versionMessage.body}
                         </MessageBarBody>
+                        <MessageBarActions
+                            containerAction={
+                                <Button
+                                    appearance="transparent"
+                                    icon={<DismissRegular />}
+                                    aria-label={t.common.close}
+                                    onClick={() => setVersionMessage(null)}
+                                />
+                            }
+                        />
                     </MessageBar>
                 )}
 

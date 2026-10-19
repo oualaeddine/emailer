@@ -238,7 +238,7 @@ export function SmtpTestResultDialog({
                         {diagnostic && (
                             <div className={styles.solutionCard}>
                                 <div className={styles.solutionTitle}>
-                                    <LightbulbRegular style={{ color: tokens.colorPaletteGoldForeground1 }} />
+                                    <LightbulbRegular style={{ color: tokens.colorPaletteGoldForeground2 }} />
                                     <span>{t.smtp.diagnosticSectionTitle}</span>
                                 </div>
 

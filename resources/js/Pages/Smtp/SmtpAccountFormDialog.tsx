@@ -25,7 +25,6 @@ import {
     ChevronUpRegular,
     CheckmarkCircleRegular,
     DismissCircleRegular,
-    InfoRegular,
     PlugConnectedRegular,
     WrenchRegular,
 } from '@fluentui/react-icons';
