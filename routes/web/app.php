@@ -77,3 +77,4 @@ require __DIR__.'/senders.php';
 require __DIR__.'/lab.php';
 require __DIR__.'/lists.php';
 require __DIR__.'/imports.php';
+require __DIR__.'/blocklist.php';
