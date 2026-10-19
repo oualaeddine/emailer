@@ -63,3 +63,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 1 | decision | — | **GrapesJS GO** (criteria of the orchestrator prompt met: load/save/compile work in the Fluent shell, lazy chunk < 1.2 MB gzip). WP-60 builds per docs/46 §7; server compile = spatie/mjml-php + npm mjml (memo §4) | decided |
 | 2026-10-19 | 1 | merge | — | Merged 60S (e6a72be; append conflict in routes/web/app.php resolved; `npm install` for the 3 new deps) and the integration test fixes (aa7c22c; Campaigns dir 86 tests green, Senders 15 green in the fix worktree) | merged |
 | 2026-10-19 | 1 | gate | — | Nav: removed `hidden` on `/settings/senders` (page delivered this wave); tsc + build green; second full suite run started; Opus review running | running |
+| 2026-10-19 | 1 | gate | — | Full suite on merged Wave 1: **320 passed, 0 failed** (28 s); tsc + build green; migrate:fresh --seed green; route diff clean | green (pending review) |
