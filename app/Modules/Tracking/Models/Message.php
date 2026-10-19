@@ -71,7 +71,9 @@ class Message extends Model
      */
     public function recipient(): BelongsTo
     {
-        return $this->belongsTo(Recipient::class);
+        // Test sends may target a soft-deleted contact (Wave 1 review S9):
+        // the message must still resolve its recipient for delivery.
+        return $this->belongsTo(Recipient::class)->withTrashed();
     }
 
     /**
