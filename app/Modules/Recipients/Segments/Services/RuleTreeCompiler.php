@@ -58,6 +58,13 @@ class RuleTreeCompiler implements SegmentCompilerContract
     /** @var array<string, list<string>> */
     private static array $columns = [];
 
+    /**
+     * False while validating at apply time: list / campaign UUIDs are only
+     * checked when a tree is saved (FormRequests → {@see validate()}); at
+     * evaluation an unknown reference simply matches nobody.
+     */
+    private bool $checkReferences = true;
+
     public function __construct(private readonly FieldCatalog $fields) {}
 
     // ---------------------------------------------------------------------
@@ -72,7 +79,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
     public function constraint(array $tree): Closure
     {
         $tree = $this->normalize($tree);
-        $this->validate($tree);
+        $this->validateShape($tree);
 
         return fn (EloquentBuilder $query): EloquentBuilder => $this->apply($query, $tree);
     }
@@ -80,7 +87,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
     public function apply(EloquentBuilder $recipients, array $tree): EloquentBuilder
     {
         $tree = $this->normalize($tree);
-        $this->validate($tree);
+        $this->validateShape($tree);
 
         $recipients->whereNull('recipients.deleted_at');
         $recipients->where(function (EloquentBuilder $query) use ($tree): void {
@@ -127,6 +134,27 @@ class RuleTreeCompiler implements SegmentCompilerContract
 
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
+        }
+    }
+
+    /**
+     * Structural validation only (grammar, fields, operators, value types):
+     * list / campaign UUIDs are not looked up, so a saved segment whose list
+     * or campaign was deleted still evaluates (that condition matches none).
+     *
+     * @param  array<string, mixed>  $tree
+     *
+     * @throws ValidationException
+     */
+    public function validateShape(array $tree, string $path = 'rules'): void
+    {
+        $previous = $this->checkReferences;
+        $this->checkReferences = false;
+
+        try {
+            $this->validate($tree, $path);
+        } finally {
+            $this->checkReferences = $previous;
         }
     }
 
@@ -265,7 +293,14 @@ class RuleTreeCompiler implements SegmentCompilerContract
             return;
         }
 
-        $definition = $this->fields->definition($field, $fieldType);
+        $legacyKey = $condition['legacy_key'] ?? null;
+        if ($legacyKey !== null && ! is_string($legacyKey)) {
+            $errors["{$path}.legacy_key"] = 'Clé héritée invalide.';
+
+            return;
+        }
+
+        $definition = $this->fields->definition($field, $fieldType, $legacyKey);
         if ($definition === null) {
             $errors["{$path}.field"] = str_starts_with($field, 'attribute.')
                 ? 'Attribut inconnu : '.substr($field, strlen('attribute.'))
@@ -360,7 +395,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
 
             case 'list':
                 $this->validateList($value, $path, $errors, fn ($v) => is_string($v) && $v !== '');
-                if (! isset($errors[$path]) && is_array($value)) {
+                if ($this->checkReferences && ! isset($errors[$path]) && is_array($value)) {
                     $known = DB::table('recipient_lists')->whereNull('deleted_at')->whereIn('uuid', $value)->pluck('uuid')->all();
                     foreach ($value as $i => $uuid) {
                         if (! in_array($uuid, $known, true)) {
@@ -395,7 +430,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
                 $errors["{$path}.campaign_ids"] = 'Sélectionnez entre 1 et '.self::MAX_CAMPAIGNS.' campagnes, ou aucune pour « n’importe quelle campagne ».';
             } elseif (array_filter($campaignIds, fn ($v) => ! is_string($v)) !== []) {
                 $errors["{$path}.campaign_ids"] = 'Identifiants de campagne invalides.';
-            } else {
+            } elseif ($this->checkReferences) {
                 $known = DB::table('campaigns')->whereIn('uuid', $campaignIds)->pluck('uuid')->all();
                 foreach ($campaignIds as $i => $uuid) {
                     if (! in_array($uuid, $known, true)) {
@@ -510,7 +545,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
      */
     private function compileCondition(EloquentBuilder|QueryBuilder $query, array $condition, string $boolean): void
     {
-        $definition = $this->fields->definition($condition['field'], $condition['field_type'] ?? null);
+        $definition = $this->fields->definition($condition['field'], $condition['field_type'] ?? null, $condition['legacy_key'] ?? null);
         $operator = $condition['operator'];
         $negate = isset(self::NEGATIONS[$operator]);
         $positive = self::NEGATIONS[$operator] ?? $operator;
@@ -695,7 +730,7 @@ class RuleTreeCompiler implements SegmentCompilerContract
      */
     private function dateString(EloquentBuilder|QueryBuilder $q, string $e, string $has, string $op, mixed $value): void
     {
-        $d = "SUBSTRING({$e}, 1, 10)";
+        $d = self::dateCast($e);
         $today = $this->today();
 
         match ($op) {
@@ -708,6 +743,15 @@ class RuleTreeCompiler implements SegmentCompilerContract
             'in_next_days' => $q->whereRaw("{$has} AND {$d} >= ? AND {$d} <= ?", [$today->toDateString(), $today->copy()->addDays($value)->toDateString()]),
             'anniversary_today' => $q->whereRaw("{$has} AND SUBSTRING({$e}, 6, 5) = ?", [$today->format('m-d')]),
         };
+    }
+
+    /**
+     * Date part (`YYYY-MM-DD`) of a JSON-extracted date string. Shared with
+     * the contacts table sort (ContactColumns).
+     */
+    public static function dateCast(string $e): string
+    {
+        return "SUBSTRING({$e}, 1, 10)";
     }
 
     /**
@@ -744,7 +788,16 @@ class RuleTreeCompiler implements SegmentCompilerContract
 
     private function castNumber(EloquentBuilder|QueryBuilder $q, string $e): string
     {
-        return match ($this->driver($q)) {
+        return self::numberCast($this->driver($q), $e);
+    }
+
+    /**
+     * SQL casting a JSON-extracted string to a number (NULL when not numeric
+     * on Postgres). Shared with the contacts table sort (ContactColumns).
+     */
+    public static function numberCast(string $driver, string $e): string
+    {
+        return match ($driver) {
             'pgsql' => "(CASE WHEN {$e} ~ '^\\s*-?[0-9]+(\\.[0-9]+)?\\s*$' THEN CAST({$e} AS NUMERIC) END)",
             'sqlite' => "CAST({$e} AS REAL)",
             'sqlsrv' => "TRY_CAST({$e} AS DECIMAL(30, 10))",
@@ -794,15 +847,21 @@ class RuleTreeCompiler implements SegmentCompilerContract
             return;
         }
 
+        // The `blocklisted_at` mirror can lag (a contact created after its
+        // suppression entry), so a suppression entry for the email also counts.
+        $suppressed = function (QueryBuilder $sub): void {
+            $sub->selectRaw('1')->from('suppression_entries as s')->whereColumn('s.email', 'recipients.email');
+        };
+        $blocked = function ($inner) use ($suppressed): void {
+            $inner->whereNotNull('recipients.blocklisted_at')->orWhereExists($suppressed);
+        };
+
         if ($this->hasColumn('recipients', 'blocklisted_at')) {
-            $op === 'is_true' ? $q->whereNotNull('recipients.blocklisted_at') : $q->whereNull('recipients.blocklisted_at');
+            $op === 'is_true' ? $q->where($blocked) : $q->whereNot($blocked);
 
             return;
         }
 
-        $suppressed = function (QueryBuilder $sub): void {
-            $sub->selectRaw('1')->from('suppression_entries as s')->whereColumn('s.email', 'recipients.email');
-        };
         $op === 'is_true' ? $q->whereExists($suppressed) : $q->whereNotExists($suppressed);
     }
 
@@ -983,8 +1042,12 @@ class RuleTreeCompiler implements SegmentCompilerContract
 
         $textColumns = ['email' => 'attribute.EMAIL', 'first_name' => 'attribute.PRENOM', 'last_name' => 'attribute.NOM', 'company_name' => 'attribute.SOCIETE'];
         if (isset($textColumns[$field]) || str_starts_with($field, 'custom_fields.')) {
-            $target = $textColumns[$field] ?? 'attribute.'.substr($field, strlen('custom_fields.'));
-            $extra = isset($textColumns[$field]) ? [] : ['field_type' => 'text'];
+            // v1 `custom_fields.<key>` keeps its raw JSON key (`legacy_key`) so the
+            // condition still reads `custom_fields-><key>` (exact case) even when
+            // no `contact_attributes` row exists for it (FieldCatalog).
+            $key = substr($field, strlen('custom_fields.'));
+            $target = $textColumns[$field] ?? 'attribute.'.$key;
+            $extra = isset($textColumns[$field]) ? [] : ['field_type' => 'text', 'legacy_key' => $key];
 
             return match ($op) {
                 'equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with' => $make($target, $op, is_scalar($value) ? (string) $value : $value, $extra),

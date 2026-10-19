@@ -14,6 +14,7 @@ use App\Modules\Recipients\Segments\Http\Requests\UpdateSegmentRequest;
 use App\Modules\Recipients\Segments\Http\Resources\SegmentResource;
 use App\Modules\Recipients\Segments\Services\FieldCatalog;
 use App\Modules\Recipients\Segments\Services\SegmentService;
+use App\Modules\Recipients\Views\Services\ContactQueryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -82,12 +83,26 @@ class SegmentController extends Controller
         return response()->json(['data' => $this->segments->refreshCount($segment)]);
     }
 
-    public function members(SegmentMembersRequest $request, string $id): AnonymousResourceCollection
+    /**
+     * `GET /segments/{id}/members` — `CursorPaginatedResponse<Contact>`: the
+     * contacts-table rows (ContactQueryService, `segment_id` scope), honouring
+     * `columns` (comma-separated ContactColumns keys).
+     */
+    public function members(SegmentMembersRequest $request, string $id, ContactQueryService $contacts): JsonResponse
     {
         $segment = $this->segments->findByUuid($id);
         $this->authorize('view', $segment);
 
-        return RecipientResource::collection($this->segments->members($segment, $request->integer('per_page', 25)));
+        $columns = array_values(array_filter(explode(',', (string) $request->input('columns', '')), fn ($c) => $c !== ''));
+        $effective = $contacts->effective(['segment_id' => $segment->uuid, 'columns' => $columns], $request->user());
+
+        return response()->json($contacts->paginate(
+            $effective,
+            $request->user(),
+            $request->integer('per_page', 25),
+            $request->input('cursor'),
+            url("/api/v1/segments/{$segment->uuid}/members"),
+        ));
     }
 
     public function duplicate(Request $request, string $id): JsonResponse
