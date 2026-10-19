@@ -75,3 +75,4 @@ require __DIR__.'/reporting.php';
 require __DIR__.'/help.php';
 require __DIR__.'/senders.php';
 require __DIR__.'/lab.php';
+require __DIR__.'/blocklist.php';
