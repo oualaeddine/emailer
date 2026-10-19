@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Modules\Campaigns\Services\Checklist\CampaignChecklistContract;
+use App\Modules\Campaigns\Services\Checklist\CampaignChecklistService;
 use App\Modules\DeliveryEngine\Services\SmtpConnectionTesterContract;
 use App\Modules\DeliveryEngine\Services\SmtpManagerContract;
 use App\Modules\DeliveryEngine\Services\SmtpManagerService;
@@ -38,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
         // integrated/configured in this codebase yet); tests bind a fake
         // implementation instead (docs/32-testing.md §32.4).
         $this->app->bind(VerificationProviderContract::class, NullVerificationProvider::class);
+
+        // docs/45-brevo-api-contracts.md §45.9 — WP-45 pre-send checklist.
+        $this->app->bind(CampaignChecklistContract::class, CampaignChecklistService::class);
+        $this->app->bind(CampaignChecklistService::class);
     }
 
     /**
