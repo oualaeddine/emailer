@@ -79,3 +79,4 @@ require __DIR__.'/lists.php';
 require __DIR__.'/imports.php';
 require __DIR__.'/blocklist.php';
 require __DIR__.'/contact-detail.php';
+require __DIR__.'/segments.php';
