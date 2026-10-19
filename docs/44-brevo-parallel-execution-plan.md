@@ -252,7 +252,7 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 
 | Wave | WPs | Status |
 |---|---|---|
-| 0 | 40, 40N | ⬜ not started |
+| 0 | 40, 40N | ✅ merged (brevo/wave-0 → brevo/main); gate green locally (CI unavailable: GitHub billing lock); review findings fixed — see [47](47-orchestration-log.md) |
 | 1 | 41, 41U, 42, 43, 44, 45, 60S | ⬜ |
 | 2 | 50, 51, 52, 53, 54, 54U, 55, 56, 57 | ⬜ |
 | 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ⬜ |
