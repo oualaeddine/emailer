@@ -68,3 +68,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 1 | fix-B | sonnet | Returned; all assigned findings fixed (B1 shared `PublicUrlGuard` + LinkChecker SSRF guard, S4–S9, S12, S14, N1, N5–N7); 114 tests green in its worktree; tsc clean | 830d70c |
 | 2026-10-19 | 1 | fix-A | opus | Returned; B2, B3, S1–S4 (campaign side), S9–S11, S13, S15, N2–N4, N8 fixed; 110 tests green in its worktree | 24f6123 |
 | 2026-10-19 | 1 | merge | — | Merged fix-A (f6f24c1) and fix-B (b1be3ae); orchestrator applied the S9 follow-up (`Message::recipient()->withTrashed()`); tsc + build green; final full suite running | running |
+| 2026-10-19 | 1 | gate | — | Final full suite on brevo/wave-1 (after review fixes): **385 passed, 0 failed**; migrate:fresh --seed green; tsc + build green | green |
