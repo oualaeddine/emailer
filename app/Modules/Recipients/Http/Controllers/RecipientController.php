@@ -4,7 +4,10 @@ namespace App\Modules\Recipients\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Recipients\DataTransferObjects\CreateRecipientData;
+use App\Modules\Recipients\Http\Requests\RecipientIndexRequest;
 use App\Modules\Recipients\Http\Requests\StoreRecipientRequest;
+use App\Modules\Recipients\Views\Services\ContactQueryService;
+use App\Modules\Recipients\Views\Support\ContactColumns;
 use App\Modules\Recipients\Http\Requests\UpdateRecipientRequest;
 use App\Modules\Recipients\Http\Resources\RecipientResource;
 use App\Modules\Recipients\Models\Recipient;
@@ -19,17 +22,47 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
  */
 class RecipientController extends Controller
 {
-    public function __construct(private readonly RecipientService $recipients)
-    {
+    public function __construct(
+        private readonly RecipientService $recipients,
+        private readonly ContactQueryService $contacts,
+    ) {
     }
 
-    public function index(Request $request): AnonymousResourceCollection
+    /**
+     * docs/45 §45.5.4 — `pagination=cursor` returns the ContactIndexResponse;
+     * otherwise the legacy page-based response is unchanged.
+     */
+    public function index(RecipientIndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         $this->authorize('viewAny', Recipient::class);
+
+        if ($request->input('pagination') === 'cursor') {
+            return $this->cursorIndex($request);
+        }
 
         return RecipientResource::collection(
             $this->recipients->paginate($request->only(['q', 'source', 'status', 'tag_id'])),
         );
+    }
+
+    public function search(RecipientIndexRequest $request): JsonResponse
+    {
+        $this->authorize('viewAny', Recipient::class);
+
+        return $this->cursorIndex($request);
+    }
+
+    private function cursorIndex(RecipientIndexRequest $request): JsonResponse
+    {
+        $effective = $this->contacts->effective($request->validated(), $request->user());
+
+        return response()->json($this->contacts->paginate(
+            $effective,
+            $request->user(),
+            $request->integer('per_page', 50),
+            $request->input('cursor'),
+            url('/api/v1/recipients'),
+        ));
     }
 
     public function store(StoreRecipientRequest $request): JsonResponse
@@ -45,6 +78,10 @@ class RecipientController extends Controller
 
         $recipient = $this->recipients->create($data);
 
+        if (ContactColumns::hasRecipientColumn('created_by')) {
+            $recipient->forceFill(['created_by' => $request->user()?->id])->saveQuietly();
+        }
+
         return (new RecipientResource($recipient->load('tags')))
             ->response()
             ->setStatusCode(201);
@@ -54,6 +91,7 @@ class RecipientController extends Controller
     {
         $recipient = $this->recipients->findByUuid($uuid);
         $this->authorize('view', $recipient);
+        $recipient->load('recipientLists:recipient_lists.id,recipient_lists.uuid,recipient_lists.name');
 
         return new RecipientResource($recipient);
     }
