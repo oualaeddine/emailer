@@ -15,3 +15,11 @@ use Inertia\Inertia;
 Route::get('campaigns', fn () => Inertia::render('Campaigns/Index'))
     ->middleware('can:campaigns.view')
     ->name('campaigns.index');
+
+// docs/43-brevo-parity-plan.md §43.4.2 / docs/45 §45.4.3 (WP-43) — Brevo
+// "campaign dashboard": the five setup cards, checklist and Confirmer l'envoi.
+Route::get('campaigns/{campaign}/setup', fn (string $campaign) => Inertia::render('Campaigns/Setup', [
+    'campaignId' => $campaign,
+]))
+    ->middleware('can:campaigns.view')
+    ->name('campaigns.setup');
