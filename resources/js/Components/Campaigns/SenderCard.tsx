@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Field, Input, Link, MessageBar, MessageBarBody, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { SenderPicker } from '@/Components/Senders/SenderPicker';
+import SenderPicker from '@/Components/Senders/SenderPicker';
 import { useText } from '@/Hooks/useText';
 import { updateCampaignV2 } from '@/Lib/api/campaigns';
 import type { Sender } from '@/Lib/types/senders';
