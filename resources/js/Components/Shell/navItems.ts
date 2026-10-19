@@ -134,7 +134,7 @@ export const navItems: NavItem[] = [
     { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['transactional.view'], hidden: true },
 
     // Paramètres (account menu, top-right)
-    { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['senders.manage'], hidden: true },
+    { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['senders.manage'] },
     { href: '/smtp', icon: ServerIcon, label: (t) => t.nav.smtp, match: 'exact', group: 'settings', permissions: ['smtp.view'] },
     { href: '/settings/unsubscribe-pages', icon: ShieldProhibitedIcon, label: (t) => t.nav.unsubscribePages, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/update-profile-forms', icon: DocumentIcon, label: (t) => t.nav.updateProfileForms, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
