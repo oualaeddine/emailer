@@ -51,3 +51,6 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 1 | 42, 43, 60S | opus/high | Launched (pre-made worktrees) | running |
 | 2026-10-19 | 1 | WP-41U | sonnet | Returned; owned paths only; tsc clean | 86b7c19 |
 | 2026-10-19 | 1 | — | — | Finding: with `vendor` symlinked, `php artisan` in a worktree resolves base path to the main checkout. Fix: `.env` copied into every worktree and agents told to run `APP_BASE_PATH=$PWD … php artisan test` | applied |
+| 2026-10-19 | 1 | WP-41 | sonnet | Returned; 31 files, owned paths + 3 append-only lines; 11 tests green in its worktree | 073c141 |
+| 2026-10-19 | 1 | WP-44 | sonnet | Returned; 28 files, owned paths only; 19 tests green; tsc clean; note: `TemplatePicker.onApplied` typed `CampaignV2Detail` (relayed to WP-43); test-send creates a Recipient per test address (review item) | 009b874 |
+| 2026-10-19 | 1 | env | — | Worktree PHP testing: full `vendor` copy impossible (6.1 GB, disk full once — reverted). Final setup per backend worktree: `vendor/` = per-package symlinks + own `vendor/composer` (installed.json copied, `dump-autoload --ignore-platform-req=php --no-scripts`) + copied `vendor/bin`; tests run through the scratchpad runner `wt-phpunit.php` (single autoloader). `.env` copied per worktree | applied |
