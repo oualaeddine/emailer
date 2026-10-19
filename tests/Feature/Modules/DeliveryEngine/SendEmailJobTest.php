@@ -266,7 +266,9 @@ class SendEmailJobTest extends TestCase
         ]);
         $this->assertTrue($this->app->make(SuppressionManager::class)->isSuppressed('ghost@example.com'));
 
-        Bus::assertNothingDispatched();
+        // No retry: a hard bounce is permanent. Queued listeners (list recounts on
+        // blocklist changes, Wave 2) may be dispatched; only the send job must not.
+        Bus::assertNotDispatched(SendEmailJob::class);
     }
 
     public function test_retries_exhausted_marks_message_failed_without_further_dispatch(): void
