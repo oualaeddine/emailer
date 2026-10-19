@@ -60,6 +60,7 @@ This documentation is written so that **another AI or engineering team can imple
 | 40 | [Central Search Service](40-search-service.md) | Shared cross-entity search abstraction |
 | 41 | [Notification Center](41-notification-center.md) | Centralized in-app notification routing & preferences |
 | 42 | [Parallel Execution Plan](42-parallel-execution-plan.md) | Agent-orchestrated work packages, waves, file ownership, token-economy protocol |
+| 43 | [Brevo Parity Plan](43-brevo-parity-plan.md) | Gap analysis vs. Brevo, target IA, page-by-page specs, schema addendum, phased work packages to reach Brevo-equivalent email marketing |
 
 ## How to Use This Documentation
 
