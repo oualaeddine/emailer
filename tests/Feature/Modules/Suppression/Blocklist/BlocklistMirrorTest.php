@@ -56,6 +56,17 @@ class BlocklistMirrorTest extends TestCase
         $this->assertNull($r->fresh()->blocklisted_at);
     }
 
+    public function test_removing_the_entry_reactivates_a_suppressed_recipient(): void
+    {
+        $r = $this->recipient('a@example.com');
+        $entry = app(SuppressionManager::class)->suppress('a@example.com', SuppressionReason::ManualBlock);
+        $this->assertSame('suppressed', $r->fresh()->status);
+
+        app(SuppressionEntryService::class)->remove($entry);
+
+        $this->assertSame('active', $r->fresh()->status);
+    }
+
     public function test_api_create_and_delete_keep_the_mirror_in_sync(): void
     {
         $this->seed(RolePermissionSeeder::class);

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Suppression\Listeners;
 
+use App\Domain\Enums\RecipientStatus;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Suppression\Models\SuppressionEntry;
 
@@ -33,7 +34,11 @@ class SyncRecipientBlocklist
         $recipients = Recipient::withTrashed()->where('email', $entry->email)->whereNotNull('blocklisted_at')->get();
 
         foreach ($recipients as $recipient) {
-            $recipient->forceFill(['blocklisted_at' => null])->saveQuietly();
+            $recipient->forceFill(['blocklisted_at' => null]);
+            if ($recipient->status === RecipientStatus::Suppressed->value || $recipient->status === RecipientStatus::Suppressed) {
+                $recipient->status = RecipientStatus::Active->value;
+            }
+            $recipient->saveQuietly();
             RecipientBlocklistChanged::dispatch($recipient->id, false, $entry->reason);
         }
     }

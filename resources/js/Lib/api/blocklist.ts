@@ -2,38 +2,42 @@ import axios from 'axios';
 import type { SuppressionEntry, SuppressionReason } from '@/Lib/types/suppression';
 
 /**
- * docs/45 §45.5.8 — Contacts/Blocklist reuses `GET /suppression-entries`.
- * The endpoint filters on a single scalar `reason` (and `q` for email), so a
- * tab spanning several reasons issues one request per reason and merges the
- * results client-side (newest first). Pages are followed up to MAX_PAGES.
+ * docs/45 §45.5.8 — Contacts/Blocklist reuses `GET /suppression-entries`,
+ * which filters server-side on `reason[]`, `q`, `sort` and paginates.
  */
-const MAX_PAGES = 10;
-
-interface Page {
+export interface BlocklistPage {
     data: SuppressionEntry[];
-    meta?: { current_page: number; last_page: number };
+    meta: { current_page: number; last_page: number; total: number };
 }
 
-async function fetchReason(reason: SuppressionReason, q: string): Promise<SuppressionEntry[]> {
-    const rows: SuppressionEntry[] = [];
-    for (let page = 1; page <= MAX_PAGES; page += 1) {
-        const response = await axios.get<Page>('/api/v1/suppression-entries', {
-            params: { reason, q: q || undefined, page },
+export const BLOCKLIST_PER_PAGE = 25;
+
+export async function listBlocklistEntries(reasons: SuppressionReason[], q = '', page = 1): Promise<BlocklistPage> {
+    const response = await axios.get<BlocklistPage>('/api/v1/suppression-entries', {
+        params: { reason: reasons, q: q || undefined, sort: '-created_at', page, per_page: BLOCKLIST_PER_PAGE },
+    });
+
+    return response.data;
+}
+
+export interface SoftBounce {
+    id: string;
+    recipient_email: string;
+    bounced_at: string | null;
+}
+
+/** Soft bounces are message statuses (not suppression entries): `GET /messages?status=soft_bounced`. */
+export async function listSoftBounces(q = ''): Promise<SoftBounce[]> {
+    try {
+        const response = await axios.get<{ data: SoftBounce[] }>('/api/v1/messages', {
+            params: { status: 'soft_bounced', q: q || undefined },
         });
-        rows.push(...response.data.data);
-        const meta = response.data.meta;
-        if (!meta || meta.current_page >= meta.last_page) {
-            break;
-        }
+
+        return response.data.data;
+    } catch {
+        // mailbox permission missing: the soft-bounce block is simply omitted.
+        return [];
     }
-
-    return rows;
-}
-
-export async function listBlocklistEntries(reasons: SuppressionReason[], q = ''): Promise<SuppressionEntry[]> {
-    const chunks = await Promise.all(reasons.map((reason) => fetchReason(reason, q)));
-
-    return chunks.flat().sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
 /** Réactiver = delete the suppression entry (existing endpoint). */

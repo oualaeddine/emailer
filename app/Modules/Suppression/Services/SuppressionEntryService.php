@@ -34,7 +34,10 @@ class SuppressionEntryService
     public function paginate(array $filters = [], int $perPage = 25): LengthAwarePaginator
     {
         return $this->applyFilters(SuppressionEntry::query()->with('addedBy'), $filters)
-            ->orderBy('created_at', 'desc')
+            ->tap(function (Builder $query) use ($filters): void {
+                $sort = (string) ($filters['sort'] ?? '-created_at');
+                $query->orderBy(ltrim($sort, '-'), str_starts_with($sort, '-') ? 'desc' : 'asc')->orderByDesc('id');
+            })
             ->paginate($perPage);
     }
 
@@ -79,7 +82,7 @@ class SuppressionEntryService
     private function applyFilters(Builder $query, array $filters): Builder
     {
         if (! empty($filters['reason'])) {
-            $query->where('reason', $filters['reason']);
+            $query->whereIn('reason', (array) $filters['reason']);
         }
 
         if (! empty($filters['q'])) {
