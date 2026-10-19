@@ -35,3 +35,7 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | — | — | — | Local `php artisan test` on SQLite fails: migrations use fulltext indexes. Installing mariadb-server via apt for a local MySQL gate on port 3307 | in progress |
 | 2026-10-19 | 0 | WP-40N | sonnet | Returned structured result; commit on brevo/wave-0-wp-40n, owned paths only; notes: `Lib/docs/registry.ts` still holds old URLs (fix in gate as trivial or via WP-102); nav gates for hidden entries chosen by agent | 9d52573 |
 | 2026-10-19 | — | — | — | MariaDB 3307 running locally; baseline `php artisan test` on brevo/wave-0 started | running |
+| 2026-10-19 | 0 | WP-40 | opus | Returned structured result; 22 files, additions only, owned paths only | 21d5de4 |
+| 2026-10-19 | 0 | — | — | Merged WP-40 (7ae2cae) then WP-40N (25de259) into brevo/wave-0; no conflicts | merged |
+| 2026-10-19 | 0 | gate | — | tsc: 2 new errors (Lib/docs/ui.ts group labels) + 3 pre-existing on main; all fixed directly (trivial); `npm run build` ok; `migrate:fresh --seed` ok on MariaDB; grep gates: only pre-existing hits (bootstrap.ts/Dashboard/Composer literals, public routes in routes/web.php) | dd2281c |
+| 2026-10-19 | 0 | gate | — | Pushed brevo/main + brevo/wave-0 (CI via new ci.yml); full PHP suite running locally; Opus review agent launched | running |
