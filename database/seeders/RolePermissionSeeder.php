@@ -75,6 +75,16 @@ class RolePermissionSeeder extends Seeder
             PermissionName::SuppressionView,
             PermissionName::SuppressionManage,
             PermissionName::SettingsBrandingOnly,
+            // docs/45-brevo-api-contracts.md §45.2 (WP-40) — Brevo-parity
+            // marketing permissions; api_keys/webhooks stay admin-only.
+            PermissionName::SendersManage,
+            PermissionName::AttributesManage,
+            PermissionName::FormsManage,
+            PermissionName::AutomationsManage,
+            PermissionName::ContactsExport,
+            PermissionName::CampaignsArchive,
+            PermissionName::TransactionalView,
+            PermissionName::TransactionalSend,
         ];
 
         $marketingOperator = [
@@ -97,6 +107,9 @@ class RolePermissionSeeder extends Seeder
             PermissionName::ReportingView,
             PermissionName::ReportingExport,
             PermissionName::SuppressionView,
+            // docs/45 §45.2 (WP-40) — operators export and archive, no manage rights.
+            PermissionName::ContactsExport,
+            PermissionName::CampaignsArchive,
         ];
 
         $viewer = [

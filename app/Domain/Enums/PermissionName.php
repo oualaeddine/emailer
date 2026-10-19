@@ -58,6 +58,19 @@ enum PermissionName: string
     case SettingsManage = 'settings.manage';
     case SettingsBrandingOnly = 'settings.branding_only';
 
+    // docs/43-brevo-parity-plan.md §43.8, docs/45-brevo-api-contracts.md §45.2
+    // (WP-40) — Brevo-parity permissions.
+    case SendersManage = 'senders.manage';
+    case AttributesManage = 'attributes.manage';
+    case FormsManage = 'forms.manage';
+    case AutomationsManage = 'automations.manage';
+    case ApiKeysManage = 'api_keys.manage';
+    case WebhooksManage = 'webhooks.manage';
+    case ContactsExport = 'contacts.export';
+    case CampaignsArchive = 'campaigns.archive';
+    case TransactionalView = 'transactional.view';
+    case TransactionalSend = 'transactional.send';
+
     /**
      * The `{module}.{action}` prefix, used to populate `permissions.module`.
      */
@@ -102,6 +115,16 @@ enum PermissionName: string
             self::UsersManage => 'Gérer les utilisateurs',
             self::SettingsManage => 'Gérer les paramètres',
             self::SettingsBrandingOnly => "Gérer l'identité visuelle uniquement",
+            self::SendersManage => 'Gérer les expéditeurs et les domaines',
+            self::AttributesManage => 'Gérer les attributs des contacts',
+            self::FormsManage => "Gérer les formulaires d'inscription",
+            self::AutomationsManage => 'Gérer les automatisations',
+            self::ApiKeysManage => 'Gérer les clés API',
+            self::WebhooksManage => 'Gérer les webhooks',
+            self::ContactsExport => 'Exporter les contacts',
+            self::CampaignsArchive => 'Archiver les campagnes',
+            self::TransactionalView => 'Voir les journaux transactionnels',
+            self::TransactionalSend => 'Envoyer des e-mails transactionnels via l\'API',
         };
     }
 }
