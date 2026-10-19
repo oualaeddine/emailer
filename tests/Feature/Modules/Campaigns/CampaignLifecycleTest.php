@@ -8,6 +8,7 @@ use App\Domain\Enums\RoleName;
 use App\Domain\Enums\SuppressionReason;
 use App\Modules\Campaigns\Enums\CampaignStatus;
 use App\Modules\Campaigns\Jobs\DispatchCampaignJob;
+use App\Modules\Campaigns\Models\CampaignAudience;
 use App\Modules\Campaigns\Services\CampaignService;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
 use App\Modules\Identity\Models\User;
@@ -134,26 +135,36 @@ class CampaignLifecycleTest extends TestCase
         $this->assertDatabaseHas('campaigns', ['name' => 'Campagne Test', 'status' => 'draft']);
     }
 
-    public function test_creating_a_campaign_requires_exactly_one_of_recipient_list_or_segment(): void
+    /**
+     * docs/45 §45.4.2 / §45.10 — the one-list-or-one-segment rule is gone:
+     * Brevo asks only for the internal name, and the legacy
+     * `recipient_list_id` / `segment_id` keys are converted to `include`
+     * audience rows (both at once is now a valid two-target audience).
+     */
+    public function test_creating_a_campaign_converts_legacy_targets_into_audience_rows(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
         $template = $this->createTemplate();
         $list = $this->createStaticList();
         $segment = $this->createSegment();
 
-        // Neither set.
+        // Neither set: only the internal name is required.
         $this->actingAs($operator)->postJson('/api/v1/campaigns', [
             'name' => 'Sans cible',
             'template_id' => $template->uuid,
-        ])->assertStatus(422);
+        ])->assertCreated()->assertJsonPath('data.audience.lists', []);
 
-        // Both set.
-        $this->actingAs($operator)->postJson('/api/v1/campaigns', [
+        // Both set: two include rows.
+        $response = $this->actingAs($operator)->postJson('/api/v1/campaigns', [
             'name' => 'Deux cibles',
             'template_id' => $template->uuid,
             'recipient_list_id' => $list->uuid,
             'segment_id' => $segment->uuid,
-        ])->assertStatus(422);
+        ])->assertCreated();
+
+        $response->assertJsonPath('data.audience.lists.0.id', $list->uuid);
+        $response->assertJsonPath('data.audience.segments.0.id', $segment->uuid);
+        $this->assertSame(2, CampaignAudience::query()->where('mode', 'include')->count());
     }
 
     public function test_full_lifecycle_draft_to_scheduled_to_running_to_completed(): void
@@ -416,6 +427,10 @@ class CampaignLifecycleTest extends TestCase
         $this->assertSame(2, $targeted->count());
     }
 
+    /**
+     * docs/45 §45.4.2 — PATCH is allowed in draft/scheduled/suspended and
+     * answers 409 (state conflict) otherwise.
+     */
     public function test_update_is_rejected_once_campaign_is_no_longer_draft(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
@@ -426,6 +441,6 @@ class CampaignLifecycleTest extends TestCase
         $campaign->update(['status' => CampaignStatus::Running->value]);
 
         $this->actingAs($operator)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['name' => 'Nouveau nom'])
-            ->assertStatus(422);
+            ->assertStatus(409);
     }
 }

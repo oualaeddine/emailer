@@ -38,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
         // integrated/configured in this codebase yet); tests bind a fake
         // implementation instead (docs/32-testing.md §32.4).
         $this->app->bind(VerificationProviderContract::class, NullVerificationProvider::class);
+
+        // docs/45-brevo-api-contracts.md §45.9 — WP-42 audience resolution contract.
+        $this->app->bind(
+            \App\Modules\Campaigns\Contracts\AudienceResolver::class,
+            \App\Modules\Campaigns\Services\AudienceResolver::class,
+        );
     }
 
     /**
