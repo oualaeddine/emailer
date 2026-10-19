@@ -26,3 +26,10 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | — | — | — | Read docs 44, 43, 42, README, 03, 07 §7.12–7.13 | done |
 | 2026-10-19 | — | — | — | Created `brevo/main` @ b3d9d83, `brevo/wave-0` | done |
 | 2026-10-19 | — | — | — | CI situation: none; local composer needs platform override; no DB server | recorded |
+| 2026-10-19 | 0 | WP-40 | opus/high | Launched (worktree) | running |
+| 2026-10-19 | 0 | WP-40N | sonnet/medium | Launched (worktree), extra owned path `.github/workflows/ci.yml` | running |
+| 2026-10-19 | 0 | both | — | Worktrees were cut from `main`, not `brevo/wave-0`; agents told to `checkout -B <wp-branch> brevo/wave-0` | corrected |
+| 2026-10-19 | 0 | both | — | **Decision:** git refuses nested `brevo/wave-N/wp-XX` under branch `brevo/wave-N`; WP branches are `brevo/wave-N-wp-XX` | applied |
+| 2026-10-19 | — | — | — | `composer install --ignore-platform-req=php` succeeded locally | vendor ready |
+| 2026-10-19 | 0 | WP-40N | sonnet | Agent reported BLOCKED twice (branch nesting, worktree cut from main); resumed on pre-made worktree `.claude/worktrees/wp-40n` @ brevo/wave-0-wp-40n | relaunched (attempt 1 continues) |
+| 2026-10-19 | — | — | — | Local `php artisan test` on SQLite fails: migrations use fulltext indexes. Installing mariadb-server via apt for a local MySQL gate on port 3307 | in progress |
