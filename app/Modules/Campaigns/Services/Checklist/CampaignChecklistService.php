@@ -2,10 +2,8 @@
 
 namespace App\Modules\Campaigns\Services\Checklist;
 
+use App\Modules\Campaigns\Contracts\AudienceResolver;
 use App\Modules\Campaigns\Models\Campaign;
-use App\Modules\Recipients\Models\RecipientList;
-use App\Modules\Recipients\Models\Segment;
-use App\Modules\Recipients\Services\SegmentEvaluationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +18,7 @@ class CampaignChecklistService implements CampaignChecklistContract
 
     public function __construct(
         private readonly LinkChecker $links,
-        private readonly SegmentEvaluationService $segments,
+        private readonly AudienceResolver $audience,
     ) {
     }
 
@@ -52,7 +50,7 @@ class CampaignChecklistService implements CampaignChecklistContract
         $senderId = $campaign->getAttribute('sender_id');
 
         if ($senderId !== null && Schema::hasTable('senders') && Schema::hasColumn('senders', 'verified_at')) {
-            $verified = DB::table('senders')->where('id', $senderId)->whereNotNull('verified_at')->exists();
+            $verified = DB::table('senders')->where('id', $senderId)->whereNull('deleted_at')->whereNotNull('verified_at')->exists();
         }
 
         return $verified
@@ -71,54 +69,13 @@ class CampaignChecklistService implements CampaignChecklistContract
             : new ChecklistItem('recipients_selected', ChecklistItem::ERROR, true, 'Aucun destinataire', ['count' => 0]);
     }
 
+    /**
+     * Same final audience as the send (exclusions, suppression, parent
+     * campaign exclusion) — the resolver is the single source of truth.
+     */
     private function audienceCount(Campaign $campaign): int
     {
-        if (Schema::hasTable('campaign_audiences')) {
-            $rows = DB::table('campaign_audiences')->where('campaign_id', $campaign->id)->get();
-            if ($rows->isNotEmpty()) {
-                $include = [];
-                $exclude = [];
-                foreach ($rows as $row) {
-                    $ids = $this->targetRecipientIds($row->target_type, (int) $row->target_id);
-                    if ($row->mode === 'exclude') {
-                        $exclude += array_flip($ids);
-                    } else {
-                        $include += array_flip($ids);
-                    }
-                }
-
-                return count(array_diff_key($include, $exclude));
-            }
-        }
-
-        $ids = [];
-        if ($campaign->recipient_list_id !== null) {
-            $ids += array_flip($this->targetRecipientIds('list', (int) $campaign->recipient_list_id));
-        }
-        if ($campaign->segment_id !== null) {
-            $ids += array_flip($this->targetRecipientIds('segment', (int) $campaign->segment_id));
-        }
-        if ($ids === [] && Schema::hasTable('campaign_recipients')) {
-            return DB::table('campaign_recipients')->where('campaign_id', $campaign->id)->count();
-        }
-
-        return count($ids);
-    }
-
-    /**
-     * @return list<int>
-     */
-    private function targetRecipientIds(string $type, int $id): array
-    {
-        if ($type === 'segment') {
-            $segment = Segment::query()->find($id);
-
-            return $segment ? $this->segments->evaluate($segment)->pluck('id')->map(fn ($v) => (int) $v)->all() : [];
-        }
-
-        $list = RecipientList::query()->find($id);
-
-        return $list ? $list->recipients()->pluck('recipients.id')->map(fn ($v) => (int) $v)->all() : [];
+        return count($this->audience->recipientIds($campaign));
     }
 
     private function subjectFilled(Campaign $campaign): ChecklistItem
@@ -137,7 +94,7 @@ class CampaignChecklistService implements CampaignChecklistContract
 
     private function unsubscribeLink(string $html): ChecklistItem
     {
-        $present = preg_match('/\{\{\s*unsubscribe\s*\}\}/i', $html) === 1
+        $present = preg_match('/\{\{\s*(unsubscribe|unsubscribe_url)\s*\}\}/i', $html) === 1
             || preg_match('#href\s*=\s*["\'][^"\']*/unsubscribe/#i', $html) === 1;
 
         return $present

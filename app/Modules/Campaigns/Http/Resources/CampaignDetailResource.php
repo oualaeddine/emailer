@@ -30,6 +30,7 @@ class CampaignDetailResource extends CampaignResource
 
         return [
             ...parent::toArray($request),
+            'html_body' => $this->html_body,
             'design_json' => $this->design_json,
             'reply_to' => $this->reply_to,
             'to_field' => $this->to_field,

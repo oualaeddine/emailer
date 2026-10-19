@@ -131,6 +131,8 @@ class CampaignService
             } elseif (array_key_exists('recipient_list_id', $data) || array_key_exists('segment_id', $data)) {
                 $this->syncLegacyAudience($campaign->fresh());
             }
+
+            $this->assertStillReady($campaign);
         });
 
         return $campaign->fresh();
@@ -149,6 +151,10 @@ class CampaignService
         ];
 
         $campaign->audiences()->delete();
+
+        if ($campaign->status === CampaignStatus::Suspended->value) {
+            $this->discardPendingMaterialisation($campaign);
+        }
 
         $seen = [];
         foreach ($map as $key => [$type, $mode]) {
@@ -189,11 +195,15 @@ class CampaignService
     {
         $this->assertEditable($campaign);
 
-        $campaign->update([
-            'editor_type' => $editorType,
-            'html_body' => $htmlBody,
-            'design_json' => $editorType === CampaignEditorType::Dnd->value ? $designJson : null,
-        ]);
+        DB::transaction(function () use ($campaign, $editorType, $htmlBody, $designJson): void {
+            $campaign->update([
+                'editor_type' => $editorType,
+                'html_body' => $htmlBody,
+                'design_json' => $editorType === CampaignEditorType::Dnd->value ? $designJson : null,
+            ]);
+
+            $this->assertStillReady($campaign);
+        });
 
         CampaignDesignSaved::dispatch($campaign->id, $editorType);
 
@@ -215,7 +225,11 @@ class CampaignService
             default => $this->designFromTemplate((string) $sourceId),
         };
 
-        $campaign->update($attributes);
+        DB::transaction(function () use ($campaign, $attributes): void {
+            $campaign->update($attributes);
+
+            $this->assertStillReady($campaign);
+        });
 
         CampaignDesignSaved::dispatch($campaign->id, $campaign->editor_type);
 
@@ -323,6 +337,7 @@ class CampaignService
      */
     public function pause(Campaign $campaign): Campaign
     {
+        $this->assertNotArchived($campaign);
         $this->transition($campaign, CampaignStatus::Paused);
 
         return $campaign->fresh();
@@ -335,6 +350,8 @@ class CampaignService
      */
     public function resume(Campaign $campaign): Campaign
     {
+        $this->assertNotArchived($campaign);
+
         if (! in_array($campaign->statusEnum(), [CampaignStatus::Paused, CampaignStatus::Suspended], true)) {
             throw new InvalidCampaignTransitionException($campaign->statusEnum(), CampaignStatus::Running);
         }
@@ -360,10 +377,17 @@ class CampaignService
     }
 
     /**
-     * §15.6 Cancel — pending rows are simply never dispatched.
+     * §15.6 Cancel — pending rows are simply never dispatched. A draft is
+     * deleted, not cancelled (docs/45 §45.4.2 `available_actions`).
      */
     public function cancel(Campaign $campaign): Campaign
     {
+        $this->assertNotArchived($campaign);
+
+        if ($campaign->status === CampaignStatus::Draft->value) {
+            throw new CampaignStateConflictException('Une campagne en brouillon ne peut pas être annulée.');
+        }
+
         $this->transition($campaign, CampaignStatus::Cancelled);
 
         return $campaign->fresh();
@@ -494,8 +518,11 @@ class CampaignService
     /**
      * docs/45 §45.4.2 `test-send` — through the normal pipeline
      * (`Message` + `SendEmailJob`) with `messages.is_test = true`. Each
-     * address needs a `recipients` row (`messages.recipient_id` is NOT NULL),
-     * so unknown addresses are created as manual contacts.
+     * address needs a `recipients` row (`messages.recipient_id` is NOT NULL):
+     * a soft-deleted contact is reused as is (never restored), and unknown
+     * addresses are created with status `invalid` so they never become
+     * marketing contacts — the audience resolver excludes `invalid`
+     * (`RecipientSource` has no `test_send` case, so `source` stays `manual`).
      *
      * @param  list<string>  $emails
      * @return array{queued: int, message_ids: list<string>, test_sent_at: string}
@@ -509,9 +536,9 @@ class CampaignService
         $messageIds = [];
 
         foreach (array_values(array_unique(array_map('strtolower', $emails))) as $email) {
-            $recipient = Recipient::query()->firstOrCreate(
+            $recipient = Recipient::withTrashed()->firstOrCreate(
                 ['email' => $email],
-                ['source' => RecipientSource::Manual->value, 'status' => RecipientStatus::Active->value, 'custom_fields' => []],
+                ['source' => RecipientSource::Manual->value, 'status' => RecipientStatus::Invalid->value, 'custom_fields' => []],
             );
             $mergeWith = $contact ?? $recipient;
 
@@ -567,7 +594,7 @@ class CampaignService
             $this->transition($campaign, CampaignStatus::Running);
         }
 
-        if (! $campaign->campaignRecipients()->exists()) {
+        if (! $campaign->isAudienceMaterialised()) {
             $this->audience->resolve($campaign);
 
             if ($campaign->send_time_optimized && app()->bound(self::BEST_SEND_TIME_SERVICE)) {
@@ -772,6 +799,35 @@ class CampaignService
         if ($campaign->isArchived() || ! $campaign->statusEnum()->isEditable()) {
             throw new CampaignStateConflictException('Seules les campagnes en brouillon, programmées ou suspendues peuvent être modifiées.');
         }
+    }
+
+    private function assertNotArchived(Campaign $campaign): void
+    {
+        if ($campaign->isArchived()) {
+            throw new CampaignStateConflictException('Cette campagne est archivée.');
+        }
+    }
+
+    /**
+     * Edits of a scheduled / suspended campaign must keep it sendable: the
+     * checklist is re-asserted (422, rolled back by the caller's transaction).
+     */
+    private function assertStillReady(Campaign $campaign): void
+    {
+        if (in_array($campaign->status, [CampaignStatus::Scheduled->value, CampaignStatus::Suspended->value], true)) {
+            $this->assertReadyToDispatch($campaign->fresh());
+        }
+    }
+
+    /**
+     * Audience edited while suspended: pending rows are dropped and the
+     * materialisation marker reset, so the next dispatch cycle re-resolves
+     * (already queued / sent / skipped rows are kept and never re-sent).
+     */
+    private function discardPendingMaterialisation(Campaign $campaign): void
+    {
+        $campaign->campaignRecipients()->where('status', CampaignRecipientStatus::Pending->value)->delete();
+        $campaign->forceFill(['recipients_count' => 0])->save();
     }
 
     private function assertReadyToDispatch(Campaign $campaign): void

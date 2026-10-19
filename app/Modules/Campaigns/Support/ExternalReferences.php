@@ -2,6 +2,7 @@
 
 namespace App\Modules\Campaigns\Support;
 
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -23,6 +24,9 @@ class ExternalReferences
     /** @var array<string, bool> */
     private static array $tables = [];
 
+    /** @var array<string, bool> */
+    private static array $softDeletes = [];
+
     /** @var array<int, array<string, mixed>|null> */
     private array $senders = [];
 
@@ -31,9 +35,26 @@ class ExternalReferences
         return self::$tables[$table] ??= Schema::hasTable($table);
     }
 
+    /**
+     * Soft-deleted rows (e.g. a deleted sender) are never resolvable.
+     */
+    private static function softDeletes(string $table): bool
+    {
+        return self::$softDeletes[$table] ??= Schema::hasColumn($table, 'deleted_at');
+    }
+
+    /**
+     * @return Builder
+     */
+    private static function live(string $table)
+    {
+        return DB::table($table)->when(self::softDeletes($table), fn ($q) => $q->whereNull('deleted_at'));
+    }
+
     public static function flush(): void
     {
         self::$tables = [];
+        self::$softDeletes = [];
     }
 
     public function idForUuid(string $table, ?string $uuid): ?int
@@ -42,7 +63,7 @@ class ExternalReferences
             return null;
         }
 
-        $id = DB::table($table)->where('uuid', $uuid)->value('id');
+        $id = self::live($table)->where('uuid', $uuid)->value('id');
 
         return $id === null ? null : (int) $id;
     }
@@ -70,7 +91,7 @@ class ExternalReferences
         }
 
         if (! array_key_exists($senderId, $this->senders)) {
-            $row = DB::table(self::SENDERS_TABLE)->where('id', $senderId)->first();
+            $row = self::live(self::SENDERS_TABLE)->where('id', $senderId)->first();
             $this->senders[$senderId] = $row === null ? null : (array) $row;
         }
 

@@ -323,6 +323,16 @@ class Campaign extends Model
         return $this->archived_at !== null;
     }
 
+    /**
+     * Completion marker of the audience materialisation: `recipients_count`
+     * is written at the end of the (transactional) `AudienceResolver::resolve()`
+     * and reset to 0 when a suspended campaign's audience is edited.
+     */
+    public function isAudienceMaterialised(): bool
+    {
+        return (int) $this->recipients_count > 0 && $this->campaignRecipients()->exists();
+    }
+
     public function smtpStrategyEnum(): CampaignSmtpStrategy
     {
         return CampaignSmtpStrategy::from($this->smtp_strategy);
