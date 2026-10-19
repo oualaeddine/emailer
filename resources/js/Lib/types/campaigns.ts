@@ -223,7 +223,7 @@ export interface EmailExpiration {
     unit: EmailExpirationUnit;
 }
 
-/** Business-hours window (ISO weekday 0 = Sunday). */
+/** Business-hours window (weekday 0 = Sunday … 6 = Saturday, JS getDay / Carbon dayOfWeek). */
 export interface CampaignSendWindow {
     days: number[];
     start: string;

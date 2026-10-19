@@ -185,7 +185,7 @@ same column.
 | File | Rule |
 |---|---|
 | `routes/api.php`, `routes/web.php` | Append one `require` line only |
-| `resources/js/Components/Shell/navItems.ts` | Frozen after WP-40N (all entries pre-added, hidden by permission until the page exists) |
+| `resources/js/Components/Shell/navItems.ts` | Frozen after WP-40N (all entries pre-added with `hidden: true` until the page exists). **WPs never edit it**: the orchestrator removes `hidden` for every page merged at the wave gate |
 | `resources/js/Lib/i18n/fr.ts` | Frozen after WP-40; missing key = defect reported in the structured return |
 | `resources/js/Lib/types/**` | Frozen after WP-40; a needed change is reported, applied by the orchestrator between waves |
 | `docs/45-brevo-api-contracts.md` | Frozen after WP-40; same rule |

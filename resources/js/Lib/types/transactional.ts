@@ -5,7 +5,7 @@
 import type { IsoDateTime, UserRef, Uuid } from '@/Lib/types/common';
 import type { DeviceType } from '@/Lib/types/reports';
 
-/** Labels: fr.apiKeys.scopes. */
+/** Labels: fr.apiKeys.scopeLabels. */
 export type ApiKeyScope =
     | 'transactional:send'
     | 'transactional:read'

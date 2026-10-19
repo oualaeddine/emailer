@@ -173,7 +173,7 @@ Exactly one of `ids` (1–1000) / `all_matching` is required (422 otherwise).
   "domain": "pagesjaunes.dz", "domain_id": "uuid|null",
   "domain_status": "verified",          // SendingDomainStatus | null (domain not registered)
   "is_default": true, "is_verified": true,
-  "verification_method": "domain",      // "email_link" | "domain" | "system" (seeded from MAIL_FROM_*)
+  "verification_method": "domain",      // "email_link" | "domain" | "system" (seeded from MAIL_FROM_*) | null while unverified
   "verified_at": "…|null", "verification_sent_at": "…|null",
   "reply_to": "contact@pagesjaunes.dz|null",
   "created_at": "…", "updated_at": "…" }
@@ -335,7 +335,7 @@ never re-implements it): `edit`, `report`, `duplicate`, `test_send`, `schedule`,
   "tracking_enabled": true,
   "smtp_strategy": "rotation",     // "rotation" | "single" ; "single" requires smtp_account_id
   "smtp_account_id": "uuid|null",
-  "send_window": { "days": [1,2,3,4,0], "start": "08:00", "end": "17:00" },   // or null (ISO weekday 0=Sun)
+  "send_window": { "days": [1,2,3,4,0], "start": "08:00", "end": "17:00" },   // or null (weekday 0=Sun…6=Sat, JS getDay / Carbon dayOfWeek)
   "requires_approval": false,
   "send_time_optimized": false,
   "batch": { "size": 500, "interval_minutes": 30 },   // or null
@@ -404,7 +404,8 @@ return today), `GET /contact-attributes/merge-tags` (§45.5.1) for the subject p
 (fallback to the static list `{{ contact.PRENOM }}`, `{{ contact.NOM }}`, `{{ contact.EMAIL }}`,
 `{{ contact.SOCIETE }}` when the endpoint 404s), `GET /unsubscribe-pages` / `GET
 /update-profile-forms` (§45.6.6, empty list until Wave 3). Labels: `fr.campaigns`,
-`fr.campaignSetup`.
+`fr.campaignSetup`. The top-bar button links to `/campaigns?create=1`: `Campaigns/Index`
+opens the create-campaign dialog when that query parameter is present.
 
 ### 45.4.4 WP-44 Template picker + code path (`routes/api/templates.php`, `Lib/types/templates.ts`)
 
@@ -1883,7 +1884,7 @@ Audit actions (doc 27, `action` strings): `sender.created`, `sender.verified`, `
 |---|---|
 | `nav` (+ `nav.groups`) | shell (WP-40N) — the mandatory nav keys |
 | `common` (extended) | shared buttons and states |
-| `campaigns` (extended: `statusLabels`, `brevoStatusLabels`, `tabs`, `actions`, `columns`, `create`, `bulk`, `folders`, `suspendedReasons`) | `Campaigns/Index` |
+| `campaigns` (extended: `statusLabels`, `brevoStatusLabels`, `tabs`, `actions`, `columns`, `create`, `bulk`, `suspendedReasons`; folder strings: `common.folder*`) | `Campaigns/Index` |
 | `campaignSetup` | `Campaigns/Setup`, recipients dialog, *Aperçu & test*, checklist, *Confirmer l'envoi*, A/B card |
 | `campaignReport` | `Campaigns/Report`, compare drawer |
 | `templates` (extended) | `Templates/Index`, `Templates/Edit` |

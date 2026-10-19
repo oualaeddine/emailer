@@ -52,6 +52,16 @@ This is intentionally **not** a fully dynamic custom-role-builder in v1 (four fi
 | `users.manage` | ✔ | — | — | — |
 | `settings.manage` | ✔ | — | — | — |
 | `settings.branding_only` | ✔ | ✔ | — | — |
+| `senders.manage` (doc 43 §43.8) | ✔ | ✔ | — | — |
+| `attributes.manage` | ✔ | ✔ | — | — |
+| `forms.manage` | ✔ | ✔ | — | — |
+| `automations.manage` | ✔ | ✔ | — | — |
+| `api_keys.manage` | ✔ | — | — | — |
+| `webhooks.manage` | ✔ | — | — | — |
+| `contacts.export` | ✔ | ✔ | ✔ | — |
+| `campaigns.archive` | ✔ | ✔ | ✔ | — |
+| `transactional.view` | ✔ | ✔ | — | — |
+| `transactional.send` | ✔ | ✔ | — | — |
 
 `—` denotes no access (nav item/action hidden entirely, per [08-navigation.md §8.4](08-navigation.md#84-navigation-behavior)).
 

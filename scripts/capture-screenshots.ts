@@ -87,17 +87,17 @@ const shots: Shot[] = [
         actions: (page) => openDialog(page, fr.campaigns.newCampaign),
     },
 
-    { name: 'recipients/01-recipients', url: '/recipients' },
+    { name: 'recipients/01-recipients', url: '/contacts' },
     {
         name: 'recipients/02-dialog',
-        url: '/recipients',
+        url: '/contacts',
         actions: (page) => openDialog(page, fr.recipients.newRecipient),
     },
 
-    { name: 'recipients-import/01-upload', url: '/recipients/import' },
+    { name: 'recipients-import/01-upload', url: '/contacts/imports/new' },
     {
         name: 'recipients-import/02-mapping',
-        url: '/recipients/import',
+        url: '/contacts/imports/new',
         actions: async (page) => {
             // The file input is visually hidden behind a styled drop zone;
             // setInputFiles drives it directly, which also advances the wizard.
@@ -118,16 +118,16 @@ const shots: Shot[] = [
             await settle(page, 400);
         },
     },
-    { name: 'pagejaunes-search/01-search', url: '/recipients/import/pagejaunes' },
+    { name: 'pagejaunes-search/01-search', url: '/contacts/pagejaunes' },
 
-    { name: 'suppression/01-suppression', url: '/suppression' },
+    { name: 'suppression/01-suppression', url: '/contacts/blocklist' },
     {
         name: 'suppression/02-dialog',
-        url: '/suppression',
+        url: '/contacts/blocklist',
         actions: (page) => openDialog(page, fr.suppression.newEntry),
     },
 
-    { name: 'reporting/01-reporting', url: '/reporting' },
+    { name: 'reporting/01-reporting', url: '/statistics' },
 
     { name: 'smtp/01-smtp', url: '/smtp' },
     {

@@ -6,6 +6,7 @@ use App\Domain\Enums\RoleName;
 use App\Modules\Identity\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class WebRouteAuthorizationTest extends TestCase
@@ -95,9 +96,7 @@ class WebRouteAuthorizationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider legacyRedirectProvider
-     */
+    #[DataProvider('legacyRedirectProvider')]
     public function test_legacy_url_permanently_redirects_to_new_url(string $old, string $new): void
     {
         $viewer = User::factory()->withRole(RoleName::Viewer)->withTwoFactor()->create();

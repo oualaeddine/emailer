@@ -14,7 +14,8 @@ class PermissionNameTest extends TestCase
 {
     public function test_it_defines_exactly_the_documented_permission_count(): void
     {
-        $this->assertCount(33, PermissionName::cases());
+        // 33 rows (doc 26 §26.3) + 10 Brevo-parity permissions (doc 45 §45.2, WP-40).
+        $this->assertCount(43, PermissionName::cases());
     }
 
     public function test_every_permission_name_is_unique(): void

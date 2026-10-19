@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test:
@@ -47,14 +47,14 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: PHP tests
-        run: php artisan test
-
       - name: Install JS dependencies
         run: npm ci
 
       - name: Type check
         run: npx tsc --noEmit
+
+      - name: PHP tests
+        run: php artisan test
 
       - name: Build assets
         run: npm run build

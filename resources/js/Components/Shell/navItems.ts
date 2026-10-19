@@ -25,6 +25,7 @@ import {
     bundleIcon,
 } from '@fluentui/react-icons';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
+import { hasAnyPermission } from '@/Lib/permissions';
 
 const HomeIcon = bundleIcon(HomeFilled, HomeRegular);
 const PeopleIcon = bundleIcon(PeopleFilled, PeopleRegular);
@@ -84,6 +85,8 @@ export interface NavItem {
     permissions?: string[];
     /** Page not built yet: NavRail/TopBar skip the entry. The owning WP deletes this flag. */
     hidden?: boolean;
+    /** Non-Inertia page (e.g. Horizon): navigate with a full page load. */
+    external?: boolean;
 }
 
 /** Groups rendered as section headers in the left rail (settings lives in the account menu). */
@@ -107,7 +110,7 @@ export const navItems: NavItem[] = [
     { href: '/contacts', icon: ContactCardIcon, label: (t) => t.nav.contacts, match: 'exact', group: 'contacts', permissions: ['recipients.view'] },
     { href: '/contacts/lists', icon: PeopleIcon, label: (t) => t.nav.lists, match: 'prefix', group: 'contacts', permissions: ['recipients.view'], hidden: true },
     { href: '/contacts/segments', icon: PeopleIcon, label: (t) => t.nav.segments, match: 'prefix', group: 'contacts', permissions: ['recipients.view', 'segments.manage'], hidden: true },
-    { href: '/contacts/pagejaunes', icon: BuildingIcon, label: (t) => t.nav.pagejaunes, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
+    { href: '/contacts/pagejaunes', icon: BuildingIcon, label: (t) => t.nav.pagejaunesCompanies, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
     { href: '/contacts/attributes', icon: DocumentIcon, label: (t) => t.nav.attributes, match: 'prefix', group: 'contacts', permissions: ['recipients.manage'], hidden: true },
     // Wizard entry; the import-history page (/contacts/imports) is reached from it.
     { href: '/contacts/imports/new', icon: PeopleIcon, label: (t) => t.nav.imports, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
@@ -115,33 +118,38 @@ export const navItems: NavItem[] = [
 
     // Marketing
     { href: '/campaigns', icon: MegaphoneLoudIcon, label: (t) => t.nav.emailCampaigns, match: 'prefix', group: 'marketing', permissions: ['campaigns.view'] },
-    { href: '/marketing/forms', icon: DocumentIcon, label: (t) => t.nav.forms, match: 'prefix', group: 'marketing', permissions: ['campaigns.view'], hidden: true },
+    { href: '/marketing/forms', icon: DocumentIcon, label: (t) => t.nav.forms, match: 'prefix', group: 'marketing', permissions: ['forms.manage'], hidden: true },
     { href: '/templates', icon: DocumentIcon, label: (t) => t.nav.templates, match: 'exact', group: 'marketing', permissions: ['templates.view'] },
     { href: '/statistics', icon: DocumentIcon, label: (t) => t.nav.statistics, match: 'exact', group: 'marketing', permissions: ['reporting.view'] },
 
     // Automatisations (phase F)
-    { href: '/automations', icon: SettingsIcon, label: (t) => t.nav.automations, match: 'prefix', group: 'automations', permissions: ['campaigns.view'], hidden: true },
+    { href: '/automations', icon: SettingsIcon, label: (t) => t.nav.automations, match: 'prefix', group: 'automations', permissions: ['automations.manage'], hidden: true },
 
     // Transactionnel
     { href: '/compose', icon: MailIcon, label: (t) => t.nav.compose, match: 'exact', group: 'transactional', permissions: ['composer.compose'] },
     // Reuses MailIcon: no npm/tsc-verified inbox icon export is available.
-    { href: '/mailbox', icon: MailIcon, label: (t) => t.nav.mailbox, match: 'exact', group: 'transactional', permissions: ['mailbox.view_own', 'mailbox.view_all'] },
-    { href: '/transactional/logs', icon: DocumentIcon, label: (t) => t.nav.transactionalLogs, match: 'prefix', group: 'transactional', permissions: ['reporting.view'], hidden: true },
+    { href: '/mailbox', icon: MailIcon, label: (t) => t.nav.messaging, match: 'exact', group: 'transactional', permissions: ['mailbox.view_own', 'mailbox.view_all'] },
+    { href: '/transactional/logs', icon: DocumentIcon, label: (t) => t.nav.transactionalLogs, match: 'prefix', group: 'transactional', permissions: ['transactional.view'], hidden: true },
     { href: '/templates?scope=transactional', icon: DocumentIcon, label: (t) => t.nav.transactionalTemplates, match: 'exact', group: 'transactional', permissions: ['templates.view'], hidden: true },
-    { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['smtp.view'], hidden: true },
+    { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['transactional.view'], hidden: true },
 
     // Paramètres (account menu, top-right)
-    { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['smtp.view'], hidden: true },
+    { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['senders.manage'], hidden: true },
     { href: '/smtp', icon: ServerIcon, label: (t) => t.nav.smtp, match: 'exact', group: 'settings', permissions: ['smtp.view'] },
     { href: '/settings/unsubscribe-pages', icon: ShieldProhibitedIcon, label: (t) => t.nav.unsubscribePages, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/update-profile-forms', icon: DocumentIcon, label: (t) => t.nav.updateProfileForms, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/tracking', icon: SettingsIcon, label: (t) => t.nav.tracking, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/branding', icon: SettingsIcon, label: (t) => t.nav.branding, match: 'prefix', group: 'settings', permissions: ['settings.branding_only', 'settings.manage'] },
     { href: '/admin/users', icon: PeopleIcon, label: (t) => t.nav.usersRoles, match: 'prefix', group: 'settings', permissions: ['users.manage'] },
-    { href: '/settings/api', icon: SettingsIcon, label: (t) => t.nav.apiKeys, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/settings/api', icon: SettingsIcon, label: (t) => t.nav.apiKeys, match: 'prefix', group: 'settings', permissions: ['api_keys.manage', 'webhooks.manage'], hidden: true },
     { href: '/admin/audit-log', icon: DocumentIcon, label: (t) => t.nav.audit, match: 'exact', group: 'settings', permissions: ['audit.view'] },
-    { href: '/horizon', icon: ServerIcon, label: (t) => t.nav.horizon, match: 'prefix', group: 'settings', permissions: ['queues.view'], hidden: true },
+    { href: '/horizon', icon: ServerIcon, label: (t) => t.nav.horizon, match: 'prefix', group: 'settings', permissions: ['queues.view'], external: true },
 
     // Aide
     { href: '/help', icon: QuestionCircleIcon, label: (t) => t.nav.help, match: 'prefix', footer: true },
 ];
+
+/** Shared visibility predicate used by NavRail and TopBar (review W0 #11). */
+export function isNavItemVisible(item: NavItem, permissions: string[]): boolean {
+    return !item.hidden && (!item.permissions || hasAnyPermission(permissions, ...item.permissions));
+}

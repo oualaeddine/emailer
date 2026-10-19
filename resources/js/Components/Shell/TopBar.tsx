@@ -110,10 +110,11 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                         appearance="primary"
                         icon={<AddRegular />}
                         as="a"
-                        href="/campaigns"
+                        href="/campaigns?create=1"
+                        aria-label={t.nav.createCampaign}
                         onClick={(e: React.MouseEvent) => {
                             e.preventDefault();
-                            router.visit('/campaigns');
+                            router.visit('/campaigns?create=1');
                         }}
                     >
                         <span className={styles.userName}>{t.nav.createCampaign}</span>
@@ -147,7 +148,7 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                                         {settingsItems.map((item) => {
                                             const Icon = item.icon;
                                             return (
-                                                <MenuItem key={item.href} icon={<Icon />} onClick={() => router.visit(item.href)}>
+                                                <MenuItem key={item.href} icon={<Icon />} onClick={() => (item.external ? (window.location.href = item.href) : router.visit(item.href))}>
                                                     {item.label(t)}
                                                 </MenuItem>
                                             );
