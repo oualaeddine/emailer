@@ -75,3 +75,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 2 | 50, 52, 53, 55, 56, 57 | sonnet/medium | Launched | running |
 | 2026-10-19 | 2 | 51, 54, 54U | opus/high | Launched | running |
 | 2026-10-19 | 2 | WP-56 | sonnet | Returned; 11 files, owned + 2 append-only; 25 tests green; gaps: suppression index lacks `reason[]`/`per_page` (client merges per reason), soft bounces not shown, `RecipientBlocklistChanged` placed under Listeners/ | 77406ae |
+| 2026-10-19 | 2 | WP-52 | sonnet | Returned; owned + 2 append-only; 6 tests green; tsc clean. **Finding:** `message_events` table does not exist on this branch (doc 45 Slot L assumes an ALTER) → WP-70 (Wave 3) must CREATE it; timeline falls back to `messages` timestamps. `RecomputeRecipientCountersJob` not built (no owner) → assign to WP-70 | 64dac68 |
