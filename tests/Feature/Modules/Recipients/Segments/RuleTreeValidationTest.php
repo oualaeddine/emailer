@@ -28,6 +28,7 @@ class RuleTreeValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->defineSegmentAttributes();
         $this->seed(RolePermissionSeeder::class);
         $this->user = User::factory()->withRole(RoleName::Viewer)->create();
     }

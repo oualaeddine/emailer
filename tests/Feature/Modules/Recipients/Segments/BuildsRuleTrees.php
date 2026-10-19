@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Modules\Recipients\Segments;
 
+use App\Modules\Recipients\Attributes\Models\ContactAttribute;
 use App\Modules\Recipients\Segments\Contracts\RuleTreeCompiler;
 use App\Modules\Recipients\Segments\Contracts\SegmentCompilerContract;
+use Database\Seeders\ContactAttributeSeeder;
 
 /**
  * Helpers for docs/45 §45.5.2 rule trees in tests.
@@ -47,6 +49,42 @@ trait BuildsRuleTrees
             'campaign_ids' => null, 'within_days' => null, 'from' => null, 'to' => null,
             'link_url' => null, 'min_count' => null, 'automation_step_id' => null,
         ];
+    }
+
+    /**
+     * Registers (idempotently) a custom contact attribute definition; the
+     * rule-tree compiler validates `attribute.NAME` against the registry.
+     *
+     * @param  list<array<string, mixed>>|null  $options
+     */
+    protected function defineAttribute(string $name, string $type = 'text', ?array $options = null): ContactAttribute
+    {
+        $name = strtoupper($name);
+
+        return ContactAttribute::query()->updateOrCreate(['name' => $name], [
+            'label' => ucfirst(strtolower($name)),
+            'type' => $type,
+            'options' => $options,
+            'is_system' => false,
+            'storage' => 'custom_fields',
+            'column' => null,
+            'position' => 100,
+        ]);
+    }
+
+    /** System attributes plus the custom ones the segment fixtures rely on. */
+    protected function defineSegmentAttributes(): void
+    {
+        $this->seed(ContactAttributeSeeder::class);
+        $this->defineAttribute('VILLE', 'text');
+        $this->defineAttribute('AGE', 'number');
+        $this->defineAttribute('NAISSANCE', 'date');
+        $this->defineAttribute('RDV', 'date');
+        $this->defineAttribute('CLIENT', 'boolean');
+        $this->defineAttribute('NIVEAU', 'category', [['value' => 'GOLD', 'label' => 'Gold'], ['value' => 'SILVER', 'label' => 'Silver']]);
+        $this->defineAttribute('INTERETS', 'multiple_choice', [['value' => 'sport', 'label' => 'Sport'], ['value' => 'tech', 'label' => 'Tech'], ['value' => 'music', 'label' => 'Music']]);
+        $this->defineAttribute('OWNER', 'user');
+        $this->defineAttribute('INDUSTRY', 'text');
     }
 
     protected function compiler(): SegmentCompilerContract

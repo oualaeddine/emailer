@@ -3,6 +3,7 @@
 namespace Tests\Feature\Modules\Recipients;
 
 use App\Domain\Enums\RecipientStatus;
+use App\Modules\Recipients\Attributes\Models\ContactAttribute;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\Tag;
 use App\Modules\Recipients\Services\SegmentEvaluationService;
@@ -75,9 +76,10 @@ class SegmentEvaluationTest extends TestCase
 
     public function test_nested_or_group_within_an_and_condition(): void
     {
-        Recipient::factory()->create(['company_name' => 'Match A', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['industry' => 'retail']]);
-        Recipient::factory()->create(['company_name' => 'Match B', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['industry' => 'tech']]);
-        Recipient::factory()->create(['company_name' => 'No Match', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['industry' => 'finance']]);
+        ContactAttribute::factory()->create(['name' => 'INDUSTRY']);
+        Recipient::factory()->create(['company_name' => 'Match A', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['INDUSTRY' => 'retail']]);
+        Recipient::factory()->create(['company_name' => 'Match B', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['INDUSTRY' => 'tech']]);
+        Recipient::factory()->create(['company_name' => 'No Match', 'status' => RecipientStatus::Active->value, 'custom_fields' => ['INDUSTRY' => 'finance']]);
 
         $service = app(SegmentEvaluationService::class);
         $results = $service->compile([
@@ -87,8 +89,8 @@ class SegmentEvaluationTest extends TestCase
                 [
                     'operator' => 'OR',
                     'conditions' => [
-                        ['field' => 'custom_fields.industry', 'operator' => 'equals', 'value' => 'retail'],
-                        ['field' => 'custom_fields.industry', 'operator' => 'equals', 'value' => 'tech'],
+                        ['field' => 'custom_fields.INDUSTRY', 'operator' => 'equals', 'value' => 'retail'],
+                        ['field' => 'custom_fields.INDUSTRY', 'operator' => 'equals', 'value' => 'tech'],
                     ],
                 ],
             ],

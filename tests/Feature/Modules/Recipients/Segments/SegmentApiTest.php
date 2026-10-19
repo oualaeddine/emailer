@@ -33,6 +33,7 @@ class SegmentApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->defineSegmentAttributes();
         $this->seed(RolePermissionSeeder::class);
         $this->admin = User::factory()->withRole(RoleName::Administrator)->create();
         $this->viewer = User::factory()->withRole(RoleName::Viewer)->create();

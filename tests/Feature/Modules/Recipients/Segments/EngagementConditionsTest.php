@@ -36,6 +36,7 @@ class EngagementConditionsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->defineSegmentAttributes();
         Carbon::setTestNow(Carbon::parse('2026-06-15 12:00:00', 'UTC'));
 
         $this->x = Campaign::factory()->create();
