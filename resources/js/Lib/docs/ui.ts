@@ -58,6 +58,10 @@ export const docsUi: Record<DocsLocale, DocsUiStrings> = {
             campaigns: 'Campagnes',
             contacts: 'Contacts',
             administration: 'Administration',
+            marketing: 'Marketing',
+            automations: 'Automatisations',
+            transactional: 'Transactionnel',
+            settings: 'Paramètres',
         },
     },
     ar: {
@@ -83,6 +87,10 @@ export const docsUi: Record<DocsLocale, DocsUiStrings> = {
             campaigns: 'الحملات',
             contacts: 'جهات الاتصال',
             administration: 'الإدارة',
+            marketing: 'التسويق',
+            automations: 'الأتمتة',
+            transactional: 'المعاملات',
+            settings: 'الإعدادات',
         },
     },
 };

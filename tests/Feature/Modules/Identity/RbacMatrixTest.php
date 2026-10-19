@@ -61,6 +61,17 @@ class RbacMatrixTest extends TestCase
             'users.manage' => [true, false, false, false],
             'settings.manage' => [true, false, false, false],
             'settings.branding_only' => [true, true, false, false],
+            // docs/45-brevo-api-contracts.md §45.2 (WP-40) — Brevo-parity permissions.
+            'senders.manage' => [true, true, false, false],
+            'attributes.manage' => [true, true, false, false],
+            'forms.manage' => [true, true, false, false],
+            'automations.manage' => [true, true, false, false],
+            'api_keys.manage' => [true, false, false, false],
+            'webhooks.manage' => [true, false, false, false],
+            'contacts.export' => [true, true, true, false],
+            'campaigns.archive' => [true, true, true, false],
+            'transactional.view' => [true, true, false, false],
+            'transactional.send' => [true, true, false, false],
         ];
     }
 

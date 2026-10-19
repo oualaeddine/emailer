@@ -185,7 +185,7 @@ same column.
 | File | Rule |
 |---|---|
 | `routes/api.php`, `routes/web.php` | Append one `require` line only |
-| `resources/js/Components/Shell/navItems.ts` | Frozen after WP-40N (all entries pre-added, hidden by permission until the page exists) |
+| `resources/js/Components/Shell/navItems.ts` | Frozen after WP-40N (all entries pre-added with `hidden: true` until the page exists). **WPs never edit it**: the orchestrator removes `hidden` for every page merged at the wave gate |
 | `resources/js/Lib/i18n/fr.ts` | Frozen after WP-40; missing key = defect reported in the structured return |
 | `resources/js/Lib/types/**` | Frozen after WP-40; a needed change is reported, applied by the orchestrator between waves |
 | `docs/45-brevo-api-contracts.md` | Frozen after WP-40; same rule |
@@ -252,7 +252,7 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 
 | Wave | WPs | Status |
 |---|---|---|
-| 0 | 40, 40N | ⬜ not started |
+| 0 | 40, 40N | ✅ merged (brevo/wave-0 → brevo/main); gate green locally (CI unavailable: GitHub billing lock); review findings fixed — see [47](47-orchestration-log.md) |
 | 1 | 41, 41U, 42, 43, 44, 45, 60S | ⬜ |
 | 2 | 50, 51, 52, 53, 54, 54U, 55, 56, 57 | ⬜ |
 | 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ⬜ |
