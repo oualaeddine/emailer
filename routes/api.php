@@ -35,4 +35,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/reporting.php';
     require __DIR__.'/api/notifications.php';
     require __DIR__.'/api/senders.php';
+    require __DIR__.'/api/campaign-checklist.php';
 });

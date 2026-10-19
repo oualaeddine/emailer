@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Modules\Campaigns\Services\Checklist\CampaignChecklistContract;
+use App\Modules\Campaigns\Services\Checklist\CampaignChecklistService;
 use App\Modules\DeliveryEngine\Services\SmtpConnectionTesterContract;
 use App\Modules\DeliveryEngine\Services\SmtpManagerContract;
 use App\Modules\DeliveryEngine\Services\SmtpManagerService;
@@ -48,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
             \App\Modules\Campaigns\Contracts\AudienceResolver::class,
             \App\Modules\Campaigns\Services\AudienceResolver::class,
         );
+        // docs/45-brevo-api-contracts.md §45.9 — WP-45 pre-send checklist.
+        $this->app->bind(CampaignChecklistContract::class, CampaignChecklistService::class);
+        $this->app->bind(CampaignChecklistService::class);
     }
 
     /**
