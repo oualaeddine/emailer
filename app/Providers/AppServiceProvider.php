@@ -43,6 +43,11 @@ class AppServiceProvider extends ServiceProvider
 
         // docs/45 §45.9 — DNS lookups for sending-domain verification (WP-41); tests bind FakeDnsResolver.
         $this->app->bind(DnsResolverContract::class, SystemDnsResolver::class);
+        // docs/45-brevo-api-contracts.md §45.9 — WP-42 audience resolution contract.
+        $this->app->bind(
+            \App\Modules\Campaigns\Contracts\AudienceResolver::class,
+            \App\Modules\Campaigns\Services\AudienceResolver::class,
+        );
     }
 
     /**
