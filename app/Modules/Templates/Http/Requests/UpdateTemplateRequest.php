@@ -25,6 +25,11 @@ class UpdateTemplateRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:150'],
             'category' => ['sometimes', 'nullable', 'string', 'max:50'],
             'html_content' => ['sometimes', 'string'],
+            'editor_type' => ['sometimes', 'in:dnd,html,rich_text'],
+            'scope' => ['sometimes', 'in:marketing,transactional'],
+            'folder_id' => ['sometimes', 'nullable', 'string'],
+            'design_json' => ['sometimes', 'nullable', 'array'],
+            'subject' => ['sometimes', 'nullable', 'string', 'max:255'],
             'change_note' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
