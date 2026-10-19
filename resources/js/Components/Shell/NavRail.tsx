@@ -120,7 +120,7 @@ export function NavRail({ mobileOpen, onMobileOpenChange }: NavRailProps) {
     const { url, props } = usePage<{ auth: { permissions: string[] } }>();
     const permissions = props.auth.permissions;
 
-    const visible = (item: NavItem) => !item.permissions || hasAnyPermission(permissions, ...item.permissions);
+    const visible = (item: NavItem) => !item.hidden && (!item.permissions || hasAnyPermission(permissions, ...item.permissions));
 
     function renderItem(item: NavItem, options?: { collapsible?: boolean; onNavigate?: () => void }) {
         const Icon = item.icon;

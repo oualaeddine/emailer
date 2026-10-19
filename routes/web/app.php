@@ -35,15 +35,15 @@ Route::get('settings/branding', fn () => Inertia::render('Settings/Branding'))
     ->middleware('can:settings.branding.access')
     ->name('settings.branding');
 
-Route::get('recipients/import/pagejaunes', fn () => Inertia::render('Recipients/PageJaunesSearch'))
+Route::get('contacts/pagejaunes', fn () => Inertia::render('Recipients/PageJaunesSearch'))
     ->middleware('can:recipients.import')
     ->name('recipients.import.pagejaunes');
 
-Route::get('recipients', fn () => Inertia::render('Recipients/Index'))
+Route::get('contacts', fn () => Inertia::render('Recipients/Index'))
     ->middleware('can:recipients.view')
     ->name('recipients.index');
 
-Route::get('recipients/import', fn () => Inertia::render('Recipients/Import'))
+Route::get('contacts/imports/new', fn () => Inertia::render('Recipients/Import'))
     ->middleware('can:recipients.import')
     ->name('recipients.import');
 
@@ -58,6 +58,14 @@ Route::get('templates', fn () => Inertia::render('Templates/Index'))
 Route::get('smtp', fn () => Inertia::render('Smtp/Index'))
     ->middleware('can:smtp.view')
     ->name('smtp.index');
+
+/*
+ | docs/43-brevo-parity-plan.md §43.3 — legacy URLs keep working as permanent
+ | redirects for one release. Same `auth` group, so guests still hit login first.
+ */
+Route::redirect('recipients/import/pagejaunes', '/contacts/pagejaunes', 301);
+Route::redirect('recipients/import', '/contacts/imports/new', 301);
+Route::redirect('recipients', '/contacts', 301);
 
 require __DIR__.'/suppression.php';
 require __DIR__.'/mailbox.php';

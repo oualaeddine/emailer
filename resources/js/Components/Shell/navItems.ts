@@ -49,14 +49,26 @@ const QuestionCircleIcon = bundleIcon(QuestionCircleFilled, QuestionCircleRegula
  * current user lacks every permission within them).
  */
 /**
- * Groups mirror how the modules are used day-to-day rather than the order
- * modules were built in (docs/42's build order): Tableau de bord stands
- * alone as the entry point, then Messagerie (day-to-day sending),
- * Campagnes (bulk sends + their results), Contacts (recipient data
- * lifecycle: list → PageJaunes sourcing → import → suppression), and
- * Administration (infrastructure/config, used far less often) last.
+ * docs/43-brevo-parity-plan.md §43.3 — Target Information Architecture.
+ * Accueil stands alone, then Contacts / Marketing / Automatisations /
+ * Transactionnel sections in the rail. The `settings` group is NOT rendered
+ * in the rail: TopBar shows it in the account menu (top-right).
+ * The first three legacy groups are kept in the type only because the help
+ * registry (Lib/docs/registry.ts) still groups topics with them.
+ *
+ * WP-40N pre-registers every §43.3 entry. Entries whose page does not exist
+ * yet carry `hidden: true`; the work package that builds the page only
+ * deletes that flag on its own entry (this file is frozen after WP-40N).
  */
-export type NavGroup = 'messaging' | 'campaigns' | 'contacts' | 'administration';
+export type NavGroup =
+    | 'messaging'
+    | 'campaigns'
+    | 'contacts'
+    | 'administration'
+    | 'marketing'
+    | 'automations'
+    | 'transactional'
+    | 'settings';
 
 export interface NavItem {
     href: string;
@@ -64,162 +76,72 @@ export interface NavItem {
     label: (t: TranslationDictionary) => string;
     /** 'exact' matches `url === href`; 'prefix' matches `url.startsWith(href)`. */
     match: 'exact' | 'prefix';
-    /** Omit for standalone entries (Tableau de bord above the groups, Aide below them). */
+    /** Omit for standalone entries (Accueil above the groups, Aide below them). */
     group?: NavGroup;
     /** Standalone entries render above the groups unless this puts them below. */
     footer?: boolean;
     /** Item is shown if the user holds ANY of these permissions; omit to always show. */
     permissions?: string[];
+    /** Page not built yet: NavRail/TopBar skip the entry. The owning WP deletes this flag. */
+    hidden?: boolean;
 }
 
-export const navGroupOrder: NavGroup[] = ['messaging', 'campaigns', 'contacts', 'administration'];
+/** Groups rendered as section headers in the left rail (settings lives in the account menu). */
+export const navGroupOrder: NavGroup[] = ['contacts', 'marketing', 'automations', 'transactional'];
 
 export const navGroupLabels: Record<NavGroup, (t: TranslationDictionary) => string> = {
     messaging: (t) => t.nav.groups.messaging,
     campaigns: (t) => t.nav.groups.campaigns,
     contacts: (t) => t.nav.groups.contacts,
     administration: (t) => t.nav.groups.administration,
+    marketing: (t) => t.nav.groups.marketing,
+    automations: (t) => t.nav.groups.automations,
+    transactional: (t) => t.nav.groups.transactional,
+    settings: (t) => t.nav.groups.settings,
 };
 
 export const navItems: NavItem[] = [
-    {
-        href: '/dashboard',
-        icon: HomeIcon,
-        label: (t) => t.nav.dashboard,
-        match: 'prefix',
-    },
+    { href: '/dashboard', icon: HomeIcon, label: (t) => t.nav.home, match: 'prefix' },
 
-    // Messagerie — composing and reading mail day-to-day.
-    {
-        href: '/compose',
-        icon: MailIcon,
-        label: (t) => t.composer.title,
-        match: 'exact',
-        group: 'messaging',
-        permissions: ['composer.compose'],
-    },
-    {
-        href: '/mailbox',
-        // Reuses the Compose entry's MailIcon rather than guessing at an
-        // unverified `MailInboxRegular`/`MailInboxFilled` import — this repo
-        // has no npm/tsc available to confirm icon names exist before the
-        // wave's build gate (docs/42-parallel-execution-plan.md §42.9).
-        icon: MailIcon,
-        label: (t) => t.nav.mailbox,
-        match: 'exact',
-        group: 'messaging',
-        permissions: ['mailbox.view_own', 'mailbox.view_all'],
-    },
-    {
-        href: '/templates',
-        icon: DocumentIcon,
-        label: (t) => t.nav.templates,
-        match: 'exact',
-        group: 'messaging',
-        permissions: ['templates.view'],
-    },
+    // Contacts
+    { href: '/contacts', icon: ContactCardIcon, label: (t) => t.nav.contacts, match: 'exact', group: 'contacts', permissions: ['recipients.view'] },
+    { href: '/contacts/lists', icon: PeopleIcon, label: (t) => t.nav.lists, match: 'prefix', group: 'contacts', permissions: ['recipients.view'], hidden: true },
+    { href: '/contacts/segments', icon: PeopleIcon, label: (t) => t.nav.segments, match: 'prefix', group: 'contacts', permissions: ['recipients.view', 'segments.manage'], hidden: true },
+    { href: '/contacts/pagejaunes', icon: BuildingIcon, label: (t) => t.nav.pagejaunes, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
+    { href: '/contacts/attributes', icon: DocumentIcon, label: (t) => t.nav.attributes, match: 'prefix', group: 'contacts', permissions: ['recipients.manage'], hidden: true },
+    // Wizard entry; the import-history page (/contacts/imports) is reached from it.
+    { href: '/contacts/imports/new', icon: PeopleIcon, label: (t) => t.nav.imports, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
+    { href: '/contacts/blocklist', icon: ShieldProhibitedIcon, label: (t) => t.nav.blocklist, match: 'exact', group: 'contacts', permissions: ['suppression.view'] },
 
-    // Campagnes — bulk sends and their results.
-    {
-        href: '/campaigns',
-        icon: MegaphoneLoudIcon,
-        label: (t) => t.nav.campaigns,
-        match: 'exact',
-        group: 'campaigns',
-        permissions: ['campaigns.view'],
-    },
-    {
-        href: '/reporting',
-        // Reuses the Templates entry's DocumentIcon (already imported/verified
-        // above) rather than guessing an unverified icon export name — same
-        // reasoning as the `/mailbox` entry's MailIcon reuse (this repo has no
-        // npm/tsc available to confirm icon names exist before the wave's
-        // build gate, docs/42-parallel-execution-plan.md §42.9).
-        icon: DocumentIcon,
-        label: (t) => t.nav.reporting,
-        match: 'exact',
-        group: 'campaigns',
-        permissions: ['reporting.view'],
-    },
+    // Marketing
+    { href: '/campaigns', icon: MegaphoneLoudIcon, label: (t) => t.nav.emailCampaigns, match: 'prefix', group: 'marketing', permissions: ['campaigns.view'] },
+    { href: '/marketing/forms', icon: DocumentIcon, label: (t) => t.nav.forms, match: 'prefix', group: 'marketing', permissions: ['campaigns.view'], hidden: true },
+    { href: '/templates', icon: DocumentIcon, label: (t) => t.nav.templates, match: 'exact', group: 'marketing', permissions: ['templates.view'] },
+    { href: '/statistics', icon: DocumentIcon, label: (t) => t.nav.statistics, match: 'exact', group: 'marketing', permissions: ['reporting.view'] },
 
-    // Contacts — recipient data lifecycle: list, source, import, suppress.
-    {
-        href: '/recipients',
-        icon: ContactCardIcon,
-        label: (t) => t.nav.recipients,
-        match: 'exact',
-        group: 'contacts',
-        permissions: ['recipients.view'],
-    },
-    {
-        href: '/recipients/import/pagejaunes',
-        icon: BuildingIcon,
-        label: (t) => t.nav.pagejaunes,
-        match: 'prefix',
-        group: 'contacts',
-        permissions: ['recipients.import'],
-    },
-    {
-        href: '/recipients/import',
-        icon: PeopleIcon,
-        label: (t) => t.nav.import,
-        match: 'exact',
-        group: 'contacts',
-        permissions: ['recipients.import'],
-    },
-    {
-        href: '/suppression',
-        icon: ShieldProhibitedIcon,
-        label: (t) => t.nav.suppression,
-        match: 'exact',
-        group: 'contacts',
-        permissions: ['suppression.view'],
-    },
+    // Automatisations (phase F)
+    { href: '/automations', icon: SettingsIcon, label: (t) => t.nav.automations, match: 'prefix', group: 'automations', permissions: ['campaigns.view'], hidden: true },
 
-    // Administration — infrastructure and account config, used less often.
-    {
-        href: '/smtp',
-        icon: ServerIcon,
-        label: (t) => t.smtp.title,
-        match: 'exact',
-        group: 'administration',
-        permissions: ['smtp.view'],
-    },
-    {
-        href: '/admin/users',
-        icon: PeopleIcon,
-        label: (t) => t.nav.users,
-        match: 'prefix',
-        group: 'administration',
-        permissions: ['users.manage'],
-    },
-    {
-        href: '/settings/branding',
-        icon: SettingsIcon,
-        label: (t) => t.nav.settings,
-        match: 'prefix',
-        group: 'administration',
-        permissions: ['settings.branding_only', 'settings.manage'],
-    },
-    {
-        href: '/admin/audit-log',
-        // Reuses the Templates entry's DocumentIcon (already imported above)
-        // rather than guessing an unverified icon export name, mirroring
-        // the `/mailbox` entry's rationale above.
-        icon: DocumentIcon,
-        label: (t) => t.nav.audit,
-        match: 'exact',
-        group: 'administration',
-        permissions: ['audit.view'],
-    },
+    // Transactionnel
+    { href: '/compose', icon: MailIcon, label: (t) => t.nav.compose, match: 'exact', group: 'transactional', permissions: ['composer.compose'] },
+    // Reuses MailIcon: no npm/tsc-verified inbox icon export is available.
+    { href: '/mailbox', icon: MailIcon, label: (t) => t.nav.mailbox, match: 'exact', group: 'transactional', permissions: ['mailbox.view_own', 'mailbox.view_all'] },
+    { href: '/transactional/logs', icon: DocumentIcon, label: (t) => t.nav.transactionalLogs, match: 'prefix', group: 'transactional', permissions: ['reporting.view'], hidden: true },
+    { href: '/templates?scope=transactional', icon: DocumentIcon, label: (t) => t.nav.transactionalTemplates, match: 'exact', group: 'transactional', permissions: ['templates.view'], hidden: true },
+    { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['smtp.view'], hidden: true },
 
-    // Aide — centre de documentation, visible par tous les utilisateurs
-    // (les rubriques y sont filtrées individuellement selon les permissions).
-    {
-        href: '/help',
-        icon: QuestionCircleIcon,
-        label: (t) => t.nav.help,
-        match: 'prefix',
-        footer: true,
-    },
+    // Paramètres (account menu, top-right)
+    { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['smtp.view'], hidden: true },
+    { href: '/smtp', icon: ServerIcon, label: (t) => t.nav.smtp, match: 'exact', group: 'settings', permissions: ['smtp.view'] },
+    { href: '/settings/unsubscribe-pages', icon: ShieldProhibitedIcon, label: (t) => t.nav.unsubscribePages, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/settings/update-profile-forms', icon: DocumentIcon, label: (t) => t.nav.updateProfileForms, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/settings/tracking', icon: SettingsIcon, label: (t) => t.nav.tracking, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/settings/branding', icon: SettingsIcon, label: (t) => t.nav.branding, match: 'prefix', group: 'settings', permissions: ['settings.branding_only', 'settings.manage'] },
+    { href: '/admin/users', icon: PeopleIcon, label: (t) => t.nav.usersRoles, match: 'prefix', group: 'settings', permissions: ['users.manage'] },
+    { href: '/settings/api', icon: SettingsIcon, label: (t) => t.nav.apiKeys, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/admin/audit-log', icon: DocumentIcon, label: (t) => t.nav.audit, match: 'exact', group: 'settings', permissions: ['audit.view'] },
+    { href: '/horizon', icon: ServerIcon, label: (t) => t.nav.horizon, match: 'prefix', group: 'settings', permissions: ['queues.view'], hidden: true },
+
+    // Aide
+    { href: '/help', icon: QuestionCircleIcon, label: (t) => t.nav.help, match: 'prefix', footer: true },
 ];
