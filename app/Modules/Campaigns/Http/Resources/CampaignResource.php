@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
  * Contract values win for the two keys whose spelling changed:
  * `smtp_strategy` (`rotation`|`single`) and `send_mode` (`now`|…).
  * Rates are computed from the stats cache counters (0 until WP-70 fills them).
+ * `html_body` is only in the detail resource (list rows stay small).
  *
  * @mixin Campaign
  */
@@ -48,7 +49,6 @@ class CampaignResource extends JsonResource
             'template_id' => $this->template?->uuid,
             'subject' => $this->subject,
             'preview_text' => $this->preview_text,
-            'html_body' => $this->html_body,
             'sender' => app(ExternalReferences::class)->sender($this->sender_id),
             'editor_type' => $this->editor_type,
             'thumbnail_url' => $this->thumbnail_path !== null ? Storage::disk('public')->url($this->thumbnail_path) : null,

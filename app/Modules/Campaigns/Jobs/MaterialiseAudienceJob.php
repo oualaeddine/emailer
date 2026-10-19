@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * docs/45-brevo-api-contracts.md §45.9 — materialises a campaign's audience
- * into `campaign_recipients` (idempotent; no-op once rows exist).
+ * into `campaign_recipients` (idempotent; no-op once materialised).
  * `DispatchCampaignJob` also materialises inline on its first cycle, so this
  * job is only needed to pre-compute large audiences ahead of the send.
  */
@@ -26,7 +26,7 @@ class MaterialiseAudienceJob implements ShouldQueue
     {
         $campaign = Campaign::find($this->campaignId);
 
-        if ($campaign === null || $campaign->campaignRecipients()->exists()) {
+        if ($campaign === null || $campaign->isAudienceMaterialised()) {
             return;
         }
 

@@ -16,6 +16,7 @@ use App\Modules\Campaigns\Http\Requests\ScheduleCampaignRequest;
 use App\Modules\Campaigns\Http\Requests\StoreCampaignRequest;
 use App\Modules\Campaigns\Http\Requests\UpdateCampaignRequest;
 use App\Modules\Campaigns\Http\Resources\CampaignDetailResource;
+use App\Modules\Campaigns\Http\Resources\CampaignRecipientResource;
 use App\Modules\Campaigns\Http\Resources\CampaignResource;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Models\CampaignFolder;
@@ -23,7 +24,6 @@ use App\Modules\Campaigns\Services\CampaignService;
 use App\Modules\Campaigns\Support\ExternalReferences;
 use App\Modules\Composer\Services\MergeVariableResolver;
 use App\Modules\Recipients\Models\Recipient;
-use App\Modules\Tracking\Http\Resources\MessageResource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
@@ -355,20 +355,24 @@ class CampaignController extends Controller
     }
 
     /**
-     * §15.8 — "Recipients" tab: `messages` grid for this campaign (test sends
-     * excluded), optional `status` filter.
+     * §15.8 — "Recipients" tab: the campaign's `campaign_recipients` rows
+     * (docs/45 §45.4.2) with their message eager-loaded; `status` filters on
+     * the row status (`pending|queued|sent|skipped`). Test sends never have
+     * a row.
      */
     public function recipients(Request $request, Campaign $campaign): AnonymousResourceCollection
     {
         $this->authorize('view', $campaign);
 
-        $query = $campaign->deliveryMessages()->with(['recipient', 'smtpAccount'])->orderByDesc('id');
+        $query = $campaign->campaignRecipients()
+            ->with(['recipient' => fn ($q) => $q->withTrashed(), 'message.smtpAccount'])
+            ->orderByDesc('id');
 
         if ($request->filled('status')) {
             $query->where('status', (string) $request->query('status'));
         }
 
-        return MessageResource::collection($query->paginate(50));
+        return CampaignRecipientResource::collection($query->paginate(50));
     }
 
     /**

@@ -283,12 +283,12 @@ class CampaignLifecycleTest extends TestCase
         Bus::assertDispatched(SendEmailJob::class, 2);
     }
 
-    public function test_cancel_is_allowed_from_draft_scheduled_and_paused(): void
+    public function test_cancel_is_allowed_from_scheduled_and_paused(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
         $template = $this->createTemplate();
 
-        foreach ([CampaignStatus::Draft, CampaignStatus::Scheduled, CampaignStatus::Paused] as $fromStatus) {
+        foreach ([CampaignStatus::Scheduled, CampaignStatus::Paused] as $fromStatus) {
             $list = $this->createStaticList(1);
             $campaign = app(CampaignService::class)->create($this->draftData($template, $list), $operator);
             $campaign->update(['status' => $fromStatus->value]);
@@ -298,6 +298,15 @@ class CampaignLifecycleTest extends TestCase
             $response->assertOk();
             $response->assertJsonPath('data.status', CampaignStatus::Cancelled->value);
         }
+    }
+
+    public function test_cancel_is_rejected_from_draft_with_409(): void
+    {
+        $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
+        $campaign = app(CampaignService::class)->create($this->draftData($this->createTemplate(), $this->createStaticList(1)), $operator);
+
+        $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/cancel")->assertStatus(409);
+        $this->assertSame(CampaignStatus::Draft->value, $campaign->fresh()->status);
     }
 
     public function test_cancel_is_rejected_from_completed(): void

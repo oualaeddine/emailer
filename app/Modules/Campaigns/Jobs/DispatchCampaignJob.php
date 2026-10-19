@@ -30,10 +30,18 @@ class DispatchCampaignJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Not promoted / not readonly: payloads serialized before this property
+     * existed unserialize without it and must keep its default (null).
+     */
+    public ?string $scheduledFor = null;
+
     public function __construct(
         public readonly int $campaignId,
-        public readonly ?string $scheduledFor = null,
-    ) {}
+        ?string $scheduledFor = null,
+    ) {
+        $this->scheduledFor = $scheduledFor;
+    }
 
     public function handle(CampaignService $campaigns): void
     {
@@ -61,12 +69,12 @@ class DispatchCampaignJob implements ShouldQueue
 
     private function isStale(Campaign $campaign): bool
     {
-        if ($this->scheduledFor === null) {
+        if (! isset($this->scheduledFor)) {
             return false;
         }
 
         return $campaign->status !== CampaignStatus::Scheduled->value
             || $campaign->scheduled_at === null
-            || ! $campaign->scheduled_at->equalTo(Carbon::parse($this->scheduledFor));
+            || $campaign->scheduled_at->timestamp !== Carbon::parse($this->scheduledFor)->timestamp;
     }
 }

@@ -191,6 +191,21 @@ class ReportingTest extends TestCase
         $response->assertJsonFragment(['campaign_name' => 'Campagne X', 'sent' => 2, 'delivered' => 1, 'bounced' => 1]);
     }
 
+    public function test_test_messages_are_excluded_from_reports(): void
+    {
+        $manager = User::factory()->withRole(RoleName::MarketingManager)->create();
+        $campaign = $this->createCampaign('Campagne T');
+
+        $this->createMessage($this->messageAttributes($campaign, null, MessageStatus::Delivered));
+        $this->createMessage(array_merge($this->messageAttributes($campaign, null, MessageStatus::Opened), ['is_test' => true]));
+
+        $this->actingAs($manager)->getJson('/api/v1/reporting/summary')
+            ->assertOk()->assertJsonPath('sent', 1)->assertJsonPath('unique_opens', 0);
+
+        $this->actingAs($manager)->getJson('/api/v1/reporting/campaigns')
+            ->assertOk()->assertJsonFragment(['campaign_name' => 'Campagne T', 'sent' => 1, 'unique_opens' => 0]);
+    }
+
     public function test_smtp_account_breakdown_endpoint_returns_per_account_rows(): void
     {
         $manager = User::factory()->withRole(RoleName::MarketingManager)->create();

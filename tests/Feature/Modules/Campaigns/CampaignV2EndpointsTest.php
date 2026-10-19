@@ -192,7 +192,9 @@ class CampaignV2EndpointsTest extends TestCase
         $user = $this->operator();
 
         foreach (['scheduled' => 200, 'suspended' => 200, 'completed' => 409, 'running' => 409] as $status => $code) {
-            $campaign = Campaign::factory()->create(['created_by' => $user->id, 'status' => $status]);
+            // Ready campaign: edits of scheduled / suspended ones re-assert the checklist.
+            $campaign = $this->campaignWithAudience($user, ['lists' => [$this->listWith($this->recipients(1))->id]]);
+            $campaign->update(['status' => $status]);
             $this->actingAs($user)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['name' => 'X'])->assertStatus($code);
         }
 

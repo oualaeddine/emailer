@@ -66,26 +66,33 @@ class AudienceResolver implements AudienceResolverContract
                 : $now->copy();
         }
 
-        foreach (array_chunk($ids, self::CHUNK, true) as $chunk) {
-            $rows = [];
-            foreach ($chunk as $index => $recipientId) {
-                $rows[] = [
-                    'campaign_id' => $campaign->id,
-                    'recipient_id' => $recipientId,
-                    'status' => CampaignRecipientStatus::Pending->value,
-                    'scheduled_for' => $batching
-                        ? $batchStart->copy()->addMinutes(intdiv($index, $batchSize) * $interval)
-                        : null,
-                    'materialised_at' => $now,
-                ];
+        // One transaction: a worker killed mid-way leaves no partial
+        // materialisation; `recipients_count` (the completion marker, see
+        // Campaign::isAudienceMaterialised()) is written last.
+        $count = DB::transaction(function () use ($campaign, $ids, $batching, $batchStart, $batchSize, $interval, $now): int {
+            foreach (array_chunk($ids, self::CHUNK, true) as $chunk) {
+                $rows = [];
+                foreach ($chunk as $index => $recipientId) {
+                    $rows[] = [
+                        'campaign_id' => $campaign->id,
+                        'recipient_id' => $recipientId,
+                        'status' => CampaignRecipientStatus::Pending->value,
+                        'scheduled_for' => $batching
+                            ? $batchStart->copy()->addMinutes(intdiv($index, $batchSize) * $interval)
+                            : null,
+                        'materialised_at' => $now,
+                    ];
+                }
+                CampaignRecipient::query()->insertOrIgnore($rows);
             }
-            CampaignRecipient::query()->insertOrIgnore($rows);
-        }
 
-        $this->linkAlreadyDispatchedMessages($campaign);
+            $this->linkAlreadyDispatchedMessages($campaign);
 
-        $count = CampaignRecipient::query()->where('campaign_id', $campaign->id)->count();
-        $campaign->forceFill(['recipients_count' => $count])->save();
+            $count = CampaignRecipient::query()->where('campaign_id', $campaign->id)->count();
+            $campaign->forceFill(['recipients_count' => $count])->save();
+
+            return $count;
+        });
 
         AudienceMaterialised::dispatch($campaign->id, $count);
 
@@ -294,8 +301,8 @@ class AudienceResolver implements AudienceResolverContract
     }
 
     /**
-     * Recipients suppressed by status or by a suppression entry on their email
-     * (docs/23-suppression-list.md §23.6).
+     * Recipients suppressed or invalid by status, or by a suppression entry on
+     * their email (docs/23-suppression-list.md §23.6).
      *
      * @param  list<int>  $ids
      * @return list<int>
@@ -308,7 +315,8 @@ class AudienceResolver implements AudienceResolverContract
             $found = Recipient::query()
                 ->whereIn('id', $chunk)
                 ->where(function ($q): void {
-                    $q->where('status', RecipientStatus::Suppressed->value)
+                    // `invalid`: undeliverable (docs/22) or test-send-only addresses.
+                    $q->whereIn('status', [RecipientStatus::Suppressed->value, RecipientStatus::Invalid->value])
                         ->orWhereIn('email', SuppressionEntry::query()->select('email'));
                 })
                 ->pluck('id')
