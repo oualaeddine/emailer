@@ -8,6 +8,8 @@ use App\Modules\DeliveryEngine\Services\SmtpManagerService;
 use App\Modules\DeliveryEngine\Services\SymfonySmtpConnectionTester;
 use App\Modules\Verification\Services\NullVerificationProvider;
 use App\Modules\Verification\Services\VerificationProviderContract;
+use App\Modules\Senders\Contracts\DnsResolverContract;
+use App\Modules\Senders\Support\SystemDnsResolver;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -38,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
         // integrated/configured in this codebase yet); tests bind a fake
         // implementation instead (docs/32-testing.md §32.4).
         $this->app->bind(VerificationProviderContract::class, NullVerificationProvider::class);
+
+        // docs/45 §45.9 — DNS lookups for sending-domain verification (WP-41); tests bind FakeDnsResolver.
+        $this->app->bind(DnsResolverContract::class, SystemDnsResolver::class);
     }
 
     /**
