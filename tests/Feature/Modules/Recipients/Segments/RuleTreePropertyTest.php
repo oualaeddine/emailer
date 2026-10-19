@@ -38,6 +38,7 @@ class RuleTreePropertyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->defineSegmentAttributes();
         Carbon::setTestNow(Carbon::parse('2026-03-01 08:00:00', 'UTC'));
         mt_srand(self::SEED);
         $this->seedContacts();

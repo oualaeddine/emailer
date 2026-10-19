@@ -40,6 +40,7 @@ class RuleTreeOperatorsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->defineSegmentAttributes();
         Carbon::setTestNow(Carbon::parse('2026-05-12 10:00:00', 'UTC'));
         $this->seedFixture();
     }

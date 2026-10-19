@@ -5,6 +5,7 @@ namespace Tests\Feature\Modules\Recipients\Views;
 use App\Domain\Enums\RoleName;
 use App\Modules\Audit\Models\AuditLog;
 use App\Modules\Identity\Models\User;
+use App\Modules\Recipients\Attributes\Models\ContactAttribute;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Recipients\Views\Contracts\RuleTreeCompilerName;
@@ -106,11 +107,22 @@ class ContactViewsTest extends TestCase
             ->assertOk()->assertJsonPath('data.0.email', 'out@x.dz');
     }
 
-    public function test_filters_without_compiler_return_422(): void
+    public function test_filters_use_the_real_compiler_end_to_end(): void
     {
+        ContactAttribute::factory()->create(['name' => 'VILLE']);
+        Recipient::factory()->create(['email' => 'in@x.dz', 'custom_fields' => ['VILLE' => 'oran']]);
+        Recipient::factory()->create(['email' => 'out@x.dz', 'custom_fields' => ['VILLE' => 'alger']]);
+
         $filters = urlencode(json_encode($this->tree('attribute.VILLE', 'oran')));
         $this->actingAs($this->manager)->getJson("/api/v1/recipients?pagination=cursor&filters=$filters")
-            ->assertStatus(422)->assertJsonValidationErrors('filters');
+            ->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.email', 'in@x.dz');
+    }
+
+    public function test_invalid_filter_tree_returns_422(): void
+    {
+        $filters = urlencode(json_encode($this->tree('attribute.UNDEFINED_ATTR', 'oran')));
+        $this->actingAs($this->manager)->getJson("/api/v1/recipients?pagination=cursor&filters=$filters")
+            ->assertStatus(422)->assertJsonValidationErrors('rules.children.0.field');
     }
 
     public function test_legacy_index_is_unchanged(): void
