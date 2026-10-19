@@ -26,6 +26,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $error_count
  * @property array<string, mixed>|null $column_mapping
  * @property int|null $target_recipient_list_id
+ * @property list<array<string, mixed>>|null $mapping
+ * @property list<string>|null $list_ids
+ * @property array<string, mixed>|null $new_list
+ * @property bool $update_existing
+ * @property bool $empty_values_overwrite
+ * @property bool $mark_blocklisted
+ * @property bool $mark_opt_in
+ * @property array<string, int>|null $summary
+ * @property int|null $created_list_id
  */
 class ImportJob extends Model
 {
@@ -44,6 +53,15 @@ class ImportJob extends Model
         'error_count',
         'column_mapping',
         'target_recipient_list_id',
+        'mapping',
+        'list_ids',
+        'new_list',
+        'update_existing',
+        'empty_values_overwrite',
+        'mark_blocklisted',
+        'mark_opt_in',
+        'summary',
+        'created_list_id',
         'started_at',
         'completed_at',
     ];
@@ -52,9 +70,23 @@ class ImportJob extends Model
     {
         return [
             'column_mapping' => 'array',
+            'mapping' => 'array',
+            'list_ids' => 'array',
+            'new_list' => 'array',
+            'update_existing' => 'boolean',
+            'empty_values_overwrite' => 'boolean',
+            'mark_blocklisted' => 'boolean',
+            'mark_opt_in' => 'boolean',
+            'summary' => 'array',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
+    }
+
+    /** True once the Brevo-style wizard mapping (§45.5.7) has been saved. */
+    public function isWizardJob(): bool
+    {
+        return $this->mapping !== null;
     }
 
     public function getRouteKeyName(): string

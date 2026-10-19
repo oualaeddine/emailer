@@ -104,6 +104,7 @@ with exclusions, from a verified sender, from the new Setup page.
 | **WP-55** Import wizard + history | `import_jobs` columns `mapping`, `list_ids`, `update_existing`, `summary` (slot H); mapping applied in the existing row pipeline; `Contacts/ImportWizard.tsx` five steps (Fichier incl. PagesJaunes tab reusing `PageJaunesSearch`, Correspondance with inline *Créer un attribut*, Listes, Paramètres, Lancer); `Contacts/Imports.tsx` history with errors CSV. | doc 43 §43.4.12; `app/Modules/Importing/**` | `app/Modules/Importing/**` (additive), migrations slot H, `resources/js/Pages/Contacts/{ImportWizard,Imports}.tsx`, tests | `Pages/Recipients/Import.tsx` | **Sonnet** |
 | **WP-56** Blocklist move | `Contacts/Blocklist.tsx` with tabs *Contacts en liste noire* / *Rebonds*, *Réactiver* action; reuses suppression API; `recipients.blocklisted_at` mirror kept in sync by suppression events (slot I). | doc 43 §43.4.13 | `resources/js/Pages/Contacts/Blocklist.tsx`, `app/Modules/Suppression/Listeners/**`, migrations slot I, tests | `Pages/Suppression/Index.tsx` | **Sonnet** |
 | **WP-57** Views + export backend | `contact_views` (slot J) CRUD; `GET recipients` gains `filters` (same rule tree as segments, compiled by WP-54's service — read-only dependency on its *contract*, stubbed in tests), `columns`, `sort`, cursor pagination; `ExportContactsJob` → CSV/XLSX via openspout with signed download link; bulk endpoints (add/remove list, blocklist, update attribute, delete). | doc 43 §43.4.6 | `app/Modules/Recipients/Views/**`, `app/Modules/Recipients/Http/Controllers/{RecipientBulkController,ContactViewController,ContactExportController}.php`, `RecipientController@index` (owned this wave), migrations slot J, tests | `AuditLogController` (export pattern) | **Sonnet** |
+| **WP-50U** Attributes page (added by the orchestrator at the Wave 2 gate: doc 43 §43.4.10 specifies a page but WP-50 was backend-only) | `Contacts/Attributes.tsx`: table of definitions (name, type, used in N contacts, created), *Créer un attribut* dialog (name rules, 7 types, options), edit label/options, delete with confirm (409 handling), system attributes read-only. | doc 43 §43.4.10; doc 45 §45.5.1 | `resources/js/Pages/Contacts/Attributes.tsx`, `resources/js/Components/Attributes/**`, `Lib/api/attributes.ts`, `routes/web/attributes.php` | `Pages/Smtp/Index.tsx` | **Sonnet** |
 
 Exit criteria (doc 43 Phase B): a user imports a file mapped to typed attributes into a list,
 filters contacts with the builder, saves a segment, opens a contact's timeline.
@@ -254,7 +255,7 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 |---|---|---|
 | 0 | 40, 40N | ✅ merged (brevo/wave-0 → brevo/main); gate green locally (CI unavailable: GitHub billing lock); review findings fixed — see [47](47-orchestration-log.md) |
 | 1 | 41, 41U, 42, 43, 44, 45, 60S | ✅ merged; gate green locally; review: 3 blocking + 15 should-fix + 8 nits fixed; GrapesJS **GO** per [46](46-editor-spike.md) |
-| 2 | 50, 51, 52, 53, 54, 54U, 55, 56, 57 | ⬜ |
+| 2 | 50, 50U, 51, 52, 53, 54, 54U, 55, 56, 57 | ✅ merged; gate green locally; review: 5 blocking + 16 should-fix + 11 nits fixed |
 | 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ⬜ |
 | 4 | 61, 80, 81, 90, 90U, 91, 91U, 100, 101, 102 | ⬜ |
 

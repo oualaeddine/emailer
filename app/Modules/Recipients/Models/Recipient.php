@@ -2,6 +2,8 @@
 
 namespace App\Modules\Recipients\Models;
 
+use App\Domain\Enums\RecipientStatus;
+use App\Modules\Identity\Models\User;
 use App\Modules\PageJaunesIntegration\Models\PageJaunesCompanyCache;
 use App\Support\Concerns\HasUuid;
 use Database\Factories\RecipientFactory;
@@ -11,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * docs/04-database-design.md §4.5 — `recipients`.
@@ -44,6 +48,42 @@ class Recipient extends Model
         'last_contacted_at',
     ];
 
+    /** @var array<string, bool> connection => recipients.blocklisted_at exists */
+    private static array $hasBlocklistedAt = [];
+
+    /**
+     * docs/45 §45.8 Slot I — a contact created for an address that already
+     * has a suppression entry starts blocklisted (`blocklisted_at` mirror +
+     * `status = suppressed`): the SyncRecipientBlocklist listener only runs
+     * when the entry itself is created.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Recipient $recipient): void {
+            $email = $recipient->getAttribute('email');
+            if (! is_string($email) || $email === '') {
+                return;
+            }
+
+            $entry = DB::table('suppression_entries')->where('email', $email)->first(['created_at']);
+            if ($entry === null) {
+                return;
+            }
+
+            $recipient->setAttribute('status', RecipientStatus::Suppressed->value);
+            if ($recipient->getAttribute('blocklisted_at') === null && self::hasBlocklistedAtColumn($recipient)) {
+                $recipient->setAttribute('blocklisted_at', $entry->created_at ?? now());
+            }
+        });
+    }
+
+    private static function hasBlocklistedAtColumn(Recipient $recipient): bool
+    {
+        $connection = (string) $recipient->getConnectionName() ?: 'default';
+
+        return self::$hasBlocklistedAt[$connection] ??= Schema::connection($recipient->getConnectionName())->hasColumn('recipients', 'blocklisted_at');
+    }
+
     protected function casts(): array
     {
         return [
@@ -63,6 +103,16 @@ class Recipient extends Model
     public function pageJaunesCompany(): BelongsTo
     {
         return $this->belongsTo(PageJaunesCompanyCache::class, 'pagejaunes_company_cache_id');
+    }
+
+    /**
+     * `recipients.created_by` (docs/45 §45.8 Slot J).
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**

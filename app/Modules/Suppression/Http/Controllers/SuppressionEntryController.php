@@ -5,6 +5,7 @@ namespace App\Modules\Suppression\Http\Controllers;
 use App\Domain\Enums\SuppressionReason;
 use App\Http\Controllers\Controller;
 use App\Modules\Suppression\Http\Requests\DestroySuppressionEntryRequest;
+use App\Modules\Suppression\Http\Requests\IndexSuppressionEntriesRequest;
 use App\Modules\Suppression\Http\Requests\StoreSuppressionEntryRequest;
 use App\Modules\Suppression\Http\Resources\SuppressionEntryResource;
 use App\Modules\Suppression\Models\SuppressionEntry;
@@ -24,12 +25,15 @@ class SuppressionEntryController extends Controller
     {
     }
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(IndexSuppressionEntriesRequest $request): AnonymousResourceCollection
     {
         $this->authorize('viewAny', SuppressionEntry::class);
 
         return SuppressionEntryResource::collection(
-            $this->suppressionEntries->paginate($request->only(['reason', 'q'])),
+            $this->suppressionEntries->paginate(
+                $request->safe()->only(['reason', 'q', 'sort']),
+                (int) ($request->validated('per_page') ?? 25),
+            ),
         );
     }
 

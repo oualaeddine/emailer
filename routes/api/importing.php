@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('import-jobs', [ImportJobController::class, 'index']);
 Route::post('import-jobs', [ImportJobController::class, 'store']);
+Route::get('import-jobs/{uuid}', [ImportJobController::class, 'show']);
+Route::get('import-jobs/{uuid}/preview', [ImportJobController::class, 'preview']);
+Route::put('import-jobs/{uuid}/settings', [ImportJobController::class, 'updateSettings']);
+Route::get('import-jobs/{uuid}/errors.csv', [ImportJobController::class, 'errorsCsv'])->name('import-jobs.errors');
 Route::put('import-jobs/{uuid}/mapping', [ImportJobController::class, 'updateMapping']);
 Route::get('import-jobs/{uuid}/rows', [ImportJobController::class, 'rows']);
 Route::post('import-jobs/{uuid}/commit', [ImportJobController::class, 'commit']);

@@ -108,10 +108,10 @@ export const navItems: NavItem[] = [
 
     // Contacts
     { href: '/contacts', icon: ContactCardIcon, label: (t) => t.nav.contacts, match: 'exact', group: 'contacts', permissions: ['recipients.view'] },
-    { href: '/contacts/lists', icon: PeopleIcon, label: (t) => t.nav.lists, match: 'prefix', group: 'contacts', permissions: ['recipients.view'], hidden: true },
-    { href: '/contacts/segments', icon: PeopleIcon, label: (t) => t.nav.segments, match: 'prefix', group: 'contacts', permissions: ['recipients.view', 'segments.manage'], hidden: true },
+    { href: '/contacts/lists', icon: PeopleIcon, label: (t) => t.nav.lists, match: 'prefix', group: 'contacts', permissions: ['recipients.view'] },
+    { href: '/contacts/segments', icon: PeopleIcon, label: (t) => t.nav.segments, match: 'prefix', group: 'contacts', permissions: ['recipients.view', 'segments.manage'] },
     { href: '/contacts/pagejaunes', icon: BuildingIcon, label: (t) => t.nav.pagejaunesCompanies, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
-    { href: '/contacts/attributes', icon: DocumentIcon, label: (t) => t.nav.attributes, match: 'prefix', group: 'contacts', permissions: ['recipients.manage'], hidden: true },
+    { href: '/contacts/attributes', icon: DocumentIcon, label: (t) => t.nav.attributes, match: 'prefix', group: 'contacts', permissions: ['recipients.manage'] },
     // Wizard entry; the import-history page (/contacts/imports) is reached from it.
     { href: '/contacts/imports/new', icon: PeopleIcon, label: (t) => t.nav.imports, match: 'prefix', group: 'contacts', permissions: ['recipients.import'] },
     { href: '/contacts/blocklist', icon: ShieldProhibitedIcon, label: (t) => t.nav.blocklist, match: 'exact', group: 'contacts', permissions: ['suppression.view'] },

@@ -39,13 +39,8 @@ Route::get('contacts/pagejaunes', fn () => Inertia::render('Recipients/PageJaune
     ->middleware('can:recipients.import')
     ->name('recipients.import.pagejaunes');
 
-Route::get('contacts', fn () => Inertia::render('Recipients/Index'))
-    ->middleware('can:recipients.view')
-    ->name('recipients.index');
-
-Route::get('contacts/imports/new', fn () => Inertia::render('Recipients/Import'))
-    ->middleware('can:recipients.import')
-    ->name('recipients.import');
+// docs/47 — `/contacts` and `/contacts/imports/new` are served by routes/web/contacts.php
+// and routes/web/imports.php since Wave 2 (Contacts/Index, Contacts/ImportWizard).
 
 Route::get('compose', fn () => Inertia::render('Composer/Index'))
     ->middleware('can:composer.compose')
@@ -75,3 +70,10 @@ require __DIR__.'/reporting.php';
 require __DIR__.'/help.php';
 require __DIR__.'/senders.php';
 require __DIR__.'/lab.php';
+require __DIR__.'/lists.php';
+require __DIR__.'/imports.php';
+require __DIR__.'/blocklist.php';
+require __DIR__.'/contact-detail.php';
+require __DIR__.'/segments.php';
+require __DIR__.'/contacts.php';
+require __DIR__.'/attributes.php';

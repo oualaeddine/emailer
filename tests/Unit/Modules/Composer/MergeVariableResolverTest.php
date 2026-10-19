@@ -3,6 +3,7 @@
 namespace Tests\Unit\Modules\Composer;
 
 use App\Modules\Composer\Services\MergeVariableResolver;
+use App\Modules\Recipients\Attributes\Models\ContactAttribute;
 use App\Modules\Recipients\Models\Recipient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -76,6 +77,48 @@ class MergeVariableResolverTest extends TestCase
             $recipient,
         );
 
-        $this->assertSame('Amine Benali <a@b.dz> Acme x ', $result);
+        $this->assertSame('Amine Benali <a@b.dz> Acme x', $result);
+    }
+
+    public function test_it_supports_the_default_filter(): void
+    {
+        $recipient = Recipient::factory()->make(['first_name' => null]);
+        $resolver = new MergeVariableResolver;
+
+        $this->assertSame('Bonjour cher client', $resolver->resolve('Bonjour {{ contact.PRENOM | default:"cher client" }}', $recipient));
+        $this->assertSame('Bonjour ami', $resolver->resolve("Bonjour {{ contact.PRENOM|default:'ami' }}", $recipient));
+        $this->assertSame('Amine', $resolver->resolve('{{ contact.PRENOM | default:"x" }}', Recipient::factory()->make(['first_name' => 'Amine'])));
+    }
+
+    public function test_it_resolves_every_attribute_definition_by_type(): void
+    {
+        $opts = [['value' => 'alger', 'label' => 'Alger'], ['value' => 'oran', 'label' => 'Oran']];
+        ContactAttribute::factory()->ofType('category', $opts)->create(['name' => 'VILLE']);
+        ContactAttribute::factory()->ofType('multiple_choice', $opts)->create(['name' => 'ZONES']);
+        ContactAttribute::factory()->ofType('boolean')->create(['name' => 'VIP']);
+        ContactAttribute::factory()->ofType('date')->create(['name' => 'NAISSANCE']);
+        ContactAttribute::factory()->ofType('number')->create(['name' => 'AGE']);
+
+        $recipient = Recipient::factory()->make([
+            'first_name' => 'Amine',
+            'custom_fields' => [
+                'VILLE' => 'oran', 'ZONES' => ['alger', 'oran'], 'VIP' => true, 'NAISSANCE' => '1990-02-03', 'AGE' => 34,
+            ],
+        ]);
+
+        $result = (new MergeVariableResolver)->resolve(
+            '{{ contact.ville }}|{{ contact.ZONES }}|{{ contact.VIP }}|{{ contact.naissance }}|{{ contact.AGE }}|{{ contact.PRENOM }}|{{ contact.MISSING | default:"-" }}',
+            $recipient,
+        );
+
+        $this->assertSame('Oran|Alger, Oran|Oui|03/02/1990|34|Amine|-', $result);
+    }
+
+    public function test_it_resolves_the_unsubscribe_alias_and_spaced_filters_in_extraction(): void
+    {
+        $resolver = new MergeVariableResolver;
+
+        $this->assertSame('https://u', $resolver->resolve('{{ unsubscribe }}', Recipient::factory()->make(), 'https://u'));
+        $this->assertSame(['contact.PRENOM'], $resolver->extractVariableNames('{{ contact.PRENOM | default:"x" }}'));
     }
 }
