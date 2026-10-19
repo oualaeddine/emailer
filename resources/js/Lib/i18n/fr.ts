@@ -306,6 +306,13 @@ export const fr = {
         // Existing keys above are unchanged.
         importContacts: 'Importer des contacts',
         wizard: {
+            // Added at the Wave 2 gate (WP-55 report).
+            sampleValues: 'Exemples',
+            summaryCreated: 'Contacts créés',
+            summaryBlocklisted: 'Mis en liste noire',
+            summaryAddedToLists: 'Ajouts aux listes',
+            importing: 'Import en cours…',
+            contactsCount: 'contact(s) avec e-mail',
             title: 'Importer des contacts',
             steps: {
                 file: 'Fichier',

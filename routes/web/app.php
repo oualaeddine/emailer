@@ -39,13 +39,8 @@ Route::get('contacts/pagejaunes', fn () => Inertia::render('Recipients/PageJaune
     ->middleware('can:recipients.import')
     ->name('recipients.import.pagejaunes');
 
-Route::get('contacts', fn () => Inertia::render('Recipients/Index'))
-    ->middleware('can:recipients.view')
-    ->name('recipients.index');
-
-Route::get('contacts/imports/new', fn () => Inertia::render('Recipients/Import'))
-    ->middleware('can:recipients.import')
-    ->name('recipients.import');
+// docs/47 — `/contacts` and `/contacts/imports/new` are served by routes/web/contacts.php
+// and routes/web/imports.php since Wave 2 (Contacts/Index, Contacts/ImportWizard).
 
 Route::get('compose', fn () => Inertia::render('Composer/Index'))
     ->middleware('can:composer.compose')

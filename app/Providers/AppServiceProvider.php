@@ -56,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(\App\Modules\Campaigns\Support\ExternalReferences::class);
         // docs/45-brevo-api-contracts.md §45.9 — WP-54 rule-tree compiler (SegmentCompilerContract resolves via #[Bind]).
         $this->app->bind(\App\Modules\Recipients\Segments\Contracts\RuleTreeCompiler::class, \App\Modules\Recipients\Segments\Services\RuleTreeCompiler::class);
+        // docs/45 §45.3 — WP-57 async operations store (bound at the Wave 2 gate).
+        $this->app->bind(\App\Modules\Recipients\Views\Contracts\AsyncOperations::class, \App\Modules\Recipients\Views\Services\AsyncOperationService::class);
     }
 
     /**
