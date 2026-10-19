@@ -69,3 +69,8 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 1 | fix-A | opus | Returned; B2, B3, S1–S4 (campaign side), S9–S11, S13, S15, N2–N4, N8 fixed; 110 tests green in its worktree | 24f6123 |
 | 2026-10-19 | 1 | merge | — | Merged fix-A (f6f24c1) and fix-B (b1be3ae); orchestrator applied the S9 follow-up (`Message::recipient()->withTrashed()`); tsc + build green; final full suite running | running |
 | 2026-10-19 | 1 | gate | — | Final full suite on brevo/wave-1 (after review fixes): **385 passed, 0 failed**; migrate:fresh --seed green; tsc + build green | green |
+| 2026-10-19 | 1 | PR | — | PR #15 brevo/wave-1 → brevo/main opened, ready, merged (local gate; CI billing-locked) | 609cc12 |
+| 2026-10-19 | 2 | — | — | Cut `brevo/wave-2`; 9 worktrees `wp-{50,51,52,53,54,54u,55,56,57}` with the per-worktree vendor/runner setup; DBs `brevo_wpXX`; Wave 1 worktrees removed | ready |
+| 2026-10-19 | 2 | — | — | **Decisions:** (1) new Inertia pages register in a NEW `routes/web/<wp>.php` (one `require` appended to app.php); superseded legacy page routes (`/contacts`, `/contacts/imports/new`, `/contacts/blocklist`) are removed by the orchestrator at the gate; (2) API: WP-53 owns `routes/api/lists.php` (all `recipient-lists` routes), WP-54 owns `routes/api/segments.php` (all `segments` routes), WP-57 owns `routes/api/recipients.php` but edits only `recipients*` lines; legacy list/segment lines in recipients.php removed by the orchestrator at the gate; (3) `RecipientSource::TestSend` deferred to a later contract-fix | applied |
+| 2026-10-19 | 2 | 50, 52, 53, 55, 56, 57 | sonnet/medium | Launched | running |
+| 2026-10-19 | 2 | 51, 54, 54U | opus/high | Launched | running |
