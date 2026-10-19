@@ -892,6 +892,20 @@ No new endpoint. `Contacts/Blocklist` tabs:
 (`{id, name}`|null) — added by the suppression resource when available, UI renders "—" otherwise.
 WP-56's listener keeps `recipients.blocklisted_at` in sync on suppression create/delete.
 
+### 45.5.9 Additions recorded at the Wave 2 gate (orchestrator)
+
+Routes delivered by Wave 2 that the tables above did not list, kept as the contract:
+
+| Method | Path | Permission | Notes |
+|---|---|---|---|
+| GET | `/segments/fields` | `recipients.view` | `{data: FieldCatalog}` (optional `?category=`); the ConditionBuilder's catalog source (WP-54). |
+| GET | `/exports/{operation}/download` | signed URL (no session) | Contact export download (WP-57). Replaces `web:/exports/{operation}/download`; 410 after expiry. |
+| POST | `/recipient-lists/{id}/export` | `contacts.export` | List export → `AsyncOperation` (WP-53). |
+| GET | `/recipient-lists/exports/{operation}/download` | signed URL | List export download (WP-53). |
+| GET | `/recipient-lists/operations/{operation}` | creator | Status of a list export/delete/bulk operation (WP-53's cache-based store; to be unified with `/operations/{id}` of WP-57 in a later contract-fix). |
+
+Other deviations recorded: `POST /segments/count` is always synchronous (no 202 fallback yet); conditions may carry an optional `field_type`; `recipients.custom_fields` validation errors are keyed `attributes.NAME`; audit actions `segment.*`, `list.*`, `list_folder.*`, `attribute.*`, `contacts.bulk_*` added to §45.9's list; `RecipientBlocklistChanged` lives in `App\Modules\Suppression\Listeners`.
+
 ## 45.6 Wave 3 — Design & reports
 
 ### 45.6.1 WP-60 EmailBuilder core (`Lib/types/editor.ts`)
