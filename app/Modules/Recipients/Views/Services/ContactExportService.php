@@ -65,7 +65,7 @@ class ContactExportService
 
             $writer = $format === 'xlsx' ? new XlsxWriter : new CsvWriter(new CsvOptions(FIELD_DELIMITER: ';'));
             $writer->openToFile($absolute);
-            $writer->addRow(Row::fromValues(array_map(fn (string $k) => ContactColumns::label($k), $columns)));
+            $writer->addRow(Row::fromValues(array_map(fn (string $k) => self::neutralizeFormula(ContactColumns::label($k)), $columns)));
 
             $with = ['tags'];
             if (in_array('lists', $columns, true)) {
@@ -109,12 +109,25 @@ class ContactExportService
         return array_map(function (string $key) use ($recipient) {
             $value = ContactColumns::value($recipient, $key);
 
-            return match (true) {
+            return self::neutralizeFormula(match (true) {
                 is_array($value) => implode(', ', array_map(fn ($v) => is_scalar($v) ? (string) $v : json_encode($v), $value)),
                 is_bool($value) => $value ? 'oui' : 'non',
                 $value === null, is_scalar($value) => $value,
                 default => json_encode($value),
-            };
+            });
         }, $columns);
+    }
+
+    /**
+     * CSV/XLSX formula injection: a text cell starting with `=`, `+`, `-`,
+     * `@`, tab or CR is prefixed with `'` so spreadsheets show it as text.
+     */
+    public static function neutralizeFormula(mixed $value): mixed
+    {
+        if (is_string($value) && $value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 }

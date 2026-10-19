@@ -2,16 +2,21 @@
 
 namespace App\Modules\Recipients\Views\Support;
 
+use App\Modules\Recipients\Attributes\Support\AttributeStorageMap;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Recipients\Segments\Services\RuleTreeCompiler;
+use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 /**
  * docs/45 §45.5.4 — column / sort whitelist for the contacts table.
  *
- * Keys: `attribute.NAME` (system attributes map to base columns, any other
- * name is read from the `custom_fields` JSON column), `contact.<column>`
- * (whitelisted base columns), `lists`, `tags`.
+ * Keys: `attribute.NAME` (attributes stored in a column — system ones,
+ * EXT_ID → `ext_id` — map to that column, any other name is read from the
+ * `custom_fields` JSON column), `contact.<column>` (whitelisted base
+ * columns), `contact.blocklisted` (computed, not sortable), `lists`, `tags`.
  */
 final class ContactColumns
 {
@@ -31,6 +36,9 @@ final class ContactColumns
         'opt_in_at', 'blocklisted_at', 'engagement_score', 'status', 'source', 'ext_id', 'opt_in_source',
     ];
 
+    /** `contact.<key>` computed from other columns (displayable, not sortable). */
+    public const COMPUTED_COLUMNS = ['blocklisted'];
+
     private const DATE_COLUMNS = [
         'created_at', 'updated_at', 'last_contacted_at', 'last_opened_at', 'last_clicked_at', 'opt_in_at', 'blocklisted_at',
     ];
@@ -40,6 +48,7 @@ final class ContactColumns
         'attribute.SOCIETE' => 'Société', 'contact.created_at' => 'Créé le', 'contact.updated_at' => 'Modifié le',
         'contact.status' => 'Statut', 'contact.source' => 'Source', 'lists' => 'Listes', 'tags' => 'Étiquettes',
         'contact.last_contacted_at' => 'Dernier contact', 'contact.blocklisted_at' => 'Mis en liste noire le',
+        'contact.blocklisted' => 'En liste noire',
     ];
 
     /** @var list<string>|null */
@@ -80,11 +89,15 @@ final class ContactColumns
         if (preg_match('/^attribute\.([A-Za-z0-9_]{1,50})$/', $key, $m) === 1) {
             $name = strtoupper($m[1]);
 
-            return ['kind' => 'attribute', 'name' => $name, 'column' => self::SYSTEM_ATTRIBUTES[$name] ?? null];
+            return ['kind' => 'attribute', 'name' => $name, 'column' => app(AttributeStorageMap::class)->column($name)];
         }
 
         if (str_starts_with($key, 'contact.')) {
             $name = substr($key, 8);
+
+            if (in_array($name, self::COMPUTED_COLUMNS, true)) {
+                return ['kind' => 'computed', 'name' => $name, 'column' => null];
+            }
 
             if (in_array($name, self::CONTACT_COLUMNS, true) && self::hasRecipientColumn($name)) {
                 return ['kind' => 'contact', 'name' => $name, 'column' => $name];
@@ -137,7 +150,7 @@ final class ContactColumns
     /**
      * `-contact.created_at` → [orderBy expression, 'desc'].
      *
-     * @return array{0: string, 1: 'asc'|'desc'}
+     * @return array{0: string|Expression, 1: 'asc'|'desc'}
      */
     public static function sortExpression(string $sort): array
     {
@@ -145,16 +158,28 @@ final class ContactColumns
         $key = ltrim($sort, '-+ ');
         $parsed = in_array($key, ['lists', 'tags'], true) ? null : self::parse($key);
 
-        if ($parsed === null) {
+        if ($parsed === null || $parsed['kind'] === 'computed') {
             throw ValidationException::withMessages(['sort' => ["Tri non autorisé : {$sort}"]]);
         }
 
-        $expression = match (true) {
-            $parsed['column'] !== null => 'recipients.'.$parsed['column'],
-            default => 'custom_fields->'.$parsed['name'],
-        };
+        if ($parsed['column'] !== null) {
+            return ['recipients.'.$parsed['column'], $direction];
+        }
 
-        return [$expression, $direction];
+        $json = 'custom_fields->'.$parsed['name'];
+        $type = app(AttributeStorageMap::class)->type($parsed['name']);
+        if (! in_array($type, ['number', 'date'], true)) {
+            return [$json, $direction];
+        }
+
+        // Typed attributes sort by value, not by their JSON text (same casts as the segment compiler).
+        $connection = DB::connection();
+        $extracted = $connection->getQueryGrammar()->wrap('recipients.'.$json);
+        $cast = $type === 'number'
+            ? RuleTreeCompiler::numberCast($connection->getDriverName(), $extracted)
+            : RuleTreeCompiler::dateCast($extracted);
+
+        return [new Expression($cast), $direction];
     }
 
     /**
@@ -174,6 +199,10 @@ final class ContactColumns
 
         if ($parsed['kind'] === 'lists') {
             return $recipient->recipientLists->pluck('name')->all();
+        }
+
+        if ($parsed['kind'] === 'computed') {
+            return $recipient->getAttribute('blocklisted_at') !== null || $recipient->status === 'suppressed';
         }
 
         if ($parsed['column'] !== null) {

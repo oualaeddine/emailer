@@ -13,9 +13,11 @@ use App\Modules\Recipients\Http\Resources\RecipientResource;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Services\RecipientService;
 use App\Domain\Enums\RecipientSource;
+use App\Modules\Recipients\Attributes\Contracts\ContactAttributeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * docs/29-api-specification.md §29.4 — /api/v1/recipients.
@@ -91,6 +93,7 @@ class RecipientController extends Controller
     {
         $recipient = $this->recipients->findByUuid($uuid);
         $this->authorize('view', $recipient);
+        $recipient->loadMissing(['pageJaunesCompany', 'createdBy']);
         $recipient->load('recipientLists:recipient_lists.id,recipient_lists.uuid,recipient_lists.name');
 
         return new RecipientResource($recipient);
@@ -100,12 +103,32 @@ class RecipientController extends Controller
     {
         $this->authorize('update', $recipient);
 
-        $recipient->fill($request->safe()->only(['first_name', 'last_name', 'company_name', 'status', 'custom_fields']));
-        $recipient->save();
+        DB::transaction(function () use ($request, $recipient): void {
+            $recipient->fill($request->safe()->only(['first_name', 'last_name', 'company_name', 'status']));
 
-        if ($request->has('tag_ids')) {
-            $this->recipients->syncTags($recipient, $request->input('tag_ids'));
-        }
+            // `custom_fields` is a partial update: sent keys are merged, null clears a key.
+            if ($request->has('custom_fields')) {
+                $fields = $recipient->custom_fields ?? [];
+                foreach ($request->clearedCustomFields() as $key) {
+                    unset($fields[$key]);
+                }
+                $recipient->custom_fields = array_merge($fields, (array) $request->validated('custom_fields', []));
+            }
+            $recipient->save();
+
+            // Typed attribute writes (and `ext_id` → EXT_ID) go through the single writer.
+            $attributes = (array) $request->validated('attributes', []);
+            if ($request->exists('ext_id')) {
+                $attributes['EXT_ID'] = $request->validated('ext_id');
+            }
+            if ($attributes !== []) {
+                app(ContactAttributeService::class)->apply($recipient, $attributes, 'manual');
+            }
+
+            if ($request->has('tag_ids')) {
+                $this->recipients->syncTags($recipient, $request->input('tag_ids'));
+            }
+        });
 
         return new RecipientResource($recipient->fresh(['tags']));
     }

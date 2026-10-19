@@ -22,5 +22,5 @@ Route::get('contacts/segments/new', fn () => Inertia::render('Contacts/SegmentEd
 
 Route::get('contacts/segments/{segment}', fn (string $segment) => Inertia::render('Contacts/SegmentEdit', ['uuid' => $segment]))
     ->whereUuid('segment')
-    ->middleware('can:segments.manage')
+    ->middleware('can:recipients.view') // read-only in the page without segments.manage
     ->name('contacts.segments.edit');

@@ -72,15 +72,16 @@ class ContactQueryService
         }
 
         if (! empty($effective['q'])) {
-            $q = '%'.$effective['q'].'%';
-            $query->where(function (Builder $inner) use ($q): void {
-                $inner->where('recipients.email', 'like', $q)
-                    ->orWhere('recipients.first_name', 'like', $q)
-                    ->orWhere('recipients.last_name', 'like', $q)
-                    ->orWhere('recipients.company_name', 'like', $q);
-
-                if (ContactColumns::hasRecipientColumn('ext_id')) {
-                    $inner->orWhere('recipients.ext_id', 'like', $q);
+            // `%` / `_` are literal; case-insensitive on every driver (LOWER … LIKE).
+            $term = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_strtolower((string) $effective['q'])).'%';
+            $columns = ['email', 'first_name', 'last_name', 'company_name'];
+            if (ContactColumns::hasRecipientColumn('ext_id')) {
+                $columns[] = 'ext_id';
+            }
+            $grammar = $query->getQuery()->getGrammar();
+            $query->where(function (Builder $inner) use ($columns, $term, $grammar): void {
+                foreach ($columns as $column) {
+                    $inner->orWhereRaw('LOWER('.$grammar->wrap('recipients.'.$column).') LIKE ?', [$term]);
                 }
             });
         }
@@ -145,8 +146,9 @@ class ContactQueryService
             return;
         }
 
+        // apply() validates the tree's shape; unknown list / campaign references
+        // in a saved segment or view match nobody instead of failing.
         $compiler = $this->compiler($field);
-        $compiler->validate($tree);
         $query->where(function (Builder $group) use ($compiler, $tree): void {
             $compiler->apply($group, $tree);
         });

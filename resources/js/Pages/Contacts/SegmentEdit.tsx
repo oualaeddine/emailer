@@ -138,13 +138,17 @@ const formatDateTime = (iso: string | null) =>
  * docs/43-brevo-parity-plan.md §43.4.9 — create / edit a segment: name,
  * description, folder, the shared ConditionBuilder with live count, the
  * members preview of the saved segment and *Utiliser dans une campagne*.
- * Routes `contacts.segments.create` / `contacts.segments.edit` (`segments.manage`).
+ * Routes `contacts.segments.create` (`segments.manage`) / `contacts.segments.edit`
+ * (`recipients.view`): without `segments.manage` the page is read-only
+ * (disabled inputs, no save).
  */
 export default function SegmentEdit({ uuid }: SegmentEditProps) {
     const styles = useStyles();
     const t = useText();
-    const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
-    const canUseInCampaign = hasPermission(props.auth.user.permissions, 'campaigns.create');
+    const { props } = usePage<{ auth: { user: AuthenticatedUser; permissions: string[] } }>();
+    const permissions = props.auth.permissions ?? [];
+    const canUseInCampaign = hasPermission(permissions, 'campaigns.create');
+    const readOnly = !hasPermission(permissions, 'segments.manage');
     const { fieldCatalog, loading: catalogLoading, failed: catalogFailed } = useFieldCatalog();
 
     const [segment, setSegment] = useState<Segment | null>(null);
@@ -236,6 +240,7 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
 
     async function save(event?: FormEvent) {
         event?.preventDefault();
+        if (readOnly) return;
         setAttempted(true);
         if (nameMissing || !rulesComplete || saving) return;
         setSaving(true);
@@ -358,14 +363,16 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
                                 {t.segments.useInCampaign}
                             </Button>
                         )}
-                        <Button
-                            appearance="primary"
-                            type="submit"
-                            icon={saving ? <Spinner size="tiny" /> : <SaveRegular />}
-                            disabled={saving || nameMissing || !rulesComplete}
-                        >
-                            {saving ? t.common.saving : t.common.save}
-                        </Button>
+                        {!readOnly && (
+                            <Button
+                                appearance="primary"
+                                type="submit"
+                                icon={saving ? <Spinner size="tiny" /> : <SaveRegular />}
+                                disabled={saving || nameMissing || !rulesComplete}
+                            >
+                                {saving ? t.common.saving : t.common.save}
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -388,7 +395,12 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
                             validationMessage={fieldErrors.name ?? (attempted && nameMissing ? t.common.required : undefined)}
                             validationState={fieldErrors.name || (attempted && nameMissing) ? 'error' : 'none'}
                         >
-                            <Input value={name} maxLength={255} onChange={(_, data) => edit(setName)(data.value)} />
+                            <Input
+                                value={name}
+                                maxLength={255}
+                                disabled={readOnly}
+                                onChange={(_, data) => edit(setName)(data.value)}
+                            />
                         </Field>
                         <Field
                             label={t.segments.folder}
@@ -398,6 +410,7 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
                             <Dropdown
                                 selectedOptions={[folderId ?? NO_FOLDER]}
                                 value={folderLabel}
+                                disabled={readOnly}
                                 onOptionSelect={(_, data) =>
                                     edit(setFolderId)(!data.optionValue || data.optionValue === NO_FOLDER ? null : data.optionValue)
                                 }
@@ -416,7 +429,12 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
                             validationMessage={fieldErrors.description}
                             validationState={fieldErrors.description ? 'error' : 'none'}
                         >
-                            <Textarea value={description} resize="vertical" onChange={(_, data) => edit(setDescription)(data.value)} />
+                            <Textarea
+                                value={description}
+                                resize="vertical"
+                                disabled={readOnly}
+                                onChange={(_, data) => edit(setDescription)(data.value)}
+                            />
                         </Field>
                     </div>
                     {segment && (segment.used_in.campaigns > 0 || segment.used_in.automations > 0) && (
@@ -438,7 +456,7 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
                             onCount={countRuleTree}
                             optionSources={defaultConditionOptionSources}
                             errors={ruleTreeErrors(fieldErrors)}
-                            disabled={saving}
+                            disabled={saving || readOnly}
                             variant="full"
                         />
                     </div>

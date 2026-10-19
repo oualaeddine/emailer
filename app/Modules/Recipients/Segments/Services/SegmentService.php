@@ -10,7 +10,6 @@ use App\Modules\Recipients\Models\Segment;
 use App\Modules\Recipients\Segments\Contracts\SegmentCompilerContract;
 use App\Modules\Recipients\Segments\Exceptions\SegmentInUseException;
 use App\Modules\Recipients\Services\SegmentEvaluationService;
-use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -20,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * docs/45-brevo-api-contracts.md §45.5.2 — standalone segments (CRUD, live
- * count, members, duplicate, legacy preview).
+ * count, duplicate, legacy preview; members: ContactQueryService).
  */
 class SegmentService
 {
@@ -192,17 +191,6 @@ class SegmentService
     public function refreshCount(Segment $segment): array
     {
         return $this->storeCount($segment);
-    }
-
-    /**
-     * @return CursorPaginator<int, Recipient>
-     */
-    public function members(Segment $segment, int $perPage): CursorPaginator
-    {
-        return $this->compiler->compile($this->rulesOf($segment))
-            ->with('tags')
-            ->orderBy('recipients.id')
-            ->cursorPaginate($perPage);
     }
 
     /**

@@ -58,12 +58,18 @@ class SegmentsWebRouteTest extends TestCase
         $this->actingAs($viewer)->get('/contacts/segments')->assertOk();
     }
 
-    public function test_viewer_is_blocked_from_segment_builder(): void
+    public function test_viewer_is_blocked_from_new_segment_but_can_open_existing_read_only(): void
     {
         $viewer = User::factory()->withRole(RoleName::Viewer)->withTwoFactor()->create();
+        $uuid = (string) Str::uuid();
 
         $this->actingAs($viewer)->get('/contacts/segments/new')->assertStatus(403);
-        $this->actingAs($viewer)->get('/contacts/segments/'.Str::uuid())->assertStatus(403);
+        $this->actingAs($viewer)->get("/contacts/segments/{$uuid}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Contacts/SegmentEdit', false)
+                ->where('uuid', $uuid)
+                ->where('auth.permissions', fn ($permissions) => collect($permissions)->contains('recipients.view')
+                    && ! collect($permissions)->contains('segments.manage')));
     }
 
     public function test_guest_is_redirected_to_login(): void

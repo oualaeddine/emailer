@@ -14,10 +14,12 @@ use Illuminate\Support\Facades\Schema;
  * consumed by {@see RuleTreeCompiler} (never serialised).
  *
  * Attribute fields: rows of `contact_attributes` (WP-50) when that table
- * exists; built-in attributes (EMAIL, PRENOM, NOM, SOCIETE) map to
- * `recipients` columns; any other `attribute.NAME` reads
- * `recipients.custom_fields->NAME`, typed by the attribute row, else by the
- * condition's optional `field_type`, else `text`.
+ * exists; built-in attributes (EMAIL, PRENOM, NOM, SOCIETE) and rows with
+ * `storage = 'column'` (EXT_ID → `ext_id`) map to `recipients` columns; any
+ * other `attribute.NAME` reads `recipients.custom_fields->NAME`, typed by the
+ * attribute row, else by the condition's optional `field_type`, else `text`.
+ * Conditions upgraded from v1 `custom_fields.<key>` carry `legacy_key` and
+ * always read `custom_fields-><key>` (exact v1 key, as text).
  */
 class FieldCatalog
 {
@@ -97,10 +99,14 @@ class FieldCatalog
      *
      * @return array<string, mixed>|null
      */
-    public function definition(string $key, ?string $fieldType = null): ?array
+    public function definition(string $key, ?string $fieldType = null, ?string $legacyKey = null): ?array
     {
         if (str_starts_with($key, 'attribute.')) {
-            return $this->attributeDefinition(substr($key, strlen('attribute.')), $fieldType);
+            $name = substr($key, strlen('attribute.'));
+
+            return $legacyKey !== null
+                ? $this->legacyDefinition($name, $legacyKey)
+                : $this->attributeDefinition($name, $fieldType);
         }
 
         return $this->staticDefinitions()[$key] ?? null;
@@ -148,7 +154,12 @@ class FieldCatalog
                 return null; // "Attribut inconnu"
             }
 
-            return $row + ['target' => ['kind' => 'json', 'name' => $row['name']]];
+            $target = isset($row['column'])
+                ? ['kind' => 'optional_column', 'column' => $row['column']]
+                : ['kind' => 'json', 'name' => $row['name']];
+            unset($row['column']);
+
+            return $row + ['target' => $target];
         }
 
         $type = in_array($fieldType, self::ATTRIBUTE_TYPES, true) ? $fieldType : 'text';
@@ -156,6 +167,27 @@ class FieldCatalog
         return [
             'key' => 'attribute.'.$name, 'label' => $name, 'category' => 'attribute', 'type' => $type,
             'target' => ['kind' => 'json', 'name' => $name],
+        ];
+    }
+
+    /**
+     * A condition upgraded from v1 `custom_fields.<key>` (doc 13 §13.7): v1
+     * compared the raw JSON key as text, so the definition keeps that exact
+     * key whether or not a registry row exists for it.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function legacyDefinition(string $name, string $legacyKey): ?array
+    {
+        if (! preg_match('/^[A-Za-z0-9_-]{1,100}$/', $legacyKey) || strcasecmp($name, $legacyKey) !== 0) {
+            return null;
+        }
+
+        $label = $this->attributeRows()[strtoupper($legacyKey)]['label'] ?? $legacyKey;
+
+        return [
+            'key' => 'attribute.'.$name, 'label' => $label, 'category' => 'attribute', 'type' => 'text',
+            'target' => ['kind' => 'json', 'name' => $legacyKey],
         ];
     }
 
@@ -171,6 +203,7 @@ class FieldCatalog
             ];
         }
         foreach ($this->attributeRows() ?? [] as $upper => $row) {
+            unset($row['column']);
             $definitions[$upper] ??= $row;
         }
 
@@ -207,6 +240,9 @@ class FieldCatalog
                 'category' => 'attribute',
                 'type' => $type,
             ];
+            if (in_array('storage', $columns, true) && ($row['storage'] ?? null) === 'column' && filled($row['column'] ?? null)) {
+                $definition['column'] = (string) $row['column'];
+            }
             if (in_array('options', $columns, true) && filled($row['options'])) {
                 $options = is_string($row['options']) ? json_decode($row['options'], true) : $row['options'];
                 if (is_array($options)) {

@@ -123,6 +123,10 @@ class ContactBulkService
             $this->audit->record('contacts.bulk_blocklisted', null, $user, null, ['count' => $result['processed']]);
         }
 
+        if ($action === 'unblocklist' && $result['processed'] > 0) {
+            $this->audit->record('contacts.bulk_unblocklisted', null, $user, null, ['count' => $result['processed']]);
+        }
+
         if ($action === 'delete' && $result['processed'] > 0) {
             $this->audit->record('contacts.bulk_deleted', null, $user, null, ['count' => $result['processed']]);
         }
@@ -235,25 +239,53 @@ class ContactBulkService
     }
 
     /**
+     * Only manual blocks are lifted here: entries for hard bounces, complaints,
+     * unsubscribes… stay (those contacts are reported as skipped). Entries are
+     * deleted one by one through Eloquent so the `blocklisted_at` mirror
+     * listener (SyncRecipientBlocklist) and model events run.
+     *
      * @param  Collection<int, Recipient>  $chunk
      * @return array{processed: int, skipped: list<array{id: string, reason: string}>, failed: int}
      */
     private function unblocklist(Collection $chunk): array
     {
-        $blocked = $chunk->filter(fn (Recipient $r) => $r->status === RecipientStatus::Suppressed->value);
-        $skipped = $chunk->reject(fn (Recipient $r) => $r->status === RecipientStatus::Suppressed->value)
+        $isBlocked = fn (Recipient $r): bool => $r->status === RecipientStatus::Suppressed->value
+            || $r->getAttribute('blocklisted_at') !== null;
+
+        $skipped = $chunk->reject($isBlocked)
             ->map(fn (Recipient $r) => ['id' => $r->uuid, 'reason' => 'Pas en liste noire'])->values()->all();
 
-        if ($blocked->isNotEmpty()) {
-            SuppressionEntry::query()->whereIn('email', $blocked->pluck('email'))->delete();
+        $blocked = $chunk->filter($isBlocked);
+        if ($blocked->isEmpty()) {
+            return ['processed' => 0, 'skipped' => $skipped, 'failed' => 0];
+        }
+
+        $entries = SuppressionEntry::query()->whereIn('email', $blocked->pluck('email')->unique()->values())->get()->groupBy('email');
+        $unblocked = collect();
+
+        foreach ($blocked as $recipient) {
+            $own = $entries->get($recipient->email, collect());
+            $other = $own->first(fn (SuppressionEntry $e) => $e->reason !== SuppressionReason::ManualBlock->value);
+
+            if ($other !== null) {
+                $skipped[] = ['id' => $recipient->uuid, 'reason' => 'Bloqué pour une autre raison ('.$other->reason.')'];
+
+                continue;
+            }
+
+            $own->each->delete();
+            $unblocked->push($recipient);
+        }
+
+        if ($unblocked->isNotEmpty()) {
             $update = ['status' => RecipientStatus::Active->value];
             if (ContactColumns::hasRecipientColumn('blocklisted_at')) {
                 $update['blocklisted_at'] = null;
             }
-            Recipient::query()->whereIn('id', $blocked->pluck('id'))->update($update);
+            Recipient::query()->whereIn('id', $unblocked->pluck('id'))->update($update);
         }
 
-        return ['processed' => $blocked->count(), 'skipped' => $skipped, 'failed' => 0];
+        return ['processed' => $unblocked->count(), 'skipped' => $skipped, 'failed' => 0];
     }
 
     /**
