@@ -33,3 +33,5 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | — | — | — | `composer install --ignore-platform-req=php` succeeded locally | vendor ready |
 | 2026-10-19 | 0 | WP-40N | sonnet | Agent reported BLOCKED twice (branch nesting, worktree cut from main); resumed on pre-made worktree `.claude/worktrees/wp-40n` @ brevo/wave-0-wp-40n | relaunched (attempt 1 continues) |
 | 2026-10-19 | — | — | — | Local `php artisan test` on SQLite fails: migrations use fulltext indexes. Installing mariadb-server via apt for a local MySQL gate on port 3307 | in progress |
+| 2026-10-19 | 0 | WP-40N | sonnet | Returned structured result; commit on brevo/wave-0-wp-40n, owned paths only; notes: `Lib/docs/registry.ts` still holds old URLs (fix in gate as trivial or via WP-102); nav gates for hidden entries chosen by agent | 9d52573 |
+| 2026-10-19 | — | — | — | MariaDB 3307 running locally; baseline `php artisan test` on brevo/wave-0 started | running |
