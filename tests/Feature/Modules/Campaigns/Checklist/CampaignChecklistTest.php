@@ -12,13 +12,12 @@ use App\Modules\Campaigns\Services\Checklist\LinkChecker;
 use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
+use App\Modules\Senders\Models\Sender;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -28,30 +27,11 @@ class CampaignChecklistTest extends TestCase
 {
     use RefreshDatabase;
 
-    private bool $createdSenders = false;
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(RolePermissionSeeder::class);
         Cache::flush();
-
-        if (! Schema::hasTable('senders')) {
-            Schema::create('senders', function ($t): void {
-                $t->id();
-                $t->timestamp('verified_at')->nullable();
-                $t->timestamp('deleted_at')->nullable();
-            });
-            $this->createdSenders = true;
-        }
-    }
-
-    protected function tearDown(): void
-    {
-        if ($this->createdSenders) {
-            Schema::dropIfExists('senders');
-        }
-        parent::tearDown();
     }
 
     private function campaign(array $attrs = []): Campaign
@@ -88,11 +68,11 @@ class CampaignChecklistTest extends TestCase
         $c = $this->campaign();
         $this->assertSame('error', $this->itemStatus($c, 'sender_verified'));
 
-        $unverified = DB::table('senders')->insertGetId(['verified_at' => null]);
+        $unverified = Sender::factory()->create()->id;
         $c->setAttribute('sender_id', $unverified);
         $this->assertSame('error', $this->itemStatus($c, 'sender_verified'));
 
-        $verified = DB::table('senders')->insertGetId(['verified_at' => now()]);
+        $verified = Sender::factory()->verified()->create()->id;
         $c->setAttribute('sender_id', $verified);
         $this->assertSame('ok', $this->itemStatus($c, 'sender_verified'));
     }
@@ -171,7 +151,7 @@ class CampaignChecklistTest extends TestCase
     public function test_complete_when_everything_ok(): void
     {
         $c = $this->campaign(['recipient_list_id' => $this->listWith(1)->id]);
-        $c->setAttribute('sender_id', DB::table('senders')->insertGetId(['verified_at' => now()]));
+        $c->setAttribute('sender_id', Sender::factory()->verified()->create()->id);
         $c->setAttribute('test_sent_at', now());
         Cache::put(LinkChecker::cacheKey($c->uuid, $c->html_body), ['checked' => 1, 'broken' => []]);
 

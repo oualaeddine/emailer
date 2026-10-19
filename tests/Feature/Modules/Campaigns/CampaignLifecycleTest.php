@@ -17,6 +17,7 @@ use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Recipients\Models\Segment;
 use App\Modules\Suppression\Services\SuppressionManager;
 use App\Modules\Templates\Models\Template;
+use App\Modules\Senders\Models\Sender;
 use App\Modules\Tracking\Models\Message;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -101,7 +102,8 @@ class CampaignLifecycleTest extends TestCase
             'name' => 'Campagne Test',
             'template_id' => $template->id,
             'subject' => 'Objet de test',
-            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p>',
+            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p><a href="{{ unsubscribe }}">Se désinscrire</a>',
+            'sender_id' => Sender::factory()->verified()->create()->id,
             'recipient_list_id' => $list->id,
         ];
     }
