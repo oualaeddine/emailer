@@ -31,7 +31,7 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
-import { listBlocklistEntries, reactivateEntry } from '@/Lib/api/blocklist';
+import { listBlocklistEntries, listSoftBounces, reactivateEntry, type SoftBounce } from '@/Lib/api/blocklist';
 import { createSuppressionEntry, type CreateSuppressionEntryPayload } from '@/Lib/api/suppression';
 import {
     BLOCKLIST_TAB_REASONS,
@@ -94,16 +94,26 @@ export default function Blocklist() {
     const [reasonFilter, setReasonFilter] = useState<SuppressionReason | ''>('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [formErrors, setFormErrors] = useState<Partial<Record<string, string>>>({});
+    const [softBounces, setSoftBounces] = useState<SoftBounce[]>([]);
+    const [page, setPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
     const [target, setTarget] = useState<SuppressionEntry | null>(null);
     const [busy, setBusy] = useState(false);
     const [notice, setNotice] = useState<string | null>(null);
 
     const tabReasons = BLOCKLIST_TAB_REASONS[tab];
 
-    const load = useCallback(async (nextTab: BlocklistTab, q: string, reason: SuppressionReason | '') => {
-        const reasons = reason ? [reason] : BLOCKLIST_TAB_REASONS[nextTab];
-        setEntries(await listBlocklistEntries(reasons, q));
-    }, []);
+    const load = useCallback(
+        async (nextTab: BlocklistTab, q: string, reason: SuppressionReason | '', nextPage = 1) => {
+            const reasons = reason ? [reason] : BLOCKLIST_TAB_REASONS[nextTab];
+            const result = await listBlocklistEntries(reasons, q, nextPage);
+            setEntries(result.data);
+            setPage(result.meta.current_page);
+            setLastPage(result.meta.last_page);
+            setSoftBounces(nextTab === 'bounces' && !reason ? await listSoftBounces(q) : []);
+        },
+        [],
+    );
 
     useEffect(() => {
         void load(tab, search, reasonFilter);
@@ -234,7 +244,7 @@ export default function Blocklist() {
                 )}
             </div>
             <div className={styles.card}>
-                {entries.length === 0 ? (
+                {entries.length === 0 && softBounces.length === 0 ? (
                     <EmptyState icon={ShieldProhibitedRegular} title={t.blocklist.empty} />
                 ) : (
                     <DataGrid items={entries} columns={columns} getRowId={(e) => e.id} className={styles.grid}>
@@ -251,6 +261,27 @@ export default function Blocklist() {
                             )}
                         </DataGridBody>
                     </DataGrid>
+                )}
+                {softBounces.length > 0 && (
+                    <ul>
+                        {softBounces.map((m) => (
+                            <li key={m.id}>
+                                {m.recipient_email} <Badge appearance="tint">Rebond temporaire</Badge>{' '}
+                                {m.bounced_at ? formatDate(m.bounced_at) : ''}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                {lastPage > 1 && (
+                    <div>
+                        <Button disabled={page <= 1} onClick={() => void load(tab, search, reasonFilter, page - 1)}>
+                            ‹
+                        </Button>{' '}
+                        {page} / {lastPage}{' '}
+                        <Button disabled={page >= lastPage} onClick={() => void load(tab, search, reasonFilter, page + 1)}>
+                            ›
+                        </Button>
+                    </div>
                 )}
             </div>
             <SuppressionEntryFormDialog

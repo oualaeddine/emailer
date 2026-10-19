@@ -17,3 +17,6 @@ Artisan::command('inspire', function () {
 */
 
 Schedule::job(new SyncPageJaunesCompaniesJob)->daily();
+
+Schedule::command('recipients:recompute-counters')->daily();
+Schedule::command('exports:prune')->daily();
