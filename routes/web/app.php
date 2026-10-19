@@ -76,3 +76,4 @@ require __DIR__.'/blocklist.php';
 require __DIR__.'/contact-detail.php';
 require __DIR__.'/segments.php';
 require __DIR__.'/contacts.php';
+require __DIR__.'/attributes.php';
