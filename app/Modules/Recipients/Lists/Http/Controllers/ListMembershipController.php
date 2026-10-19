@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Modules\Recipients\Lists\Contracts\ListMembershipService;
 use App\Modules\Recipients\Lists\Http\Requests\ListMembershipRequest;
 use App\Modules\Recipients\Lists\Jobs\BulkMembershipJob;
-use App\Modules\Recipients\Lists\Support\ListOperationStore;
+use App\Modules\Recipients\Views\Contracts\AsyncOperations;
+use App\Modules\Recipients\Views\Http\Resources\AsyncOperationResource;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
@@ -17,7 +18,7 @@ class ListMembershipController extends Controller
 {
     public function __construct(
         private readonly ListMembershipService $members,
-        private readonly ListOperationStore $operations,
+        private readonly AsyncOperations $operations,
         private readonly AuditLogger $audit,
     ) {}
 
@@ -28,14 +29,16 @@ class ListMembershipController extends Controller
         $selection = $request->input('selection');
 
         if (! empty($selection)) {
-            $ids = $this->members->resolveSelection($selection);
-            if (count($ids) > 1000 || isset($selection['all_matching'])) {
-                $op = $this->operations->start('contacts_bulk', $request->user(), count($ids));
-                BulkMembershipJob::dispatch($list->id, $action, $selection, $op['id']);
+            $count = $this->members->countSelection($selection, $request->user());
+            if ($count > 1000 || isset($selection['all_matching'])) {
+                $op = $this->operations->start('contacts_bulk', $request->user(), [
+                    'list_id' => $list->id, 'action' => $action, 'selection' => $selection,
+                ], $count);
+                BulkMembershipJob::dispatch($list->id, $action, $selection, $op->id, $request->user()->id);
 
-                return response()->json(['data' => $this->operations->present($op)], 202);
+                return (new AsyncOperationResource($op->fresh()))->response()->setStatusCode(202);
             }
-            $result = $this->apply($list, $action, $ids, []);
+            $result = $this->apply($list, $action, $this->members->resolveSelection($selection, $request->user()), []);
         } else {
             $notFound = [];
             $ids = [];

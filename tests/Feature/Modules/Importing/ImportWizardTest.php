@@ -5,6 +5,8 @@ namespace Tests\Feature\Modules\Importing;
 use App\Domain\Enums\RoleName;
 use App\Modules\Identity\Models\User;
 use App\Modules\Importing\Models\ImportJob;
+use App\Modules\PageJaunesIntegration\Models\PageJaunesCompanyCache;
+use App\Modules\Recipients\Attributes\Models\ContactAttribute;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Suppression\Models\SuppressionEntry;
@@ -227,6 +229,8 @@ class ImportWizardTest extends TestCase
 
     public function test_mark_blocklisted_writes_suppression_entries(): void
     {
+        $manager = User::factory()->withRole(RoleName::MarketingManager)->create();
+        $this->operator = $manager;
         $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
         $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true, 'mark_blocklisted' => true]);
         $this->actingAs($this->operator)->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
@@ -309,5 +313,129 @@ class ImportWizardTest extends TestCase
 
         $this->actingAs($viewer)->get('/contacts/imports')->assertForbidden();
         $this->actingAs($viewer)->get('/contacts/imports/new')->assertForbidden();
+    }
+
+    public function test_mark_blocklisted_requires_suppression_manage(): void
+    {
+        [$id] = $this->upload();
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+
+        $this->actingAs($this->operator)->putJson("/api/v1/import-jobs/{$id}/settings", [
+            'list_ids' => [$list->uuid], 'update_existing' => true, 'mark_blocklisted' => true,
+        ])->assertForbidden();
+    }
+
+    public function test_mapping_and_settings_are_frozen_once_the_import_started(): void
+    {
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+        $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true]);
+        ImportJob::query()->where('uuid', $id)->update(['status' => 'importing']);
+
+        $this->actingAs($this->operator)->putJson("/api/v1/import-jobs/{$id}/mapping", ['mapping' => $this->mapping()])->assertStatus(409);
+        $this->putJson("/api/v1/import-jobs/{$id}/settings", ['list_ids' => [$list->uuid], 'update_existing' => false])->assertStatus(409);
+        $this->assertGreaterThan(0, ImportJob::query()->where('uuid', $id)->first()->rows()->count());
+    }
+
+    public function test_second_commit_is_a_conflict(): void
+    {
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+        $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true]);
+
+        $this->actingAs($this->operator)->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
+        $this->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(409);
+    }
+
+    public function test_choice_attributes_are_normalised_before_apply(): void
+    {
+        ContactAttribute::query()->create([
+            'name' => 'INTERETS', 'label' => 'Intérêts', 'type' => 'multiple_choice', 'is_system' => false, 'storage' => 'custom_fields',
+            'options' => [['value' => 'sport', 'label' => 'Sport'], ['value' => 'tech', 'label' => 'Technologie']],
+        ]);
+        ContactAttribute::query()->create([
+            'name' => 'NIVEAU', 'label' => 'Niveau', 'type' => 'category', 'is_system' => false, 'storage' => 'custom_fields',
+            'options' => [['value' => 'gold', 'label' => 'Or'], ['value' => 'silver', 'label' => 'Argent']],
+        ]);
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+        $csv = "Courriel;Intérêts;Niveau\nz@example.com;Sport, technologie;OR";
+        $mapping = [
+            ['column' => 0, 'header' => 'Courriel', 'target' => ['type' => 'attribute', 'attribute' => 'EMAIL']],
+            ['column' => 1, 'header' => 'Intérêts', 'target' => ['type' => 'attribute', 'attribute' => 'INTERETS']],
+            ['column' => 2, 'header' => 'Niveau', 'target' => ['type' => 'attribute', 'attribute' => 'NIVEAU']],
+        ];
+        $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true], $mapping, $csv);
+        $this->actingAs($this->operator)->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
+
+        $recipient = Recipient::query()->where('email', 'z@example.com')->firstOrFail();
+        $this->assertSame(['sport', 'tech'], $recipient->custom_fields['INTERETS']);
+        $this->assertSame('gold', $recipient->custom_fields['NIVEAU']);
+        $this->assertSame('completed', ImportJob::query()->where('uuid', $id)->value('status'));
+    }
+
+    public function test_duplicate_row_whose_recipient_vanished_is_created(): void
+    {
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+        $ghost = Recipient::factory()->create(['email' => 'ghost@example.com']);
+        $csv = "Courriel;Prénom;Nom de famille;Ville\nghost@example.com;Gina;H;Oran";
+        $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true], null, $csv);
+        $ghost->forceDelete();
+
+        $this->actingAs($this->operator)->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
+
+        $this->assertSame('Gina', Recipient::query()->where('email', 'ghost@example.com')->value('first_name'));
+        $this->assertSame(1, ImportJob::query()->where('uuid', $id)->firstOrFail()->summary['created']);
+    }
+
+    public function test_pagejaunes_import_resolves_emails_server_side_and_links_company(): void
+    {
+        $company = PageJaunesCompanyCache::query()->create(['pagejaunes_company_id' => 77, 'pagejaunes_code' => 'PJ77', 'company_name' => 'Atlas SARL']);
+        $company->emails()->create(['pagejaunes_email_id' => 1, 'email' => 'contact@atlas.dz']);
+        $company->emails()->create(['pagejaunes_email_id' => 2, 'email' => 'ventes@atlas.dz']);
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+
+        // A forged address is rejected.
+        $this->actingAs($this->operator)->postJson('/api/v1/import-jobs', [
+            'source_type' => 'pagejaunes', 'external_ids' => [77],
+            'contacts' => [['email' => 'evil@elsewhere.test', 'company_name' => 'X', 'external_id' => 77]],
+        ])->assertUnprocessable()->assertJsonValidationErrors('contacts.0.email');
+
+        $response = $this->postJson('/api/v1/import-jobs', [
+            'source_type' => 'pagejaunes', 'external_ids' => [77],
+            'contacts' => [['email' => 'contact@atlas.dz', 'company_name' => 'Atlas SARL', 'external_id' => 77]],
+        ])->assertCreated();
+        $this->assertSame(1, $response->json('data.preview.total_rows'));
+
+        // Without `contacts`, every address of the company is resolved.
+        $both = $this->postJson('/api/v1/import-jobs', ['source_type' => 'pagejaunes', 'external_ids' => [77]])->assertCreated();
+        $id = $both->json('data.id');
+        $this->assertSame(2, $both->json('data.preview.total_rows'));
+
+        $this->putJson("/api/v1/import-jobs/{$id}/mapping", ['mapping' => [
+            ['column' => 0, 'header' => 'EMAIL', 'target' => ['type' => 'attribute', 'attribute' => 'EMAIL']],
+            ['column' => 1, 'header' => 'SOCIETE', 'target' => ['type' => 'attribute', 'attribute' => 'SOCIETE']],
+        ]])->assertOk();
+        $this->putJson("/api/v1/import-jobs/{$id}/settings", ['list_ids' => [$list->uuid], 'update_existing' => true])->assertOk();
+        $this->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
+
+        $this->assertSame(2, Recipient::query()->whereIn('email', ['contact@atlas.dz', 'ventes@atlas.dz'])->count());
+        $this->assertSame(0, Recipient::query()->whereNotNull('ext_id')->count());
+        $this->assertSame(2, Recipient::query()->where('pagejaunes_company_cache_id', $company->id)->count());
+        $this->assertSame('completed', ImportJob::query()->where('uuid', $id)->value('status'));
+    }
+
+    public function test_ext_id_owned_by_another_recipient_is_skipped_with_a_row_error(): void
+    {
+        Recipient::factory()->create(['email' => 'owner@example.com', 'ext_id' => 'X-1']);
+        $list = RecipientList::query()->create(['name' => 'L', 'type' => 'static']);
+        $csv = "Courriel;Ref\nnew@example.com;X-1";
+        $mapping = [
+            ['column' => 0, 'header' => 'Courriel', 'target' => ['type' => 'attribute', 'attribute' => 'EMAIL']],
+            ['column' => 1, 'header' => 'Ref', 'target' => ['type' => 'attribute', 'attribute' => 'EXT_ID']],
+        ];
+        $id = $this->prepare(['list_ids' => [$list->uuid], 'update_existing' => true], $mapping, $csv);
+        $this->actingAs($this->operator)->postJson("/api/v1/import-jobs/{$id}/commit")->assertStatus(202);
+
+        $new = Recipient::query()->where('email', 'new@example.com')->firstOrFail();
+        $this->assertNull($new->ext_id);
+        $this->assertDatabaseHas('import_errors', ['error_code' => 'ext_id_conflict', 'row_number' => 1]);
     }
 }

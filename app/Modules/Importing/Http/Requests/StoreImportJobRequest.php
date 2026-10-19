@@ -30,7 +30,7 @@ class StoreImportJobRequest extends FormRequest
             'pagejaunes' => [
                 'external_ids' => ['required', 'array', 'min:1', 'max:5000'],
                 'external_ids.*' => ['integer'],
-                // Resolved contacts sent by the wizard (company + e-mail) — additive to the contract.
+                // Optional subset of addresses picked client-side; each must belong to one of `external_ids` (checked server-side).
                 'contacts' => ['nullable', 'array', 'max:20000'],
                 'contacts.*.email' => ['required_with:contacts', 'string', 'max:255'],
                 'contacts.*.company_name' => ['nullable', 'string', 'max:255'],

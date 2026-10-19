@@ -9,9 +9,12 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Lists\Contracts\ListMembershipService;
 use App\Modules\Recipients\Lists\Models\ListFolder;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Recipients\Events\RecipientDeleted;
 use App\Modules\Recipients\Models\RecipientList;
+use App\Modules\Suppression\Listeners\RecipientBlocklistChanged;
 use Database\Factories\ListFolderFactory;
 use Database\Factories\RecipientListFactory;
+use Database\Factories\SegmentFactory;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -224,5 +227,85 @@ class ListsTest extends TestCase
     {
         $this->actingAs($this->manager)->get('/contacts/lists')->assertOk();
         $this->get('/contacts/lists/abc')->assertOk();
+    }
+
+    public function test_export_requires_contacts_export_permission(): void
+    {
+        $viewer = User::factory()->withRole(RoleName::Viewer)->create();
+        $list = RecipientListFactory::new()->create();
+
+        $this->actingAs($viewer)->postJson("/api/v1/recipient-lists/{$list->uuid}/export")->assertForbidden();
+    }
+
+    public function test_export_neutralises_formula_injection(): void
+    {
+        Storage::fake('local');
+        $list = RecipientListFactory::new()->create();
+        $r = Recipient::factory()->create(['email' => 'f@exemple.dz', 'first_name' => '=HYPERLINK("http://x")', 'last_name' => '@cmd']);
+        app(ListMembershipService::class)->add($list, [$r->id], 'manual');
+
+        $this->actingAs($this->manager)->postJson("/api/v1/recipient-lists/{$list->uuid}/export")->assertStatus(202);
+
+        $csv = Storage::disk('local')->get(collect(Storage::disk('local')->files('exports'))->first());
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringContainsString("'@cmd", $csv);
+    }
+
+    public function test_selection_with_segment_only_adds_the_segments_members(): void
+    {
+        $list = RecipientListFactory::new()->create();
+        $in = Recipient::factory()->create(['company_name' => 'Atlas']);
+        Recipient::factory()->create(['company_name' => 'Other']);
+        $this->seed(\Database\Seeders\ContactAttributeSeeder::class);
+        $segment = SegmentFactory::new()->withRules(['version' => 2, 'type' => 'group', 'operator' => 'and', 'children' => [
+            ['type' => 'condition', 'field' => 'attribute.SOCIETE', 'operator' => 'equals', 'value' => 'Atlas'],
+        ]])->create();
+
+        $this->actingAs($this->manager)->postJson("/api/v1/recipient-lists/{$list->uuid}/contacts", [
+            'action' => 'add', 'selection' => ['all_matching' => ['segment_id' => $segment->uuid]],
+        ])->assertStatus(202)->assertJsonPath('data.status_url', fn ($u) => str_starts_with($u, '/api/v1/operations/'));
+
+        $this->assertSame([$in->id], DB::table('recipient_list_recipient')->where('recipient_list_id', $list->id)->pluck('recipient_id')->all());
+    }
+
+    public function test_rules_are_rejected_on_create_and_dynamic_lists_hidden_from_index(): void
+    {
+        $this->actingAs($this->manager)->postJson('/api/v1/recipient-lists', ['name' => 'Dyn', 'rules' => ['x' => 1]])
+            ->assertStatus(422)->assertJsonValidationErrors('rules');
+
+        RecipientListFactory::new()->create(['name' => 'Legacy', 'type' => 'dynamic_segment']);
+        RecipientListFactory::new()->create(['name' => 'Static']);
+        $this->getJson('/api/v1/recipient-lists')->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Static');
+        $this->getJson('/api/v1/recipient-lists?include_legacy=1')->assertJsonCount(2, 'data');
+    }
+
+    public function test_deleting_or_blocklisting_a_contact_recounts_its_lists(): void
+    {
+        $list = RecipientListFactory::new()->create();
+        $keep = Recipient::factory()->create();
+        $gone = Recipient::factory()->create();
+        app(ListMembershipService::class)->add($list, [$keep->id, $gone->id], 'manual');
+        $this->assertSame(2, $list->fresh()->contact_count);
+
+        $keep->forceFill(['blocklisted_at' => now()])->saveQuietly();
+        RecipientBlocklistChanged::dispatch($keep->id, true, 'manual');
+        $this->assertSame(1, $list->fresh()->blocklisted_count);
+
+        $gone->delete();
+        event(new RecipientDeleted($gone->id, $gone->email));
+        $this->assertSame(1, $list->fresh()->contact_count);
+    }
+
+    public function test_delete_with_contacts_recounts_other_lists(): void
+    {
+        $a = RecipientListFactory::new()->create();
+        $b = RecipientListFactory::new()->create();
+        $r = Recipient::factory()->create();
+        app(ListMembershipService::class)->add($a, [$r->id], 'manual');
+        app(ListMembershipService::class)->add($b, [$r->id], 'manual');
+
+        $this->actingAs($this->manager)->deleteJson('/api/v1/recipient-lists/'.$a->uuid.'?delete_contacts=1')->assertNoContent();
+
+        $this->assertSame(0, $b->fresh()->contact_count);
     }
 }

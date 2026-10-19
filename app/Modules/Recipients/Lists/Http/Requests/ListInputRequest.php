@@ -13,6 +13,12 @@ class ListInputRequest extends FormRequest
         return $this->user()?->hasPermission(PermissionName::RecipientsManage->value) ?? false;
     }
 
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return ['rules.prohibited' => 'Utilisez les segments pour les règles dynamiques.'];
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {
@@ -22,7 +28,7 @@ class ListInputRequest extends FormRequest
             'name' => [$required, 'string', 'min:1', 'max:150'],
             'description' => ['sometimes', 'nullable', 'string', 'max:500'],
             'folder_id' => ['sometimes', 'nullable', 'uuid'],
-            'rules' => ['sometimes', 'array'],
+            'rules' => ['prohibited'],
         ];
     }
 }

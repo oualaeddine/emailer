@@ -5,9 +5,9 @@ namespace App\Modules\Recipients\Lists\Services;
 use App\Modules\Recipients\Lists\Contracts\ListMembershipService as Contract;
 use App\Modules\Recipients\Lists\Events\RecipientsAddedToList;
 use App\Modules\Recipients\Lists\Events\RecipientsRemovedFromList;
-use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\RecipientList;
-use Illuminate\Database\Eloquent\Builder;
+use App\Modules\Recipients\Views\Services\ContactQueryService;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -95,7 +95,7 @@ class ListMembershipService implements Contract
 
         $counts = [
             'contact_count' => (clone $base)->count(),
-            'blocklisted_count' => (clone $base)->where('r.status', 'suppressed')->count(),
+            'blocklisted_count' => (clone $base)->whereNotNull('r.blocklisted_at')->count(),
         ];
 
         DB::table('recipient_lists')->where('id', $list->id)->update($counts);
@@ -103,37 +103,21 @@ class ListMembershipService implements Contract
     }
 
     /**
-     * Resolves a ContactSelection (§45.3) to internal recipient ids.
-     * `all_matching` supports `q`, `list_id` and `exclude_ids` (the full
-     * filter/segment/view resolution belongs to WP-57).
+     * Resolves a ContactSelection (§45.3) to internal recipient ids through the
+     * shared {@see ContactQueryService} (filters, segment, view, scope, status,
+     * source and the `MAX_ALL_MATCHING` cap are applied there).
      *
      * @param  array<string, mixed>  $selection
      * @return list<int>
      */
-    public function resolveSelection(array $selection): array
+    public function resolveSelection(array $selection, ?User $user = null): array
     {
-        if (isset($selection['ids'])) {
-            return Recipient::query()->whereIn('uuid', $selection['ids'])->pluck('id')->all();
-        }
+        return app(ContactQueryService::class)->selectionQuery($selection, $user)->pluck('recipients.id')->all();
+    }
 
-        $criteria = $selection['all_matching'] ?? [];
-        $query = Recipient::query()
-            ->when($criteria['q'] ?? null, fn (Builder $q, string $term) => $q->where(function (Builder $w) use ($term): void {
-                $like = '%'.$term.'%';
-                $w->where('email', 'like', $like)->orWhere('first_name', 'like', $like)
-                    ->orWhere('last_name', 'like', $like)->orWhere('company_name', 'like', $like);
-            }))
-            ->when($criteria['list_id'] ?? null, fn (Builder $q, string $listUuid) => $q->whereIn(
-                'recipients.id',
-                DB::table('recipient_list_recipient as p')
-                    ->join('recipient_lists as l', 'l.id', '=', 'p.recipient_list_id')
-                    ->where('l.uuid', $listUuid)->select('p.recipient_id'),
-            ));
-
-        if (! empty($selection['exclude_ids'])) {
-            $query->whereNotIn('uuid', $selection['exclude_ids']);
-        }
-
-        return $query->pluck('id')->all();
+    /** @param  array<string, mixed>  $selection */
+    public function countSelection(array $selection, ?User $user = null): int
+    {
+        return app(ContactQueryService::class)->selectionQuery($selection, $user)->count();
     }
 }

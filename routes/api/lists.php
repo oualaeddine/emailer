@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('recipient-lists', [ListController::class, 'index']);
 Route::post('recipient-lists', [ListController::class, 'store']);
 // Literal sub-paths before the {id} routes.
-Route::get('recipient-lists/operations/{operation}', [ListExportController::class, 'status']);
 Route::get('recipient-lists/exports/{operation}/download', [ListExportController::class, 'download'])
     ->middleware('signed:relative')->name('lists.exports.download');
 Route::get('recipient-lists/{id}', [ListController::class, 'show']);
