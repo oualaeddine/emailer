@@ -4,9 +4,13 @@ namespace App\Modules\Templates\Services;
 
 use App\Modules\Composer\Models\Draft;
 use App\Modules\Identity\Models\User;
+use App\Modules\Templates\Events\TemplateSaved;
 use App\Modules\Templates\Models\Template;
 use App\Modules\Templates\Models\TemplateVersion;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -32,10 +36,14 @@ class TemplateService
         return $query->get();
     }
 
-    public function create(User $author, string $name, string $htmlContent, ?string $category = null): Template
+    /**
+     * @param  array<string, mixed>  $extra  v2 attributes (editor_type, scope, design_json, subject…)
+     */
+    public function create(User $author, string $name, string $htmlContent, ?string $category = null, array $extra = []): Template
     {
-        return DB::transaction(function () use ($author, $name, $htmlContent, $category): Template {
+        $template = DB::transaction(function () use ($author, $name, $htmlContent, $category, $extra): Template {
             $template = Template::query()->create([
+                ...$extra,
                 'name' => $name,
                 'category' => $category,
                 'html_content' => $htmlContent,
@@ -46,6 +54,10 @@ class TemplateService
 
             return $template;
         });
+
+        TemplateSaved::dispatch($template->id);
+
+        return $template;
     }
 
     /**
@@ -53,12 +65,100 @@ class TemplateService
      */
     public function update(Template $template, User $author, string $htmlContent, ?string $changeNote = null): Template
     {
-        return DB::transaction(function () use ($template, $author, $htmlContent, $changeNote): Template {
+        $fresh = DB::transaction(function () use ($template, $author, $htmlContent, $changeNote): Template {
             $template->update(['html_content' => $htmlContent]);
             $this->saveVersion($template, $author, $changeNote);
 
             return $template->fresh();
         });
+
+        TemplateSaved::dispatch($fresh->id);
+
+        return $fresh;
+    }
+
+    /**
+     * docs/45 §45.4.4 — duplicate; works on gallery templates (the copy lands
+     * in "Mes modèles": `is_gallery = false`).
+     *
+     * @param  array{name?: string|null, scope?: string|null}  $overrides
+     */
+    public function duplicate(Template $source, User $author, array $overrides = []): Template
+    {
+        $copy = DB::transaction(function () use ($source, $author, $overrides): Template {
+            $copy = Template::query()->create([
+                'name' => $overrides['name'] ?? 'Copie de '.$source->name,
+                'category' => $source->category,
+                'html_content' => $source->html_content,
+                'design_json' => $source->design_json,
+                'editor_type' => $source->editor_type,
+                'scope' => $overrides['scope'] ?? $source->scope,
+                'subject' => $source->subject,
+                'is_gallery' => false,
+                'gallery_category' => null,
+                'created_by' => $author->id,
+            ]);
+
+            $this->saveVersion($copy, $author, 'Dupliqué depuis « '.$source->name.' »');
+
+            return $copy;
+        });
+
+        TemplateSaved::dispatch($copy->id);
+
+        return $copy;
+    }
+
+    private const SORTABLE = ['updated_at', 'name', 'created_at', 'usage_count'];
+
+    /**
+     * docs/45 §45.4.4 — `TemplateListQuery`.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return LengthAwarePaginator<int, Template>
+     */
+    public function search(array $filters, int $perPage = 25): LengthAwarePaginator
+    {
+        /** @var Builder<Template> $query */
+        $query = Template::query();
+
+        if (! empty($filters['scope'])) {
+            $query->where('scope', $filters['scope']);
+        }
+        if (($filters['folder_id'] ?? null) === 'none') {
+            $query->whereNull('folder_id');
+        }
+        if (! empty($filters['q'])) {
+            $needle = '%'.addcslashes((string) $filters['q'], '%_\\').'%';
+            $query->where('name', 'like', $needle);
+        }
+        if (array_key_exists('is_gallery', $filters) && $filters['is_gallery'] !== null) {
+            $query->where('is_gallery', (bool) $filters['is_gallery']);
+        }
+        if (! empty($filters['editor_type'])) {
+            $query->where('editor_type', $filters['editor_type']);
+        }
+        $query->where('is_archived', (bool) ($filters['is_archived'] ?? false));
+        if (! empty($filters['category'])) {
+            $query->where(fn (Builder $q) => $q->where('category', $filters['category'])->orWhere('gallery_category', $filters['category']));
+        }
+
+        $sort = (string) ($filters['sort'] ?? '-updated_at');
+        $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
+        $field = ltrim($sort, '-');
+        if (! in_array($field, self::SORTABLE, true)) {
+            throw ValidationException::withMessages(['sort' => ['Tri non pris en charge.']]);
+        }
+        if ($field === 'usage_count') {
+            $query->orderBy(
+                Draft::query()->selectRaw('count(*)')->whereColumn('drafts.template_id', 'templates.id'),
+                $direction,
+            );
+        } else {
+            $query->orderBy($field, $direction);
+        }
+
+        return $query->orderBy('id')->paginate($perPage);
     }
 
     public function saveVersion(Template $template, User $author, ?string $changeNote = null): TemplateVersion
