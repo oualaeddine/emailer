@@ -61,6 +61,7 @@ This documentation is written so that **another AI or engineering team can imple
 | 41 | [Notification Center](41-notification-center.md) | Centralized in-app notification routing & preferences |
 | 42 | [Parallel Execution Plan](42-parallel-execution-plan.md) | Agent-orchestrated work packages, waves, file ownership, token-economy protocol |
 | 43 | [Brevo Parity Plan](43-brevo-parity-plan.md) | Gap analysis vs. Brevo, target IA, page-by-page specs, schema addendum, phased work packages to reach Brevo-equivalent email marketing |
+| 44 | [Brevo Parallel Execution Plan](44-brevo-parallel-execution-plan.md) | Agent-orchestrated delivery of doc 43: Opus/Sonnet assignment per work package, contracts-first Wave 0, five waves, gates, migration slots, prompt template, runbook |
 
 ## How to Use This Documentation
 
