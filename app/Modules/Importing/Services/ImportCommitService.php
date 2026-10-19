@@ -10,6 +10,7 @@ use App\Modules\Importing\Events\ImportCompleted;
 use App\Modules\Importing\Models\ImportJob;
 use App\Modules\Importing\Models\ImportRow;
 use App\Modules\Importing\Support\ImportSource;
+use App\Modules\PageJaunesIntegration\Models\PageJaunesCompanyEmailCache;
 use App\Modules\Recipients\DataTransferObjects\CreateRecipientData;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
@@ -34,10 +35,42 @@ class ImportCommitService
 
     private const ATTRIBUTE_CONTRACT = 'App\\Modules\\Recipients\\Attributes\\Contracts\\ContactAttributeService';
 
+    /** Resolved once per commit (no per-row Schema / container probing). */
+    private bool $hasExtId = false;
+
+    private bool $hasOptIn = false;
+
+    private bool $hasOptInSource = false;
+
+    private bool $hasPageJaunesLink = false;
+
+    private ?object $attributes = null;
+
+    private ?object $listMembership = null;
+
+    /** @var array<string, mixed> attribute definitions keyed by upper-cased name */
+    private array $definitions = [];
+
+    /** @var array<int, true> ids of rows whose e-mail already appeared on an earlier row */
+    private array $repeatRowIds = [];
+
     public function __construct(
         private readonly RecipientService $recipients,
         private readonly SuppressionManager $suppression,
     ) {
+    }
+
+    private function prepare(ImportJob $job): void
+    {
+        $this->hasExtId = Schema::hasColumn('recipients', 'ext_id');
+        $this->hasOptIn = Schema::hasColumn('recipients', 'opt_in_at');
+        $this->hasOptInSource = Schema::hasColumn('recipients', 'opt_in_source');
+        $this->hasPageJaunesLink = $job->source_type === ImportSource::PAGEJAUNES
+            && Schema::hasColumn('recipients', 'pagejaunes_company_cache_id');
+        $this->attributes = interface_exists(self::ATTRIBUTE_CONTRACT) ? app(self::ATTRIBUTE_CONTRACT) : null;
+        $this->listMembership = interface_exists(self::LIST_CONTRACT) ? app(self::LIST_CONTRACT) : null;
+        $this->definitions = $this->attributes !== null ? $this->attributes->definitions()->all() : [];
+        $this->repeatRowIds = $this->repeatRowIds($job);
     }
 
     /**
@@ -49,6 +82,7 @@ class ImportCommitService
         $summary = ['created' => 0, 'updated' => 0, 'skipped' => 0, 'failed' => 0, 'blocklisted' => 0, 'added_to_lists' => 0];
 
         $job->update(['status' => $wizard ? 'importing' : ImportJobStatus::Processing->value, 'started_at' => $job->started_at ?? now()]);
+        $this->prepare($job);
 
         $lists = $this->resolveLists($job);
         $source = match ($job->source_type) {
@@ -107,7 +141,7 @@ class ImportCommitService
 
         // Rows rejected at validation time (and in-batch duplicates) count as failed / skipped.
         $invalid = $job->rows()->where('validation_status', ImportRowValidationStatus::Invalid->value)->count();
-        $inBatchDuplicates = $wizard ? $this->inBatchDuplicateCount($job) : $job->rows()->where('validation_status', ImportRowValidationStatus::Duplicate->value)->count();
+        $inBatchDuplicates = $wizard ? count($this->repeatRowIds) : $job->rows()->where('validation_status', ImportRowValidationStatus::Duplicate->value)->count();
         $summary['failed'] += $invalid;
         $summary['skipped'] += $inBatchDuplicates;
 
@@ -137,22 +171,26 @@ class ImportCommitService
 
         if ($isDuplicate) {
             // Duplicate rows only reach here for wizard jobs. In-batch repeats are counted as skipped later.
-            $existing = Recipient::query()->where('email', $email)->first();
-            if ($existing === null || $this->isRepeatInBatch($job, $row)) {
+            if (isset($this->repeatRowIds[$row->id])) {
                 return ['result' => 'noop', 'recipient' => null, 'blocklisted' => false];
             }
 
-            if (! $job->update_existing) {
+            $existing = Recipient::query()->where('email', $email)->first();
+
+            if ($existing !== null) {
+                if (! $job->update_existing) {
+                    $row->update(['created_recipient_id' => $existing->id]);
+
+                    return ['result' => 'skipped', 'recipient' => $existing->id, 'blocklisted' => $this->blocklist($job, $existing)];
+                }
+
+                $this->updateExisting($job, $existing, $data, $row);
                 $row->update(['created_recipient_id' => $existing->id]);
+                $this->markOptIn($job, $existing);
 
-                return ['result' => 'skipped', 'recipient' => $existing->id, 'blocklisted' => $this->blocklist($job, $existing)];
+                return ['result' => 'updated', 'recipient' => $existing->id, 'blocklisted' => $this->blocklist($job, $existing)];
             }
-
-            $this->updateExisting($job, $existing, $data);
-            $row->update(['created_recipient_id' => $existing->id]);
-            $this->markOptIn($job, $existing);
-
-            return ['result' => 'updated', 'recipient' => $existing->id, 'blocklisted' => $this->blocklist($job, $existing)];
+            // The recipient vanished since validation: fall through and create it.
         }
 
         $custom = $this->nonNull($data['custom_fields'] ?? []);
@@ -162,12 +200,13 @@ class ImportCommitService
             firstName: $data['first_name'] ?? null,
             lastName: $data['last_name'] ?? null,
             companyName: $data['company_name'] ?? null,
+            pageJaunesCompanyCacheId: $this->hasPageJaunesLink ? $this->pageJaunesCompanyId($email) : null,
             customFields: $wizard ? [] : $custom,
         ));
 
         if ($wizard) {
             $this->applyAttributes($recipient, $custom, 'import');
-            $this->applyExtId($recipient, $data);
+            $this->applyExtId($job, $recipient, $data, $row);
         }
 
         $row->update(['created_recipient_id' => $recipient->id]);
@@ -189,7 +228,7 @@ class ImportCommitService
      *
      * @param  array<string, mixed>  $data
      */
-    private function updateExisting(ImportJob $job, Recipient $recipient, array $data): void
+    private function updateExisting(ImportJob $job, Recipient $recipient, array $data, ImportRow $row): void
     {
         foreach (['first_name', 'last_name', 'company_name'] as $field) {
             if (! array_key_exists($field, $data)) {
@@ -218,7 +257,7 @@ class ImportCommitService
             }
         }
 
-        $this->applyExtId($recipient, $data);
+        $this->applyExtId($job, $recipient, $data, $row);
     }
 
     /**
@@ -230,8 +269,8 @@ class ImportCommitService
             return;
         }
 
-        if (app()->bound(self::ATTRIBUTE_CONTRACT)) {
-            app(self::ATTRIBUTE_CONTRACT)->apply($recipient, $values, $source);
+        if ($this->attributes !== null) {
+            $this->attributes->apply($recipient, $this->normaliseChoices($values), $source);
 
             return;
         }
@@ -242,26 +281,83 @@ class ImportCommitService
     }
 
     /**
+     * Raw CSV strings -> shapes the attribute writer accepts: multiple_choice is split
+     * on `,` / `;`, category and multiple_choice labels are mapped (case-insensitively)
+     * to their option value.
+     *
+     * @param  array<string, mixed>  $values
+     * @return array<string, mixed>
+     */
+    private function normaliseChoices(array $values): array
+    {
+        foreach ($values as $name => $value) {
+            $definition = $this->definitions[strtoupper((string) $name)] ?? null;
+            if ($definition === null || ! in_array($definition->type, ['category', 'multiple_choice'], true) || ! is_string($value)) {
+                continue;
+            }
+
+            $options = [];
+            foreach ($definition->options ?? [] as $option) {
+                $options[mb_strtolower(trim((string) $option['value']))] = (string) $option['value'];
+                $options[mb_strtolower(trim((string) ($option['label'] ?? $option['value'])))] ??= (string) $option['value'];
+            }
+            $map = fn (string $item): string => $options[mb_strtolower(trim($item))] ?? trim($item);
+
+            $values[$name] = $definition->type === 'multiple_choice'
+                ? array_values(array_unique(array_map($map, array_filter(
+                    array_map('trim', preg_split('/[,;]/', $value) ?: []),
+                    fn (string $item) => $item !== '',
+                ))))
+                : $map($value);
+        }
+
+        return $values;
+    }
+
+    /**
+     * `ext_id` is unique: a value already owned by another recipient is skipped with a row error.
+     *
      * @param  array<string, mixed>  $data
      */
-    private function applyExtId(Recipient $recipient, array $data): void
+    private function applyExtId(ImportJob $job, Recipient $recipient, array $data, ImportRow $row): void
     {
-        if (($data['ext_id'] ?? null) !== null && Schema::hasColumn('recipients', 'ext_id')) {
-            $recipient->forceFill(['ext_id' => $data['ext_id']])->save();
+        $extId = $data['ext_id'] ?? null;
+        if ($extId === null || ! $this->hasExtId) {
+            return;
         }
+
+        $owned = Recipient::withTrashed()->where('ext_id', $extId)->where('id', '!=', $recipient->id)->exists();
+        if ($owned) {
+            $job->errors()->create([
+                'row_number' => $row->row_number,
+                'error_code' => 'ext_id_conflict',
+                'message' => 'EXT_ID « '.$extId.' » déjà utilisé par un autre contact : valeur ignorée.',
+            ]);
+
+            return;
+        }
+
+        $recipient->forceFill(['ext_id' => $extId])->save();
+    }
+
+    private function pageJaunesCompanyId(string $email): ?int
+    {
+        $id = PageJaunesCompanyEmailCache::query()->where('email', $email)->value('pagejaunes_company_cache_id');
+
+        return $id !== null ? (int) $id : null;
     }
 
     private function markOptIn(ImportJob $job, Recipient $recipient): void
     {
         // `recipients.opt_in_at` is added by WP-52/WP-90 (Slot E); guard until it exists.
-        if (! $job->mark_opt_in || ! Schema::hasColumn('recipients', 'opt_in_at')) {
+        if (! $job->mark_opt_in || ! $this->hasOptIn) {
             return;
         }
 
         $fill = [];
         if ($recipient->getAttribute('opt_in_at') === null) {
             $fill['opt_in_at'] = now();
-            if (Schema::hasColumn('recipients', 'opt_in_source')) {
+            if ($this->hasOptInSource) {
                 $fill['opt_in_source'] = 'import';
             }
         }
@@ -335,8 +431,8 @@ class ImportCommitService
 
         foreach ($lists as $list) {
             foreach (array_chunk(array_values(array_unique($recipientIds)), 500) as $chunk) {
-                if (app()->bound(self::LIST_CONTRACT)) {
-                    $added += (int) app(self::LIST_CONTRACT)->add($list, $chunk, 'import', ['importJobId' => $job->id]);
+                if ($this->listMembership !== null) {
+                    $added += (int) $this->listMembership->add($list, $chunk, 'import', ['importJobId' => $job->id]);
 
                     continue;
                 }
@@ -357,21 +453,28 @@ class ImportCommitService
         return $added;
     }
 
-    private function isRepeatInBatch(ImportJob $job, ImportRow $row): bool
+    /**
+     * Ids of rows whose e-mail already appeared on an earlier row (single ordered scan).
+     *
+     * @return array<int, true>
+     */
+    private function repeatRowIds(ImportJob $job): array
     {
-        return $job->rows()
-            ->where('id', '<', $row->id)
-            ->whereRaw('lower(parsed_email) = ?', [mb_strtolower((string) $row->parsed_email)])
-            ->exists();
-    }
+        $seen = [];
+        $repeats = [];
 
-    private function inBatchDuplicateCount(ImportJob $job): int
-    {
-        return $job->rows()
-            ->where('validation_status', ImportRowValidationStatus::Duplicate->value)
-            ->get(['id', 'parsed_email'])
-            ->filter(fn (ImportRow $r) => $this->isRepeatInBatch($job, $r))
-            ->count();
+        foreach ($job->rows()->select(['id', 'parsed_email', 'validation_status'])->lazyById(1000) as $row) {
+            $key = mb_strtolower((string) $row->parsed_email);
+            if ($key === '') {
+                continue;
+            }
+            if (isset($seen[$key]) && $row->validation_status === ImportRowValidationStatus::Duplicate->value) {
+                $repeats[$row->id] = true;
+            }
+            $seen[$key] = true;
+        }
+
+        return $repeats;
     }
 
     /**

@@ -15,6 +15,7 @@ use App\Modules\Importing\Services\ExcelImportService;
 use App\Modules\Importing\Services\ImportJobService;
 use App\Modules\Importing\Services\ImportMappingService;
 use App\Modules\Importing\Services\ImportPreviewService;
+use App\Modules\Importing\Services\PageJaunesContactResolver;
 use App\Modules\Importing\Support\ImportSource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -104,6 +105,7 @@ class ImportJobController extends Controller
         Gate::authorize(PermissionName::RecipientsImport->value);
 
         $job = $this->find($uuid);
+        $this->assertEditable($job);
 
         if (! $request->has('mapping')) {
             return $this->updateLegacyMapping($request, $job);
@@ -132,6 +134,7 @@ class ImportJobController extends Controller
         Gate::authorize(PermissionName::RecipientsImport->value);
 
         $job = $this->find($uuid);
+        $this->assertEditable($job);
 
         $data = $request->validate([
             'list_ids' => ['present', 'array', 'max:50'],
@@ -153,6 +156,10 @@ class ImportJobController extends Controller
 
         if (! empty($data['new_list'])) {
             Gate::authorize(PermissionName::RecipientsManage->value);
+        }
+
+        if (! empty($data['mark_blocklisted'])) {
+            Gate::authorize(PermissionName::SuppressionManage->value);
         }
 
         $job->update([
@@ -203,7 +210,14 @@ class ImportJobController extends Controller
             ]);
         }
 
-        $job->update(['status' => 'importing']);
+        if ($job->mark_blocklisted) {
+            Gate::authorize(PermissionName::SuppressionManage->value);
+        }
+
+        // Atomic ready -> importing flip: a concurrent commit gets 0 rows and a 409.
+        $flipped = ImportJob::query()->where('id', $job->id)->where('status', 'ready')->update(['status' => 'importing']);
+        abort_if($flipped === 0, 409, 'Import déjà lancé.');
+
         CommitImportJob::dispatch($job->id, $excludedRowIds);
 
         return (new ImportJobResource($job->fresh()->load('user')))->response()->setStatusCode(202);
@@ -236,6 +250,12 @@ class ImportJobController extends Controller
 
             fclose($out);
         }, "import-{$job->uuid}-erreurs.csv", ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Mapping/settings are frozen once the import started: re-mapping would delete staged rows mid-commit. */
+    private function assertEditable(ImportJob $job): void
+    {
+        abort_if(in_array($job->status, ['importing', 'completed', 'completed_with_errors'], true), 409, 'Import déjà lancé.');
     }
 
     private function find(string $uuid): ImportJob
@@ -272,7 +292,10 @@ class ImportJobController extends Controller
 
     private function createFromPageJaunes(StoreImportJobRequest $request): ImportJob
     {
-        $contacts = $request->input('contacts', []);
+        $contacts = app(PageJaunesContactResolver::class)->resolve(
+            (array) $request->input('external_ids', []),
+            (array) $request->input('contacts', []),
+        );
 
         if ($contacts === []) {
             throw ValidationException::withMessages([
@@ -280,10 +303,12 @@ class ImportJobController extends Controller
             ]);
         }
 
+        // The company id is NOT written as EXT_ID (unique per recipient): the commit links
+        // recipients to `pagejaunes_company_cache` by e-mail instead.
         $out = fopen('php://temp', 'w+b');
-        fputcsv($out, ['EMAIL', 'SOCIETE', 'EXT_ID'], ';');
+        fputcsv($out, ['EMAIL', 'SOCIETE'], ';');
         foreach ($contacts as $contact) {
-            fputcsv($out, [$contact['email'], $contact['company_name'] ?? '', $contact['external_id'] ?? ''], ';');
+            fputcsv($out, [$contact['email'], $contact['company_name']], ';');
         }
         rewind($out);
         $csv = stream_get_contents($out);

@@ -4,7 +4,8 @@ namespace App\Modules\Recipients\Lists\Jobs;
 
 use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Lists\Services\ListService;
-use App\Modules\Recipients\Lists\Support\ListOperationStore;
+use App\Modules\Recipients\Views\Contracts\AsyncOperations;
+use App\Modules\Recipients\Views\Models\AsyncOperation;
 use App\Modules\Recipients\Models\RecipientList;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,20 +24,25 @@ class DeleteListJob implements ShouldQueue
     public function __construct(
         public readonly int $listId,
         public readonly bool $deleteContacts,
-        public readonly string $operationId,
+        public readonly int $operationId,
         public readonly ?int $actorId,
     ) {}
 
-    public function handle(ListService $lists, ListOperationStore $ops): void
+    public function handle(ListService $lists, AsyncOperations $ops): void
     {
-        $ops->update($this->operationId, ['status' => 'running']);
+        $op = AsyncOperation::query()->findOrFail($this->operationId);
+        $ops->progress($op, 0);
         $list = RecipientList::query()->findOrFail($this->listId);
         $lists->delete($list, $this->deleteContacts, $this->actorId ? User::query()->find($this->actorId) : null);
-        $ops->complete($this->operationId, []);
+        $op->forceFill(['processed' => $op->total]);
+        $ops->complete($op, []);
     }
 
     public function failed(Throwable $e): void
     {
-        app(ListOperationStore::class)->fail($this->operationId, $e->getMessage());
+        $op = AsyncOperation::query()->find($this->operationId);
+        if ($op !== null) {
+            app(AsyncOperations::class)->fail($op, $e->getMessage());
+        }
     }
 }

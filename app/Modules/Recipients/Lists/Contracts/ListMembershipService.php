@@ -2,6 +2,7 @@
 
 namespace App\Modules\Recipients\Lists\Contracts;
 
+use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Lists\Services\ListMembershipService as Implementation;
 use App\Modules\Recipients\Models\RecipientList;
 use Illuminate\Container\Attributes\Bind;
@@ -30,10 +31,14 @@ interface ListMembershipService
     public function recount(RecipientList $list): void;
 
     /**
-     * Resolves a ContactSelection (§45.3) to internal recipient ids.
+     * Resolves a ContactSelection (§45.3) to internal recipient ids
+     * (filters, segment, view, scope and the 100k cap included).
      *
      * @param  array<string, mixed>  $selection
      * @return list<int>
      */
-    public function resolveSelection(array $selection): array;
+    public function resolveSelection(array $selection, ?User $user = null): array;
+
+    /** @param  array<string, mixed>  $selection */
+    public function countSelection(array $selection, ?User $user = null): int;
 }

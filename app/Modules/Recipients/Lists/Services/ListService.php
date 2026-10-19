@@ -2,8 +2,10 @@
 
 namespace App\Modules\Recipients\Lists\Services;
 
+use App\Domain\Enums\RecipientListType;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Identity\Models\User;
+use App\Modules\Recipients\Events\RecipientDeleted;
 use App\Modules\Recipients\Lists\Models\ListFolder;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
@@ -40,6 +42,11 @@ class ListService
 
         $query = RecipientList::query()->with(['createdBy', 'segment']);
 
+        // Dynamic lists are legacy: segments replace them (docs/45 §45.5.6).
+        if (! filter_var($filters['include_legacy'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+            $query->where('type', '!=', RecipientListType::DynamicSegment->value);
+        }
+
         if (($q = trim((string) ($filters['q'] ?? ''))) !== '') {
             $query->where('name', 'like', '%'.$q.'%');
         }
@@ -56,9 +63,7 @@ class ListService
     /** @param  array<string, mixed>  $data */
     public function create(array $data, User $actor): RecipientList
     {
-        $list = isset($data['rules'])
-            ? $this->legacy->createDynamicSegment($data['name'], $data['description'] ?? null, $data['rules'], $actor)
-            : $this->legacy->createStatic($data['name'], $data['description'] ?? null, $actor);
+        $list = $this->legacy->createStatic($data['name'], $data['description'] ?? null, $actor);
 
         if (! empty($data['folder_id'])) {
             $list->forceFill(['folder_id' => $this->folderId($data['folder_id'])])->save();
@@ -124,9 +129,14 @@ class ListService
     {
         DB::transaction(function () use ($list, $deleteContacts): void {
             if ($deleteContacts) {
+                // Per-model deletes + RecipientDeleted so the other lists' counters get recounted.
                 DB::table('recipient_list_recipient')->where('recipient_list_id', $list->id)->orderBy('recipient_id')
                     ->select('recipient_id')->chunk(1000, function ($rows): void {
-                        Recipient::query()->whereIn('id', $rows->pluck('recipient_id'))->delete();
+                        Recipient::query()->whereIn('id', $rows->pluck('recipient_id'))->get()
+                            ->each(function (Recipient $recipient): void {
+                                $recipient->delete();
+                                event(new RecipientDeleted($recipient->id, $recipient->email));
+                            });
                     });
             }
             $list->delete();

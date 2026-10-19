@@ -3,7 +3,8 @@
 namespace App\Modules\Recipients\Lists\Jobs;
 
 use App\Modules\Recipients\Lists\Services\ListExportService;
-use App\Modules\Recipients\Lists\Support\ListOperationStore;
+use App\Modules\Recipients\Views\Contracts\AsyncOperations;
+use App\Modules\Recipients\Views\Models\AsyncOperation;
 use App\Modules\Recipients\Models\RecipientList;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,15 +20,18 @@ class ExportListJob implements ShouldQueue
 
     public int $tries = 1;
 
-    public function __construct(public readonly int $listId, public readonly string $operationId) {}
+    public function __construct(public readonly int $listId, public readonly int $operationId) {}
 
     public function handle(ListExportService $exports): void
     {
-        $exports->build(RecipientList::query()->findOrFail($this->listId), $this->operationId);
+        $exports->build(RecipientList::query()->findOrFail($this->listId), AsyncOperation::query()->findOrFail($this->operationId));
     }
 
     public function failed(Throwable $e): void
     {
-        app(ListOperationStore::class)->fail($this->operationId, $e->getMessage());
+        $op = AsyncOperation::query()->find($this->operationId);
+        if ($op !== null) {
+            app(AsyncOperations::class)->fail($op, $e->getMessage());
+        }
     }
 }
