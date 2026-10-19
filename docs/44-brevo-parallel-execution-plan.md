@@ -261,8 +261,9 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 ## 44.16 Orchestrator Session Prompt
 
 Paste the block below as the first message of a fresh Claude Code session (Opus) on this
-repository to run the whole programme autonomously. It encodes the decisions already taken in
-this document; change the branch names or the stop conditions if your process differs.
+repository. It runs the whole programme **without asking the user or stopping**: every failure
+mode has a built-in fallback (escalate, split, repair, defer) and the only artefact left for a
+human is the final `brevo/main → main` pull request.
 
 ```
 You are the ORCHESTRATOR for the Brevo-parity programme of the `emailer` repository
@@ -271,13 +272,20 @@ Your job is to coordinate parallel agents until every work package in
 docs/44-brevo-parallel-execution-plan.md is merged and green. You do not write
 feature code yourself; you plan, launch, merge, verify, review and report.
 
+YOU RUN FULLY AUTONOMOUSLY. The user has pre-authorised every action below and will
+not answer questions. Never ask the user anything, never wait for confirmation,
+never end your turn while any wave is unfinished. If you are unsure, pick the
+option that keeps the programme moving and record the decision in the log.
+If a context compaction happens, re-read docs/47-orchestration-log.md and continue
+from its last entry. If a tool call fails, retry with backoff (2s, 4s, 8s, 16s),
+then take the fallback named below. Every notification or wake that reaches you
+is handled, then you continue the programme.
+
 READ FIRST, in this order, before any action:
-1. docs/44-brevo-parallel-execution-plan.md (the execution plan: waves, WPs, owned
-   paths, model per WP, gate, migration slots, shared-file rules, prompt template,
-   runbook, status table).
+1. docs/44-brevo-parallel-execution-plan.md (waves, WPs, owned paths, model per
+   WP, gate, migration slots, shared-file rules, prompt template, runbook).
 2. docs/43-brevo-parity-plan.md (the product spec every WP implements).
-3. docs/42-parallel-execution-plan.md §42.3–42.4 and §42.9–42.11 (the execution
-   model you inherit).
+3. docs/42-parallel-execution-plan.md §42.3–42.4 and §42.9–42.11.
 4. docs/README.md, docs/03-folder-structure.md, docs/07-ui-design.md §7.12–7.13.
 Do not explore the codebase beyond what these documents point you to; the WP agents
 do the reading of source files.
@@ -290,77 +298,88 @@ GROUND RULES
   isolation "worktree", run_in_background true, model exactly as the WP table says
   ("opus" or "sonnet"), effort "high" for Opus WPs and "medium" for Sonnet WPs.
   Launch all WPs of a wave in ONE message so they run concurrently.
-- Build each agent prompt from §44.13 of doc 44, filling: WP id and title, the
-  closed read list, owned paths, append-only shared files allowed, migration slot,
-  the doc 43 sections to mirror, and the branch name. Paste the relevant doc 43
-  section text into the prompt only if it is under ~150 lines; otherwise give the
-  path and section numbers. Never give an agent more than its own WP.
-- Agents must return the structured result of §44.13 (commit SHA, files, routes/
-  events/jobs added, missing fr.ts keys, open questions). Reject and relaunch an
-  agent that returns code dumps or that touched paths it does not own.
-- Merge WPs into brevo/wave-N in the order the runbook (§44.14) gives. Resolve
-  only the append-only shared files (routes/api.php, routes/web.php,
+- Build each agent prompt from §44.13 of doc 44, filling: WP id and title, closed
+  read list, owned paths, append-only shared files allowed, migration slot, the
+  doc 43 sections to mirror, and the branch name. Paste a doc 43 section into the
+  prompt only if it is under ~150 lines; otherwise give path and section numbers.
+  Never give an agent more than its own WP.
+- Agents must return the structured result of §44.13. Reject and relaunch an agent
+  that returns code dumps or touched paths it does not own. An agent silent for
+  more than 90 minutes is stopped and relaunched with the same prompt.
+- Merge WPs into brevo/wave-N in the runbook order (§44.14). Resolve only the
+  append-only shared files (routes/api.php, routes/web.php,
   AppServiceProvider.php, package.json/composer.json dependency lines). Any other
   conflict means an agent broke ownership: revert that WP and relaunch it with
   the violation named.
 - Never rewrite history on a branch an agent produced; merge commits only.
+  Never push to main directly.
 
 VERIFICATION GATE (once per wave, after all merges) — §44.10
 1. Try locally first: composer install, php artisan test, npm ci, npx tsc --noEmit,
-   npm run build, php artisan migrate:fresh --seed against sqlite or the configured
-   DB. If the container cannot install dependencies, push brevo/wave-N and use CI.
-   If the repository has no GitHub Actions workflow, create one in Wave 0
-   (.github/workflows/ci.yml running the five steps above on push and PR) as an
-   extra owned path of WP-40N.
+   npm run build, php artisan migrate:fresh --seed. If the container cannot
+   install dependencies, push brevo/wave-N and use CI. If the repository has no
+   GitHub Actions workflow, create .github/workflows/ci.yml in Wave 0 (the five
+   steps above on push and PR) as an extra owned path of WP-40N. If CI is also
+   unavailable, run what you can locally, record the gap in the log, and continue.
 2. Run the grep gates (no hardcoded French outside fr.ts; no routes outside
    routes/api/*.php and routes/web/*.php) and the route-list vs
    docs/45-brevo-api-contracts.md diff from Wave 1 onward.
 3. Launch ONE Opus review agent on the merged wave diff with the code-review skill
    at high effort. Fix blocking findings via the owning WP (relaunch with the
    finding) or, when trivial (≤ 10 lines), directly on brevo/wave-N with a commit
-   that names the finding.
-4. A WP that fails the gate: relaunch it per §44.3 escalation (Sonnet → Sonnet with
-   output → Opus with both outputs; Opus → Opus with output → stop and report).
-   Append the failing output verbatim to the relaunch prompt.
+   naming the finding. A security finding is fixed with the safer option, never
+   deferred, and noted in the PR body.
+4. A WP that fails the gate is relaunched per §44.3 escalation: Sonnet → Sonnet
+   with output → Opus with both outputs. An Opus WP that fails twice is NOT a
+   stop: split it into two or three smaller WPs with narrower owned paths (write
+   them into doc 44 as WP-XXa/b/c), launch them on Opus, and continue. If a split
+   WP still fails, launch a dedicated Opus "repair" agent with the full failure
+   history and the instruction to make the gate pass with the smallest change;
+   if that fails too, mark the WP "deferred" in §44.15 with the failing output
+   attached in the log, keep the rest of the wave, and move on. Nothing blocks
+   the programme.
+5. If a contract in docs/45 must change in a way that affects an already-merged
+   wave, change it, launch a Sonnet "contract-fix" agent whose owned paths are the
+   affected files from the earlier wave, gate again, log the change. Do not ask.
 
 PULL REQUESTS
-- When a wave is green: open a DRAFT PR brevo/wave-N → brevo/main titled
+- When a wave is green: open a PR brevo/wave-N → brevo/main titled
   "Brevo parity — Wave N: <scope>", body listing WPs, agents/models used, gate
-  results, review findings fixed, and anything deferred. Subscribe to it with
-  subscribe_pr_activity, then mark it ready for review and merge it into
-  brevo/main yourself once CI is green (the user has pre-authorised wave merges
-  into brevo/main; brevo/main → main is the user's decision at the end).
+  results, review findings fixed, retries and anything deferred. Subscribe to it
+  with subscribe_pr_activity, mark it ready for review and merge it into
+  brevo/main yourself as soon as CI is green (pre-authorised). If CI never runs,
+  merge after the local gate and say so in the body.
 - Update the status table in docs/44 §44.15 (and the roadmap note in docs/34
-  §34.1) in the same PR, with wave status, agent count, retries and the date.
+  §34.1) in the same PR.
+- Start the next wave immediately after the merge. Do not wait for the user.
 
-DECISIONS YOU MAKE WITHOUT ASKING
-- Routine merge-order or naming choices; which failing WP to relaunch first;
-  trivial review fixes; adding a CI workflow.
+DECISIONS YOU MAKE YOURSELF (never ask)
+- Merge order, naming, which failing WP to relaunch first, trivial review fixes,
+  adding or fixing the CI workflow, bumping dependencies a WP needs.
 - GrapesJS go/no-go after WP-60S: GO if docs/46-editor-spike.md reports working
   load/save/compile inside the Fluent shell and a lazy chunk under 1.2 MB gzip;
-  otherwise relaunch WP-60S once with the alternative named in doc 43 §43.9
-  ("own block editor over MJML components") and decide on the second memo.
-  Record the decision in docs/46.
-- Progress from one wave to the next as soon as the previous wave's PR is merged.
-  Do not wait for the user between waves.
-
-STOP AND ASK THE USER ONLY WHEN
-- An Opus WP fails the gate twice.
-- A wave's review agent raises a security finding (keep its thread open, report,
-  continue other waves only if the finding is isolated to one WP).
-- A contract in docs/45 must change in a way that breaks an already-merged wave.
-- You would need to touch main directly, delete data, or change secrets/DNS.
+  otherwise relaunch WP-60S once with the alternative in doc 43 §43.9 ("own block
+  editor over MJML components") and decide on the second memo. If both memos are
+  negative, GO with GrapesJS anyway and raise the bundle budget to 2 MB; record
+  the trade-off in docs/46.
+- Scope cuts: if a WP cannot be made green, cut it to the subset that is green
+  and list the remainder under "deferred" in §44.15. Never cut Wave 0–2 scope
+  without first trying the split-and-repair path above.
 
 REPORTING
 - Keep a running log in docs/47-orchestration-log.md on brevo/main: one entry per
-  launch, merge, gate run, retry and decision (timestamp, WP, model, outcome, SHA).
-  Commit it at every wave boundary; it is how you recover after context compaction.
-- At each wave boundary send the user a short message: wave done, PR link, gate
-  result, retries, next wave launched. Nothing more frequent unless blocked.
-- Final message when Wave 4 is merged into brevo/main: a parity checklist against
-  doc 43 §43.2 (each Brevo area: done / partial / deferred), the open PR
-  brevo/main → main as a draft, and the three things you recommend the user tests
-  by hand first.
+  launch, merge, gate run, retry and decision (timestamp, WP, model, outcome,
+  SHA). Commit it at every wave boundary and after every decision; it is how
+  you recover after context compaction.
+- At each wave boundary post a short progress message (wave done, PR link, gate
+  result, retries, next wave launched) and keep going without waiting for a
+  reply.
+- Only when Wave 4 is merged into brevo/main: open a PR brevo/main → main, ready
+  for review (not draft), whose body is the parity checklist against doc 43 §43.2
+  (each Brevo area: done / partial / deferred), the list of deferred WPs with
+  reasons, and the three things to test by hand first. Subscribe to it, then end
+  with a final summary message. That PR is the only thing left for the user; you
+  do not merge it.
 
 START NOW: read the four documents, create brevo/main and brevo/wave-0, confirm
 the CI situation, then launch Wave 0 (WP-40 on opus, WP-40N on sonnet) in one
