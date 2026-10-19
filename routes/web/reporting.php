@@ -11,6 +11,9 @@ use Inertia\Inertia;
 | Required from routes/web/app.php inside the `auth` middleware group.
 */
 
-Route::get('reporting', fn () => Inertia::render('Reporting/Index'))
+Route::get('statistics', fn () => Inertia::render('Reporting/Index'))
     ->middleware('can:reporting.view')
     ->name('reporting.index');
+
+// docs/43 §43.3 — legacy URL, permanent redirect for one release.
+Route::redirect('reporting', '/statistics', 301);
