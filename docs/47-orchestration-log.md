@@ -93,3 +93,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 2 | fix-A | opus | Returned; B2, B3, B5, S2, S3, S9, S11, S13, N3, N4, N6, N8, N9 fixed; 346 tests green; tsc clean; shared `AttributeStorageMap` helper added | 287abec |
 | 2026-10-19 | 2 | merge | — | Merged fix-A (17a5a62), fix-B (e196e7a), fix-C (dc30df4) with no conflicts; soft-bounce badge label moved to fr.ts; final gate running | running |
 | 2026-10-19 | 2 | gate | — | Final suite: 1 failed / 658 passed — `SendEmailJobTest` hard-bounce test asserted nothing dispatched; the new queued list-recount listener fires legitimately → assertion narrowed to "no SendEmailJob retry" (trivial); confirming run started; draft PR opened | 743e140 |
+| 2026-10-20 | 2 | gate | — | Confirming full suite: **659 passed, 1 skipped, 0 failed**; PR #16 marked ready | green |
