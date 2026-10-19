@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Field, Input, Link, MessageBar, MessageBarBody, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { Field, Input, MessageBar, MessageBarBody, Text, makeStyles, tokens } from '@fluentui/react-components';
 import SenderPicker from '@/Components/Senders/SenderPicker';
 import { useText } from '@/Hooks/useText';
 import { updateCampaignV2 } from '@/Lib/api/campaigns';
@@ -119,18 +119,13 @@ export function SenderCard({ campaign, editable, expanded, onExpand, onCollapse,
                     <MessageBarBody>{error}</MessageBarBody>
                 </MessageBar>
             )}
-            <Field validationMessage={errors.sender_id}>
-                <SenderPicker
-                    value={senderId}
-                    onChange={handleSenderChange}
-                    verifiedOnly
-                    disabled={saving}
-                    label={t.campaignSetup.sender.label}
-                />
-            </Field>
-            <Link href="/settings/senders" target="_blank" rel="noreferrer">
-                {t.campaignSetup.sender.manage}
-            </Link>
+            <SenderPicker
+                value={senderId}
+                onChange={handleSenderChange}
+                verifiedOnly
+                disabled={saving}
+                label={t.campaignSetup.sender.label}
+            />
             <Field
                 label={t.campaignSetup.sender.replyTo}
                 hint={t.campaignSetup.sender.replyToHelp}

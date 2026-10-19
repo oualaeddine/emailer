@@ -27,7 +27,9 @@ class TemplateTestSendService
         $ids = [];
 
         foreach (array_unique(array_map('strtolower', $emails)) as $email) {
-            $recipient = Recipient::query()->firstOrCreate(
+            // withTrashed: a soft-deleted contact is reused as-is (not restored). RecipientStatus has no
+            // Inactive case, so newly created test contacts keep the default Active status.
+            $recipient = Recipient::withTrashed()->firstOrCreate(
                 ['email' => $email],
                 ['source' => RecipientSource::Manual->value, 'status' => 'active'],
             );

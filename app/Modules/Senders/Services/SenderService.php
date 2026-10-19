@@ -58,15 +58,26 @@ class SenderService
         }
 
         $sender = DB::transaction(function () use ($data, $email, $domain, $autoVerified, $wantsDefault, $actor): Sender {
-            $sender = Sender::query()->create([
+            $attributes = [
                 'name' => $data['name'],
                 'email' => $email,
                 'reply_to' => $data['reply_to'] ?? null,
                 'domain_id' => $domain?->id,
                 'created_by' => $actor?->id,
+                'is_default' => false,
                 'verification_method' => $autoVerified ? 'domain' : null,
                 'verified_at' => $autoVerified ? now() : null,
-            ]);
+                'verification_sent_at' => null,
+            ];
+            // The DB unique index spans soft-deleted rows: revive a trashed sender with the same email.
+            $trashed = Sender::onlyTrashed()->where('email', $email)->first();
+            if ($trashed !== null) {
+                $trashed->restore();
+                $trashed->update($attributes);
+                $sender = $trashed;
+            } else {
+                $sender = Sender::query()->create($attributes);
+            }
             if ($wantsDefault) {
                 $this->makeDefault($sender);
             }
@@ -173,6 +184,6 @@ class SenderService
         }
 
         return DB::table('campaigns')->where('sender_id', $sender->id)
-            ->whereIn('status', ['scheduled', 'sending', 'running'])->exists();
+            ->whereIn('status', ['scheduled', 'running', 'paused', 'suspended'])->exists();
     }
 }

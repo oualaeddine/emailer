@@ -195,7 +195,7 @@ class TemplateV2Test extends TestCase
         $zip = new ZipArchive();
         $zip->open($path, ZipArchive::OVERWRITE);
         $zip->addFromString('news/index.html', '<html><head><title>Zip</title></head><body><img src="images/logo.png"><script>x()</script></body></html>');
-        $zip->addFromString('news/images/logo.png', 'PNGDATA');
+        $zip->addFromString('news/images/logo.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='));
         $zip->close();
 
         $response = $this->actingAs($this->manager)->post('/api/v1/templates/import-zip', [

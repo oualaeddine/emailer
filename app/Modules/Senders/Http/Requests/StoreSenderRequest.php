@@ -4,6 +4,7 @@ namespace App\Modules\Senders\Http\Requests;
 
 use App\Domain\Enums\PermissionName;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSenderRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class StoreSenderRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:254', 'unique:senders,email'],
+            'email' => ['required', 'email', 'max:254', Rule::unique('senders', 'email')->whereNull('deleted_at')],
             'reply_to' => ['nullable', 'email', 'max:254'],
             'is_default' => ['sometimes', 'boolean'],
         ];

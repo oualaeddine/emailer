@@ -154,8 +154,17 @@ class DomainAuthService
         ));
         if ($candidates === []) {
             $cname = $this->dns->cname($record['host']);
+            if ($cname === []) {
+                return ['missing', null];
+            }
+            // Delegated DKIM: the CNAME target must itself publish the expected key.
+            foreach ($this->dns->txt(rtrim($cname[0], '.')) as $candidate) {
+                if ($expected !== '' && str_contains($this->normalise($candidate), $expected)) {
+                    return ['valid', $cname[0]];
+                }
+            }
 
-            return $cname === [] ? ['missing', null] : ['valid', $cname[0]];
+            return ['invalid', $cname[0]];
         }
         foreach ($candidates as $candidate) {
             if ($expected !== '' && str_contains($this->normalise($candidate), $expected)) {
