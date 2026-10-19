@@ -81,3 +81,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-19 | 2 | WP-50 | sonnet | Returned; 27 files; 38 tests green; merged first per runbook | d30cd42 → merged |
 | 2026-10-19 | 2 | WP-55 | sonnet | Returned; owned + 1 append-only; 20 tests green; tsc clean; 6 wizard labels kept in `Components/Imports/labels.ts` (to move into fr.ts at gate); PagesJaunes import resolved client-side (contacts list sent) | 801b4cb |
 | 2026-10-19 | 2 | WP-54U | opus | Returned; 21 files, owned + 1 append-only; tsc clean; 6 route tests green; `ConditionBuilder` matches §45.5.3 (pure) + `ConnectedConditionBuilder` fetches catalog/count | ee42522 |
+| 2026-10-19 | 2 | WP-51 | opus | Returned; 15 files, owned + 1 append-only; tsc clean except the sibling ConditionBuilder import (WP-54U provides index.tsx default export); 5 route tests green | c7b1895 |
