@@ -64,4 +64,18 @@ class MergeVariableResolverTest extends TestCase
 
         $this->assertSame(['recipient.first_name', 'recipient.custom_fields.industry'], $names);
     }
+
+    public function test_it_resolves_ui_contact_aliases_case_insensitively(): void
+    {
+        $recipient = Recipient::factory()->make([
+            'first_name' => 'Amine', 'last_name' => 'Benali', 'email' => 'a@b.dz', 'company_name' => 'Acme',
+        ]);
+
+        $result = (new MergeVariableResolver)->resolve(
+            '{{ contact.PRENOM }} {{contact.nom}} <{{ contact.EMAIL }}> {{ contact.Societe }} {{ contact.UNKNOWN|x }}',
+            $recipient,
+        );
+
+        $this->assertSame('Amine Benali <a@b.dz> Acme x ', $result);
+    }
 }

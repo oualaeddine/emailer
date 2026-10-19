@@ -13,6 +13,7 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Senders\Models\Sender;
+use App\Modules\Templates\Services\HostResolver;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -32,6 +33,17 @@ class CampaignChecklistTest extends TestCase
         parent::setUp();
         $this->seed(RolePermissionSeeder::class);
         Cache::flush();
+        $this->app->instance(HostResolver::class, new class extends HostResolver
+        {
+            public function resolve(string $host): array
+            {
+                return match (true) {
+                    str_starts_with($host, 'internal') => ['10.0.0.5'],
+                    $host === 'metadata.test' => ['169.254.169.254'],
+                    default => ['93.184.216.34'],
+                };
+            }
+        });
     }
 
     private function campaign(array $attrs = []): Campaign
@@ -245,5 +257,54 @@ class CampaignChecklistTest extends TestCase
 
         $this->actingAs($viewer)->postJson("/api/v1/campaigns/{$c->uuid}/checklist/links")->assertForbidden();
         Queue::assertNothingPushed();
+    }
+
+    public function test_link_checker_blocks_non_public_hosts_without_sending(): void
+    {
+        Http::fake(['*' => Http::response('', 200)]);
+
+        $result = app(LinkChecker::class)->check('<a href="http://internal.test/admin">x</a><a href="http://metadata.test/latest">m</a>');
+
+        $this->assertSame(2, $result['checked']);
+        $this->assertSame([
+            ['url' => 'http://internal.test/admin', 'status' => 0, 'reason' => 'blocked'],
+            ['url' => 'http://metadata.test/latest', 'status' => 0, 'reason' => 'blocked'],
+        ], $result['broken']);
+        Http::assertNothingSent();
+        $this->assertSame(0, app(LinkChecker::class)->probe('http://internal.test/'));
+    }
+
+    public function test_link_checker_does_not_follow_redirects_and_counts_3xx_ok(): void
+    {
+        Http::fake(['*' => Http::response('', 302, ['Location' => 'http://internal.test/secret'])]);
+
+        $result = app(LinkChecker::class)->check('<a href="https://short.test/x">x</a>');
+
+        $this->assertSame([], $result['broken']);
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => $request->url() === 'https://short.test/x');
+    }
+
+    public function test_probe_many_returns_statuses_in_parallel_batches(): void
+    {
+        Http::fake([
+            'gone.test/*' => Http::response('', 404),
+            'blocked.test/*' => Http::response('', 200),
+            '*' => Http::response('', 200),
+        ]);
+        $urls = [];
+        for ($i = 0; $i < 25; $i++) {
+            $urls[] = "https://site{$i}.test/";
+        }
+        $urls[] = 'https://gone.test/a';
+        $urls[] = 'http://internal.test/a';
+
+        $result = app(LinkChecker::class)->probeMany($urls);
+
+        $this->assertCount(27, $result);
+        $this->assertSame(200, $result['https://site24.test/']);
+        $this->assertSame(404, $result['https://gone.test/a']);
+        $this->assertSame(0, $result['http://internal.test/a']);
+        $this->assertSame([], app(LinkChecker::class)->probeMany([]));
     }
 }

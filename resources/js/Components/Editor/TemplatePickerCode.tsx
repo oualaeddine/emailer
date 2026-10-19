@@ -35,8 +35,10 @@ export function TemplatePickerCode({ disabled, onUse }: TemplatePickerCodeProps)
             const result = await task();
             setHtml(result.html);
             setWarnings(result.warnings);
-        } catch {
-            setError(t.templatePicker.code.invalidUrl);
+        } catch (err) {
+            const message = (err as { response?: { data?: { message?: unknown; errors?: Record<string, string[]> } } })?.response?.data;
+            const first = message?.errors ? Object.values(message.errors)[0]?.[0] : undefined;
+            setError(first ?? (typeof message?.message === 'string' ? message.message : t.templatePicker.code.invalidUrl));
         } finally {
             setBusy(false);
         }

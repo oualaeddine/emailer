@@ -66,10 +66,16 @@ class TemplateZipImportService
             $disk = Storage::disk('public');
 
             $assets = [];
+            $warnings = [];
             $used = [];
             foreach ($images as $index => $name) {
                 $contents = $zip->getFromIndex($index);
                 if ($contents === false) {
+                    continue;
+                }
+                if (@getimagesizefromstring($contents) === false) {
+                    $warnings[] = "Le fichier « {$name} » n'est pas une image valide et a été ignoré.";
+
                     continue;
                 }
                 $base = Str::slug(pathinfo($name, PATHINFO_FILENAME)) ?: 'image';
@@ -97,7 +103,7 @@ class TemplateZipImportService
 
         $clean = $this->sanitizer->clean($html);
 
-        return ['html' => $clean['html'], 'title' => $clean['title'], 'assets' => $assets, 'warnings' => $clean['warnings']];
+        return ['html' => $clean['html'], 'title' => $clean['title'], 'assets' => $assets, 'warnings' => array_merge($clean['warnings'], $warnings)];
     }
 
     private function fail(string $message): never

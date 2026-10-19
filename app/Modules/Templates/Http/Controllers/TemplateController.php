@@ -19,8 +19,10 @@ use App\Modules\Templates\Services\TemplateTestSendService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * docs/29-api-specification.md — /api/v1/templates.
@@ -108,6 +110,12 @@ class TemplateController extends Controller
 
     public function testSend(TestSendTemplateRequest $request, Template $template, TemplateTestSendService $testSend): JsonResponse
     {
+        $key = "template-test-send:{$template->id}";
+        if (RateLimiter::tooManyAttempts($key, 10)) {
+            throw new ThrottleRequestsException('Limite de 10 envois de test par heure atteinte pour ce modèle.');
+        }
+        RateLimiter::hit($key, 3600);
+
         $result = $testSend->send($template, $request->input('emails'), $request->input('subject'));
 
         return response()->json(['data' => $result], 202);

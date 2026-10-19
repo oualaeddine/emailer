@@ -231,8 +231,77 @@ class SendersTest extends TestCase
     {
         $d = SendingDomain::factory()->create();
         FakeDnsResolver::$cname['pjm1._domainkey.'.$d->domain] = ['pjm1.dkim.example.test'];
+        FakeDnsResolver::$txt['pjm1.dkim.example.test'] = [collect($d->records)->firstWhere('kind', 'dkim')['value']];
         app(\App\Modules\Senders\Services\DomainAuthService::class)->runChecks($d);
         $this->assertSame('valid', $d->refresh()->recordStatus('dkim'));
+    }
+
+    public function test_dkim_cname_to_wrong_or_empty_target_is_invalid(): void
+    {
+        $d = SendingDomain::factory()->create();
+        FakeDnsResolver::$cname['pjm1._domainkey.'.$d->domain] = ['pjm1.dkim.example.test'];
+        app(\App\Modules\Senders\Services\DomainAuthService::class)->runChecks($d);
+        $this->assertSame('invalid', $d->refresh()->recordStatus('dkim'));
+
+        FakeDnsResolver::$txt['pjm1.dkim.example.test'] = ['v=DKIM1; k=rsa; p=WRONGKEY'];
+        app(\App\Modules\Senders\Services\DomainAuthService::class)->runChecks($d);
+        $this->assertSame('invalid', $d->refresh()->recordStatus('dkim'));
+    }
+
+    public function test_deleted_sender_email_can_be_recreated(): void
+    {
+        Mail::fake();
+        $m = $this->manager();
+        $id = $this->actingAs($m)->postJson('/api/v1/senders', ['name' => 'Old', 'email' => 'again@exemple.dz'])->assertCreated()->json('data.id');
+        $this->actingAs($m)->deleteJson("/api/v1/senders/$id")->assertNoContent();
+        $this->assertSoftDeleted('senders', ['email' => 'again@exemple.dz']);
+
+        $this->actingAs($m)->postJson('/api/v1/senders', ['name' => 'New', 'email' => 'again@exemple.dz'])
+            ->assertCreated()->assertJsonPath('data.name', 'New');
+
+        $this->assertSame(1, Sender::withTrashed()->where('email', 'again@exemple.dz')->count());
+        $this->assertNull(Sender::where('email', 'again@exemple.dz')->first()->deleted_at);
+        // An active duplicate is still refused.
+        $this->actingAs($m)->postJson('/api/v1/senders', ['name' => 'Dup', 'email' => 'again@exemple.dz'])->assertStatus(422);
+    }
+
+    /** @dataProvider blockingStatuses */
+    public function test_sender_in_use_by_campaign_in_status_cannot_be_deleted(string $status, bool $blocked): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasColumn('campaigns', 'sender_id')) {
+            $this->markTestSkipped('campaigns.sender_id missing');
+        }
+        $m = $this->manager();
+        $sender = Sender::factory()->create();
+        \Illuminate\Support\Facades\DB::table('campaigns')->insert([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(), 'name' => 'C', 'subject' => 'S', 'html_body' => '<p>x</p>',
+            'status' => $status, 'sender_id' => $sender->id, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->actingAs($m)->deleteJson("/api/v1/senders/{$sender->uuid}")->assertStatus($blocked ? 409 : 204);
+    }
+
+    /** @return array<string, array{string, bool}> */
+    public static function blockingStatuses(): array
+    {
+        return [
+            'scheduled' => ['scheduled', true], 'running' => ['running', true], 'paused' => ['paused', true],
+            'suspended' => ['suspended', true], 'draft' => ['draft', false],
+        ];
+    }
+
+    public function test_default_sender_migration_is_idempotent_and_seeds(): void
+    {
+        config(['mail.from.address' => 'noreply@prod.dz', 'mail.from.name' => 'Prod']);
+        $migration = require database_path('migrations/2026_10_20_100003_seed_default_sender.php');
+        $migration->up(); // no-op under the testing environment
+        $this->assertSame(0, Sender::count());
+
+        $migration->seed();
+        $migration->seed();
+
+        $this->assertSame(1, Sender::count());
+        $this->assertTrue(Sender::first()->is_default);
     }
 
     public function test_default_sender_seeder_is_idempotent(): void
