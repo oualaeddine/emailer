@@ -10,6 +10,7 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Recipients\Models\Segment;
+use App\Modules\Senders\Models\Sender;
 use Illuminate\Support\Collection;
 
 /**
@@ -72,7 +73,8 @@ trait BuildsCampaignFixtures
         return app(CampaignService::class)->create([
             'name' => 'Campagne '.uniqid(),
             'subject' => 'Objet',
-            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p>',
+            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p><a href="{{ unsubscribe }}">Se désinscrire</a>',
+            'sender_id' => Sender::factory()->verified()->create()->id,
             'audience' => $audience,
             ...$attributes,
         ], $owner);
