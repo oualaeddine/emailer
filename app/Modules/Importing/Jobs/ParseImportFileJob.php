@@ -9,6 +9,7 @@ use App\Modules\Importing\Services\CsvImportService;
 use App\Modules\Importing\Services\ExcelImportService;
 use App\Modules\Importing\Services\ImportJobService;
 use App\Modules\Importing\Services\ImportValidationService;
+use App\Modules\Importing\Support\ImportSource;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -50,15 +51,17 @@ class ParseImportFileJob implements ShouldQueue
             $path = $jobs->absolutePath($job);
             $mapping = $job->column_mapping ?? [];
 
-            $rows = match ($job->source_type) {
-                ImportSourceType::Csv->value => $csv->parse($path),
-                ImportSourceType::Excel->value => $excel->parse($path),
+            $rows = match (true) {
+                ImportSource::isDelimited($job->source_type) => $csv->parse($path),
+                $job->source_type === ImportSourceType::Excel->value => $excel->parse($path),
                 default => throw new \RuntimeException("Type de source non pris en charge pour l'analyse : {$job->source_type}"),
             };
 
-            $validation->validateAndStage($job, $rows, $mapping);
+            $validation->validateAndStage($job, $rows, $mapping, $job->mapping);
 
-            $job->update(['status' => ImportJobStatus::Processing->value]);
+            // Wizard jobs wait for "Lancer l'import" in the `ready` state (§45.5.7);
+            // legacy jobs keep their historical `processing` status.
+            $job->update(['status' => $job->isWizardJob() ? 'ready' : ImportJobStatus::Processing->value]);
         } catch (Throwable $e) {
             $job->errors()->create([
                 'error_code' => 'parse_failed',

@@ -33,6 +33,7 @@ class CsvImportService
             }
 
             $header = array_map(fn (?string $h) => trim((string) $h), $header);
+            $header[0] = ltrim($header[0], "\xEF\xBB\xBF"); // UTF-8 BOM
 
             while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
                 if ($row === [null] || $row === false) {
@@ -44,6 +45,23 @@ class CsvImportService
 
                 yield array_combine($header, $row);
             }
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Delimiter detected on the first line of a file (preview helper).
+     */
+    public function detectDelimiterOf(string $absolutePath): string
+    {
+        $handle = fopen($absolutePath, 'rb');
+        if ($handle === false) {
+            return ',';
+        }
+
+        try {
+            return $this->detectDelimiter($handle);
         } finally {
             fclose($handle);
         }
