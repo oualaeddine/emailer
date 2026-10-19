@@ -196,7 +196,9 @@ class ReportingService
         // Filtered on `queued_at` (message's entry into the pipeline),
         // mirroring the existing `date_from`/`date_to` precedent in
         // App\Modules\Tracking\Services\MessageService::applyFilters().
+        // Test sends (`is_test`, docs/45 §45.4.2) never count in reports.
         return Message::query()
+            ->where('messages.is_test', false)
             ->when(
                 $filters['date_from'] ?? null,
                 fn (Builder $query, string $date): Builder => $query->whereDate('queued_at', '>=', $date),

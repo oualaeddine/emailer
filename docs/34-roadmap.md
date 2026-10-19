@@ -6,7 +6,7 @@ This documentation set specifies a complete v1 architecture. This roadmap identi
 
 > **Execution status & orchestration:** Phases 0–2 are implemented and Phase 3 is ~80% complete on `main`. The remaining scope is decomposed into parallel-agent work packages — with per-package read lists, file-ownership boundaries, and a wave schedule — in [42-parallel-execution-plan.md](42-parallel-execution-plan.md). That document tracks *how* the rest gets built; this one remains the *what/why*.
 >
-> **Brevo parity programme (docs 43–47):** runs on the `brevo/main` branch in five waves ([44 §44.15](44-brevo-parallel-execution-plan.md#4415-status) has the live status, [47](47-orchestration-log.md) the orchestration log). Wave 0 (contracts, permissions, i18n, nav regroup, CI workflow) is merged.
+> **Brevo parity programme (docs 43–47):** runs on the `brevo/main` branch in five waves ([44 §44.15](44-brevo-parallel-execution-plan.md#4415-status) has the live status, [47](47-orchestration-log.md) the orchestration log). Wave 0 (contracts, permissions, i18n, nav regroup, CI workflow) and Wave 1 (senders & domains, campaign model v2 + audience, campaign list/setup page, template picker + import, pre-send checklist, GrapesJS editor spike → GO) are merged.
 
 ## 34.2 Suggested Build Phases (v1)
 

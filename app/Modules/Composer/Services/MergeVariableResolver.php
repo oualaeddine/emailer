@@ -44,6 +44,17 @@ class MergeVariableResolver
             return isset($recipient->custom_fields[$key]) ? (string) $recipient->custom_fields[$key] : null;
         }
 
+        // UI aliases (`{{ contact.PRENOM }}` …), attribute names are case-insensitive.
+        if (str_starts_with(strtolower($path), 'contact.')) {
+            return match (strtolower(substr($path, 8))) {
+                'prenom' => $recipient->first_name,
+                'nom' => $recipient->last_name,
+                'email' => $recipient->email,
+                'societe' => $recipient->company_name,
+                default => null,
+            };
+        }
+
         return match ($path) {
             'recipient.first_name' => $recipient->first_name,
             'recipient.last_name' => $recipient->last_name,

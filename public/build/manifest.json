@@ -1,10 +1,10 @@
 {
-  "_DocContent-X2ZP5KvA.js": {
-    "file": "assets/DocContent-X2ZP5KvA.js",
+  "_DocContent-DIEj6qQQ.js": {
+    "file": "assets/DocContent-DIEj6qQQ.js",
     "name": "DocContent",
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_fluentui-DkjUhEya.js"
+      "_fluentui-s--lWF7I.js"
     ],
     "dynamicImports": [
       "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
@@ -61,8 +61,8 @@
       "resources/docs/fr/pages/templates.md?raw"
     ]
   },
-  "_fluentui-DkjUhEya.js": {
-    "file": "assets/fluentui-DkjUhEya.js",
+  "_fluentui-s--lWF7I.js": {
+    "file": "assets/fluentui-s--lWF7I.js",
     "name": "fluentui",
     "imports": [
       "_vendor-C_7FfyOp.js"
@@ -73,7 +73,7 @@
     "name": "vendor"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DjTG4xYx.css",
+    "file": "assets/app-CwEx5DL7.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -394,50 +394,76 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-CFv665Um.js",
+    "file": "assets/HelpCenter-EokMFjkt.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_DocContent-X2ZP5KvA.js",
+      "_DocContent-DIEj6qQQ.js",
       "resources/js/app.tsx",
-      "_fluentui-DkjUhEya.js"
+      "_fluentui-s--lWF7I.js"
     ],
     "css": [
-      "assets/app-DjTG4xYx.css"
+      "assets/app-CwEx5DL7.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-ynTGrvI-.js",
+    "file": "assets/HelpDialogBody-BdwTPkzO.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
       "resources/js/app.tsx",
-      "_DocContent-X2ZP5KvA.js",
-      "_fluentui-DkjUhEya.js"
+      "_DocContent-DIEj6qQQ.js",
+      "_fluentui-s--lWF7I.js"
     ],
     "css": [
-      "assets/app-DjTG4xYx.css"
+      "assets/app-CwEx5DL7.css"
+    ]
+  },
+  "resources/js/Pages/Lab/editorSpike/compile.ts": {
+    "file": "assets/compile-DPAJkX4K.js",
+    "name": "compile",
+    "src": "resources/js/Pages/Lab/editorSpike/compile.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-C_7FfyOp.js"
+    ]
+  },
+  "resources/js/Pages/Lab/editorSpike/engine.ts": {
+    "file": "assets/engine-C6XRZSMq.js",
+    "name": "engine",
+    "src": "resources/js/Pages/Lab/editorSpike/engine.ts",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-C_7FfyOp.js",
+      "resources/js/app.tsx",
+      "_fluentui-s--lWF7I.js"
+    ],
+    "css": [
+      "assets/engine-bosMtiEL.css",
+      "assets/app-CwEx5DL7.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-gynZ53FZ.js",
+    "file": "assets/app-DJw3NkeD.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
       "_vendor-C_7FfyOp.js",
-      "_fluentui-DkjUhEya.js"
+      "_fluentui-s--lWF7I.js"
     ],
     "dynamicImports": [
       "resources/js/Components/Help/HelpDialogBody.tsx",
-      "resources/js/Components/Help/HelpCenter.tsx"
+      "resources/js/Components/Help/HelpCenter.tsx",
+      "resources/js/Pages/Lab/editorSpike/engine.ts",
+      "resources/js/Pages/Lab/editorSpike/compile.ts"
     ],
     "css": [
-      "assets/app-DjTG4xYx.css"
+      "assets/app-CwEx5DL7.css"
     ]
   }
 }
