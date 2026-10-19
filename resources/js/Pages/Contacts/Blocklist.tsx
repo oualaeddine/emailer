@@ -266,7 +266,7 @@ export default function Blocklist() {
                     <ul>
                         {softBounces.map((m) => (
                             <li key={m.id}>
-                                {m.recipient_email} <Badge appearance="tint">Rebond temporaire</Badge>{' '}
+                                {m.recipient_email} <Badge appearance="tint">{t.mailbox.statusLabels.soft_bounced}</Badge>{' '}
                                 {m.bounced_at ? formatDate(m.bounced_at) : ''}
                             </li>
                         ))}
