@@ -102,6 +102,12 @@ export type CampaignStatusTab = 'all' | 'draft' | 'scheduled' | 'running' | 'sen
 /** Labels: fr.campaigns.types. */
 export type CampaignType = 'classic' | 'ab_test';
 
+/**
+ * `not_required` (switch off), `pending` (needs a user holding
+ * `campaigns.approve`) or `approved`. Labels: fr.campaigns.approvalStatus.
+ */
+export type CampaignApprovalStatus = 'not_required' | 'pending' | 'approved';
+
 /** Labels: fr.campaigns.suspendedReasons. */
 export type CampaignSuspendedReason = 'quota_exhausted' | 'smtp_unavailable' | 'approval_revoked' | 'manual';
 
@@ -184,6 +190,10 @@ export interface CampaignV2 extends Omit<Campaign, 'status'> {
     stats_summary: CampaignStatsSummary | null;
     ab_test_enabled: boolean;
     available_actions: CampaignAction[];
+    approval_required: boolean;
+    approval_status: CampaignApprovalStatus;
+    approved_at: string | null;
+    approver: CampaignOwnerRef | null;
 }
 
 export interface CampaignAudienceTarget {
@@ -372,6 +382,8 @@ export interface CampaignPreview {
     to: string;
     html: string;
     contact_id: string | null;
+    /** True when the contact was picked automatically from the audience (no `contact_id` requested). */
+    sample?: boolean;
 }
 
 export type AudienceTargetType = 'list' | 'segment';
@@ -456,7 +468,8 @@ export type CampaignChecklistKey =
     | 'test_sent'
     | 'links_valid'
     | 'email_size'
-    | 'spam_score';
+    | 'spam_score'
+    | 'approval';
 
 /** Labels: fr.campaignSetup.checklistItemStatus. */
 export type CampaignChecklistItemStatus = 'ok' | 'warning' | 'error' | 'pending' | 'skipped';

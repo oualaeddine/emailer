@@ -22,6 +22,7 @@ import { useText } from '@/Hooks/useText';
 import { FALLBACK_MERGE_TAGS, fetchMergeTags, updateCampaignV2 } from '@/Lib/api/campaigns';
 import { SetupCard } from '@/Components/Campaigns/SetupCard';
 import type { SetupStepCardProps } from '@/Components/Campaigns/cardTypes';
+import { placeholderMergeTags } from '@/Components/Campaigns/MergeTagText';
 import { apiErrorMessage, apiValidationErrors, formatText } from '@/Components/Campaigns/campaignUi';
 
 const SUBJECT_MAX = 255;
@@ -303,7 +304,7 @@ export function SubjectCard({ campaign, editable, expanded, onExpand, onCollapse
             <div className={styles.counter}>
                 <Text size={200}>{formatText(t.campaignSetup.subject.characters, previewText.length)}</Text>
             </div>
-            <InboxPreview senderName={senderName} subject={subject} previewText={previewText} />
+            <InboxPreview senderName={senderName} subject={placeholderMergeTags(subject)} previewText={placeholderMergeTags(previewText)} />
         </SetupCard>
     );
 }

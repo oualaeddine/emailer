@@ -12,6 +12,11 @@ Le **rapport** détaille les résultats d'une campagne envoyée, avec une compar
 | Clics | Liens classés par nombre de clics |
 | Désinscriptions | Qui s'est désabonné, et quand |
 
+## Lire l'en-tête et « Envoyés »
+
+- Dans l'en-tête, les balises de personnalisation de l'objet s'affichent en pastilles (par exemple « SOCIETE ») : c'est le modèle d'objet, chaque destinataire a reçu sa propre valeur.
+- Sous **Envoyés**, **Restants** compte les messages pas encore partis ; sur une campagne terminée, le même chiffre s'intitule **En file d'attente**. Les contacts écartés au moment de l'envoi (liste noire) sont comptés à part, sous **Ignorés (liste noire)**, et ne figurent plus dans « Restants ».
+
 ## Pas à pas
 
 1. Commencez par la **Vue d'ensemble** : repérez les écarts à la moyenne.

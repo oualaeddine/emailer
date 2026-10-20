@@ -4,6 +4,7 @@ import {
     ArrowUndoRegular,
     CalendarCancelRegular,
     CalendarLtrRegular,
+    CheckmarkCircleRegular,
     CopyRegular,
     DataBarVerticalRegular,
     DeleteRegular,
@@ -20,6 +21,7 @@ import {
 import { Fragment, type ReactElement } from 'react';
 import { useText } from '@/Hooks/useText';
 import type { CampaignAction, CampaignV2 } from '@/Lib/types/campaigns';
+import { canBeApproved } from '@/Components/Campaigns/ApprovalBanner';
 
 /** Menu order (Brevo "Plus d'actions", docs/43 §43.4.1); every entry is gated by `available_actions`. */
 const ACTION_ORDER: CampaignAction[] = [
@@ -61,14 +63,17 @@ const ACTION_ICON: Record<CampaignAction, ReactElement> = {
 export interface CampaignRowActionsProps {
     campaign: CampaignV2;
     onAction: (action: CampaignAction, campaign: CampaignV2) => void;
+    /** gap-approval — shown to users holding `campaigns.approve` for campaigns waiting for approval. */
+    onApprove?: (campaign: CampaignV2) => void;
     disabled?: boolean;
 }
 
 /** Row **Plus d'actions** menu of Campaigns/Index. */
-export function CampaignRowActions({ campaign, onAction, disabled }: CampaignRowActionsProps) {
+export function CampaignRowActions({ campaign, onAction, onApprove, disabled }: CampaignRowActionsProps) {
     const t = useText();
     const actions = ACTION_ORDER.filter((action) => campaign.available_actions.includes(action));
     const destructiveIndex = actions.indexOf('delete');
+    const approvable = onApprove !== undefined && canBeApproved(campaign);
 
     return (
         <Menu positioning="below-end">
@@ -77,13 +82,18 @@ export function CampaignRowActions({ campaign, onAction, disabled }: CampaignRow
                     <Button
                         appearance="subtle"
                         icon={<MoreHorizontalRegular />}
-                        disabled={disabled || actions.length === 0}
+                        disabled={disabled || (actions.length === 0 && !approvable)}
                         onClick={(event) => event.stopPropagation()}
                     />
                 </Tooltip>
             </MenuTrigger>
             <MenuPopover>
                 <MenuList>
+                    {approvable && (
+                        <MenuItem icon={<CheckmarkCircleRegular />} onClick={() => onApprove(campaign)}>
+                            {t.campaigns.approve.action}
+                        </MenuItem>
+                    )}
                     {actions.map((action, index) => (
                         <Fragment key={action}>
                             {index === destructiveIndex && index > 0 && <MenuDivider />}

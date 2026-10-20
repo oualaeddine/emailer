@@ -66,6 +66,31 @@ class CampaignReportTest extends TestCase
         return $c;
     }
 
+    /**
+     * gap-campaign-ux: a finished campaign must not show skipped (suppressed) recipients as "Restants".
+     */
+    public function test_overview_remaining_excludes_skipped_recipients_and_reports_them_apart(): void
+    {
+        $c = $this->sentCampaign(['recipients_count' => 105, 'sent_count' => 100]);
+        foreach (['skip1@example.com', 'skip2@example.com', 'skip3@example.com'] as $email) {
+            $recipient = \App\Modules\Recipients\Models\Recipient::factory()->create(['email' => $email]);
+            \App\Modules\Campaigns\Models\CampaignRecipient::query()->create([
+                'campaign_id' => $c->id, 'recipient_id' => $recipient->id,
+                'status' => 'skipped', 'skip_reason' => 'suppressed',
+            ]);
+        }
+
+        $d = $this->actingAs($this->manager)->getJson("/api/v1/campaigns/{$c->uuid}/report/overview")->assertOk()->json('data');
+
+        $this->assertSame(0, $d['remaining'], 'nothing is left to send on a completed campaign');
+        $this->assertSame(3, $d['skipped']);
+
+        // A message still queued is still reported as remaining.
+        $this->message($c, 'queued@example.com', ['status' => 'queued', 'sent_at' => null, 'delivered_at' => null]);
+        $d = $this->actingAs($this->manager)->getJson("/api/v1/campaigns/{$c->uuid}/report/overview")->assertOk()->json('data');
+        $this->assertSame(1, $d['remaining']);
+    }
+
     public function test_overview_shape(): void
     {
         $c = $this->seedFullCampaign();

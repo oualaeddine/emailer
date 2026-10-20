@@ -173,7 +173,10 @@ export interface ReportOverview {
     rates: RateSet;
     averages: RateSet;
     mirrorClick: number;
+    /** Still to dispatch or queued (not `recipients - sent`: skipped recipients are reported apart). */
     remaining: number;
+    /** Audience members skipped at dispatch (liste noire). */
+    skipped: number;
     timeseries: ReportTimeseries;
     campaignStats: BrevoCampaignStatsEntry[];
     audience: ReportAudience;

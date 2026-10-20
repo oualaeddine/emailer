@@ -1,10 +1,10 @@
 {
-  "_DocContent-BSUNQbF4.js": {
-    "file": "assets/DocContent-BSUNQbF4.js",
+  "_DocContent-aE0ljkZQ.js": {
+    "file": "assets/DocContent-aE0ljkZQ.js",
     "name": "DocContent",
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_fluentui-CPQuS6BR.js"
+      "_fluentui-xLrkM-_D.js"
     ],
     "dynamicImports": [
       "resources/docs/ar/dialogs/dialog-recipient-form.md?raw",
@@ -103,8 +103,8 @@
       "resources/docs/fr/pages/update-profile-forms.md?raw"
     ]
   },
-  "_fluentui-CPQuS6BR.js": {
-    "file": "assets/fluentui-CPQuS6BR.js",
+  "_fluentui-xLrkM-_D.js": {
+    "file": "assets/fluentui-xLrkM-_D.js",
     "name": "fluentui",
     "imports": [
       "_vendor-nfStYNJH.js"
@@ -180,7 +180,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/ar/flows/flow-create-send-campaign.md?raw": {
-    "file": "assets/flow-create-send-campaign-C1hPCMSZ.js",
+    "file": "assets/flow-create-send-campaign-CPMcjusm.js",
     "name": "flow-create-send-campaign",
     "src": "resources/docs/ar/flows/flow-create-send-campaign.md?raw",
     "isDynamicEntry": true
@@ -234,19 +234,19 @@
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/campaign-report.md?raw": {
-    "file": "assets/campaign-report-C2VLqoml.js",
+    "file": "assets/campaign-report-ViSBgBkJ.js",
     "name": "campaign-report",
     "src": "resources/docs/ar/pages/campaign-report.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/campaign-setup.md?raw": {
-    "file": "assets/campaign-setup-DQbMzXLR.js",
+    "file": "assets/campaign-setup-hVZ3llTZ.js",
     "name": "campaign-setup",
     "src": "resources/docs/ar/pages/campaign-setup.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/campaigns.md?raw": {
-    "file": "assets/campaigns-RvDR9Z3-.js",
+    "file": "assets/campaigns-CQ-h3j65.js",
     "name": "campaigns",
     "src": "resources/docs/ar/pages/campaigns.md?raw",
     "isDynamicEntry": true
@@ -264,7 +264,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/dashboard.md?raw": {
-    "file": "assets/dashboard-DkwQAQVg.js",
+    "file": "assets/dashboard-BbCYMOs5.js",
     "name": "dashboard",
     "src": "resources/docs/ar/pages/dashboard.md?raw",
     "isDynamicEntry": true
@@ -462,7 +462,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/fr/flows/flow-create-send-campaign.md?raw": {
-    "file": "assets/flow-create-send-campaign-Hq2_o07n.js",
+    "file": "assets/flow-create-send-campaign-BbdJrZso.js",
     "name": "flow-create-send-campaign",
     "src": "resources/docs/fr/flows/flow-create-send-campaign.md?raw",
     "isDynamicEntry": true
@@ -516,19 +516,19 @@
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/campaign-report.md?raw": {
-    "file": "assets/campaign-report-BdoG0_Ml.js",
+    "file": "assets/campaign-report-FlA0tuH-.js",
     "name": "campaign-report",
     "src": "resources/docs/fr/pages/campaign-report.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/campaign-setup.md?raw": {
-    "file": "assets/campaign-setup-CtIBsRLc.js",
+    "file": "assets/campaign-setup-DRlDJCwi.js",
     "name": "campaign-setup",
     "src": "resources/docs/fr/pages/campaign-setup.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/campaigns.md?raw": {
-    "file": "assets/campaigns-CIpFV_1-.js",
+    "file": "assets/campaigns-D_G4jd5A.js",
     "name": "campaigns",
     "src": "resources/docs/fr/pages/campaigns.md?raw",
     "isDynamicEntry": true
@@ -546,7 +546,7 @@
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/dashboard.md?raw": {
-    "file": "assets/dashboard-CmumZ51i.js",
+    "file": "assets/dashboard-B36Hxyx_.js",
     "name": "dashboard",
     "src": "resources/docs/fr/pages/dashboard.md?raw",
     "isDynamicEntry": true
@@ -702,14 +702,14 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx": {
-    "file": "assets/EmailBuilder-BJmZyyur.js",
+    "file": "assets/EmailBuilder-BTczeyOT.js",
     "name": "EmailBuilder",
     "src": "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
       "resources/js/app.tsx",
-      "_fluentui-CPQuS6BR.js",
+      "_fluentui-xLrkM-_D.js",
       "_grapesjs-D88KzZFl.js"
     ],
     "css": [
@@ -718,43 +718,43 @@
     ]
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-Dk3pxCKU.js",
+    "file": "assets/HelpCenter-0fCHF-L8.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_DocContent-BSUNQbF4.js",
+      "_DocContent-aE0ljkZQ.js",
       "resources/js/app.tsx",
-      "_fluentui-CPQuS6BR.js"
+      "_fluentui-xLrkM-_D.js"
     ],
     "css": [
       "assets/app-BqlHH_nn.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-bwWtxqGl.js",
+    "file": "assets/HelpDialogBody-DhMzBVqm.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
       "resources/js/app.tsx",
-      "_DocContent-BSUNQbF4.js",
-      "_fluentui-CPQuS6BR.js"
+      "_DocContent-aE0ljkZQ.js",
+      "_fluentui-xLrkM-_D.js"
     ],
     "css": [
       "assets/app-BqlHH_nn.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-CmUTUDIr.js",
+    "file": "assets/app-C1cmYI5y.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_fluentui-CPQuS6BR.js"
+      "_fluentui-xLrkM-_D.js"
     ],
     "dynamicImports": [
       "resources/js/Components/Help/HelpDialogBody.tsx",

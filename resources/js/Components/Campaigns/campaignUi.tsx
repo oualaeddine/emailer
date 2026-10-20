@@ -52,6 +52,11 @@ export function formatText(template: string, ...args: Array<string | number>): s
     });
 }
 
+/** French plural: 0 and 1 take the singular template (`Intl.PluralRules('fr')`). */
+export function formatPlural(count: number, one: string, other: string): string {
+    return formatText(new Intl.PluralRules('fr').select(count) === 'one' ? one : other, count);
+}
+
 export function formatDateTime(value: string | null | undefined): string {
     return value ? new Date(value).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : fr.common.emptyValue;
 }

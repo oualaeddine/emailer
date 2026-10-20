@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Badge,
     Breadcrumb,
@@ -48,7 +48,9 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
+import { hasPermission } from '@/Lib/permissions';
 import {
+    approveCampaign,
     archiveCampaign,
     bulkCampaigns,
     cancelCampaign,
@@ -78,6 +80,7 @@ import type {
     CampaignV2,
 } from '@/Lib/types/campaigns';
 import { CampaignRowActions } from '@/Components/Campaigns/CampaignRowActions';
+import { CampaignApprovalBadge } from '@/Components/Campaigns/ApprovalBadge';
 import { ConfirmActionDialog } from '@/Components/Campaigns/ConfirmActionDialog';
 import { CreateCampaignDialog } from '@/Components/Campaigns/CreateCampaignDialog';
 import { FolderTree, type FolderSelection } from '@/Components/Campaigns/FolderTree';
@@ -108,6 +111,12 @@ const ALL = '__all__';
 const PER_PAGE = 25;
 
 const useStyles = makeStyles({
+    statusCell: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: tokens.spacingVerticalXXS,
+    },
     layout: {
         display: 'grid',
         gridTemplateColumns: '240px minmax(0, 1fr)',
@@ -273,6 +282,8 @@ interface MoveState {
 export default function CampaignsIndex() {
     const styles = useStyles();
     const t = useText();
+    const { props: pageProps } = usePage<{ auth?: { permissions?: string[] } }>();
+    const canApprove = hasPermission(pageProps.auth?.permissions ?? [], 'campaigns.approve');
     const toasterId = useId('campaigns-toaster');
     const { dispatchToast } = useToastController(toasterId);
 
@@ -400,6 +411,19 @@ export default function CampaignsIndex() {
         } catch (err) {
             notify(apiErrorMessage(err), 'error');
         }
+    }
+
+    function handleApprove(campaign: CampaignV2) {
+        ask({
+            title: t.campaigns.approve.action,
+            body: t.campaigns.approve.confirm,
+            confirmLabel: t.campaigns.approve.action,
+            run: async () => {
+                await approveCampaign(campaign.id);
+                notify(t.campaigns.approve.done);
+                await load();
+            },
+        });
     }
 
     function handleAction(action: CampaignAction, campaign: CampaignV2) {
@@ -593,7 +617,12 @@ export default function CampaignsIndex() {
         createTableColumn<CampaignV2>({
             columnId: 'status',
             renderHeaderCell: () => t.campaigns.columns.status,
-            renderCell: (campaign) => <CampaignStatusChip campaign={campaign} />,
+            renderCell: (campaign) => (
+                <div className={styles.statusCell}>
+                    <CampaignStatusChip campaign={campaign} />
+                    <CampaignApprovalBadge campaign={campaign} />
+                </div>
+            ),
         }),
         createTableColumn<CampaignV2>({
             columnId: 'recipients',
@@ -634,7 +663,7 @@ export default function CampaignsIndex() {
         createTableColumn<CampaignV2>({
             columnId: 'actions',
             renderHeaderCell: () => <span className={styles.subtle}>{t.common.actions}</span>,
-            renderCell: (campaign) => <CampaignRowActions campaign={campaign} onAction={handleAction} />,
+            renderCell: (campaign) => <CampaignRowActions campaign={campaign} onAction={handleAction} onApprove={canApprove ? handleApprove : undefined} />,
         }),
     ];
 

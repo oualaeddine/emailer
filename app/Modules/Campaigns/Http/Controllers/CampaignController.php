@@ -143,13 +143,19 @@ class CampaignController extends Controller
         $abTests = app(\App\Modules\Campaigns\AbTesting\Services\AbTestService::class);
         $variant = $abTests->variantForPreview($campaign, $request->query('variant'));
 
-        $contact = $request->filled('contact_id')
-            ? Recipient::query()->where('uuid', $request->query('contact_id'))->firstOrFail()
-            : null;
+        // No explicit contact: preview with the first deliverable member of the audience, so
+        // `{{ contact.SOCIETE }}` shows real data instead of the raw tag (null when the audience is empty).
+        $sample = ! $request->filled('contact_id');
+        $contact = $sample
+            ? app(\App\Modules\Campaigns\Services\AudienceResolver::class)->sampleRecipient($campaign)
+            : Recipient::query()->where('uuid', $request->query('contact_id'))->firstOrFail();
 
         $render = fn (?string $content): ?string => $content === null || $contact === null
             ? $content
             : $merge->resolve($content, $contact);
+        $renderHtml = fn (?string $content): ?string => $content === null || $contact === null
+            ? $content
+            : $merge->resolveHtml($content, $contact);
 
         $sender = app(ExternalReferences::class)->sender($campaign->sender_id);
         $toName = $contact !== null && filled($campaign->to_field)
@@ -161,8 +167,10 @@ class CampaignController extends Controller
             'preview_text' => $render($variant !== null ? $variant->preview_text : $campaign->preview_text),
             'from' => ['name' => $sender['name'] ?? null, 'email' => $sender['email'] ?? null],
             'to' => $contact === null ? null : ($toName !== '' && $toName !== null ? "{$toName} <{$contact->email}>" : $contact->email),
-            'html' => $render($variant !== null ? $abTests->htmlFor($campaign, $variant) : $campaign->html_body),
+            'html' => $renderHtml($variant !== null ? $abTests->htmlFor($campaign, $variant) : $campaign->html_body),
             'contact_id' => $contact?->uuid,
+            // true when the contact was picked automatically from the audience (not requested by `contact_id`).
+            'sample' => $sample && $contact !== null,
         ]]);
     }
 

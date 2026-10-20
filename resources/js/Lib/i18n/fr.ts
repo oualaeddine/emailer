@@ -544,6 +544,8 @@ export const fr = {
         restorePrevious: 'Restaurer une version précédente',
         previewAndTest: 'Aperçu & test',
         saveAndQuit: 'Enregistrer et quitter',
+        // Short status of the top bar (the long sentence does not fit next to the buttons).
+        unsavedShort: 'Non enregistré',
         save: 'Enregistrer',
         saving: 'Enregistrement…',
         saved: 'Design enregistré.',
@@ -842,8 +844,8 @@ export const fr = {
         title: 'Campagnes',
         newCampaign: 'Nouvelle campagne',
         statusDraft: 'Brouillon',
-        statusScheduled: 'Planifiée',
-        statusSending: 'Envoi en cours',
+        statusScheduled: 'Programmée',
+        statusSending: 'En cours',
         statusSent: 'Envoyée',
         statusPaused: 'En pause',
         statusCancelled: 'Annulée',
@@ -853,7 +855,7 @@ export const fr = {
         status: 'Statut',
         template: 'Modèle',
         selectTemplate: 'Choisir un modèle',
-        scheduledAt: 'Planifiée pour',
+        scheduledAt: 'Programmée pour',
         sentAt: 'Envoyée le',
         target: 'Audience',
         audienceSize: "Taille de l'audience",
@@ -939,6 +941,17 @@ export const fr = {
         types: {
             classic: 'E-mail',
             ab_test: 'Test A/B',
+        },
+        // gap-approval — approbation avant envoi (liste des campagnes).
+        approvalStatus: {
+            not_required: 'Sans approbation',
+            pending: 'En attente d’approbation',
+            approved: 'Approuvée',
+        },
+        approve: {
+            action: 'Approuver',
+            done: 'Campagne approuvée.',
+            confirm: 'Approuver cette campagne ? Elle pourra ensuite être programmée ou envoyée.',
         },
         suspendedReasons: {
             quota_exhausted: 'Quota d’envoi atteint',
@@ -1072,10 +1085,17 @@ export const fr = {
             searchLists: 'Rechercher une liste…',
             searchSegments: 'Rechercher un segment…',
             contactsCount: '%d contacts',
+            contactsCountOne: '%d contact',
             noLists: 'Aucune liste.',
             noSegments: 'Aucun segment.',
             estimatedAudience: 'Audience estimée',
             estimatedCount: '%d destinataires',
+            estimatedCountOne: '%d destinataire',
+            // Caption under the big number of the estimate (the number is not repeated).
+            estimatedUnit: 'destinataires',
+            estimatedUnitOne: 'destinataire',
+            selectedTargets: 'Sélection',
+            removeTarget: 'Retirer %s',
             excludedCount: '%d exclus',
             suppressedCount: '%d en liste noire',
             computing: 'Calcul en cours…',
@@ -1126,7 +1146,10 @@ export const fr = {
             smtpStrategy: 'Stratégie SMTP',
             smtpAccount: 'Compte SMTP',
             sendWindow: 'Plage horaire d’envoi',
-            sendWindowHelp: 'Les e-mails ne partent que pendant ces heures.',
+            sendWindowHelp:
+                'Les e-mails ne partent que ces jours-là, entre ces heures (fuseau horaire de la campagne). Hors plage, l’envoi est reporté à la prochaine ouverture.',
+            smtpStrategyHelp:
+                'Compte unique : tous les e-mails de la campagne partent par ce compte. S’il est indisponible ou a atteint son quota, l’envoi attend sans basculer sur un autre compte.',
             sendWindowDays: 'Jours',
             sendWindowStart: 'Début',
             sendWindowEnd: 'Fin',
@@ -1150,11 +1173,32 @@ export const fr = {
             5: 'Vendredi',
             6: 'Samedi',
         },
+        // gap-approval — bandeau d’approbation de la page de configuration.
+        approval: {
+            pendingTitle: 'En attente d’approbation',
+            pendingCanApprove:
+                'Cette campagne doit être approuvée avant de pouvoir être programmée ou envoyée. Vous pouvez l’approuver après avoir relu l’objet, le contenu et les destinataires.',
+            pendingCannotApprove:
+                'Cette campagne doit être approuvée avant de pouvoir être programmée ou envoyée. Demandez à un responsable marketing (droit « Approuver les campagnes ») de l’approuver.',
+            approvedTitle: 'Campagne approuvée',
+            approvedBy: 'Approuvée par %s le %s.',
+            approvedNote: 'Modifier l’objet, le contenu, l’expéditeur ou les destinataires retire l’approbation.',
+            approve: 'Approuver',
+            approving: 'Approbation…',
+            approved: 'Campagne approuvée. Vous pouvez maintenant la programmer.',
+            scheduleBlocked: 'Cette campagne doit d’abord être approuvée par un responsable marketing.',
+            revoked: 'L’approbation a été retirée : la campagne modifiée doit être approuvée à nouveau.',
+            revokedUnscheduled: 'L’approbation a été retirée et la campagne est revenue en brouillon : elle doit être approuvée à nouveau avant d’être reprogrammée.',
+            summaryPending: 'Approbation requise — en attente',
+            summaryApproved: 'Approbation requise — approuvée',
+        },
         previewPanel: {
             title: 'Aperçu & test',
             desktop: 'Ordinateur',
             mobile: 'Mobile',
             previewAs: 'Prévisualiser en tant que',
+            sampleContact: 'Aperçu avec le premier contact de l’audience : %s',
+            samplePlaceholder: 'Aucun contact dans l’audience : les balises de personnalisation sont affichées entre crochets.',
             previewAsPlaceholder: 'Choisir un contact',
             sendTest: 'Envoyer un test',
             testEmails: 'Adresses de test',
@@ -1172,6 +1216,7 @@ export const fr = {
             checkLinks: 'Vérifier les liens',
             checking: 'Vérification en cours…',
             allGood: 'Votre campagne est prête à être envoyée.',
+            recommended: 'Vous pouvez programmer l’envoi ; quelques vérifications recommandées restent à faire.',
             blocking: 'Corrigez les points bloquants avant de programmer.',
             brokenLinks: '%d lien(s) inaccessible(s)',
         },
@@ -1186,6 +1231,7 @@ export const fr = {
             links_valid: 'Liens valides',
             email_size: 'Taille de l’e-mail',
             spam_score: 'Score de spam',
+            approval: 'Approbation',
         },
         checklistItemStatus: {
             ok: 'OK',
@@ -1206,6 +1252,7 @@ export const fr = {
             to: 'À',
             subject: 'Objet',
             recipientsCount: '%d destinataires',
+            recipientsCountOne: '%d destinataire',
             scheduledFor: 'Envoi prévu',
             deliveryOptions: 'Options d’envoi',
             date: 'Date',
@@ -1274,6 +1321,7 @@ export const fr = {
     // docs/43 §43.4.15 — Campaigns/Report (WP-71) + compare drawer.
     campaignReport: {
         // Added at the Wave 3 gate (WP-71 report).
+        mergeTag: 'Balise de personnalisation',
         showTable: 'Afficher le tableau',
         showChart: 'Afficher le graphique',
         noData: 'Aucune donnée pour le moment.',
@@ -1329,6 +1377,9 @@ export const fr = {
             appleMppOpens: 'Ouvertures Apple Mail Privacy',
             trackableOpens: 'Ouvertures traçables',
             remaining: 'Restants',
+            // Same figure on a finished campaign: messages still waiting in the send queue.
+            remainingQueued: 'En file d’attente',
+            skipped: 'Ignorés (liste noire)',
         },
         rates: {
             delivery_rate: 'Taux de délivrabilité',

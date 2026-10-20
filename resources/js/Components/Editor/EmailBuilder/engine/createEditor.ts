@@ -241,6 +241,10 @@ export function createEditor(options: CreateEditorOptions): EngineHandle {
         if (!doc?.head) {
             return;
         }
+        // Marketing copy is French and full of brand names / merge tags: the browser's red
+        // squiggles are noise in the canvas. GrapesJS has no option for it; the attribute is
+        // inherited by every editable block, on <html> so GrapesJS never re-renders it away.
+        doc.documentElement.setAttribute('spellcheck', 'false');
         let el = doc.getElementById('pj-global-styles');
         if (!el) {
             el = doc.createElement('style');
@@ -270,6 +274,8 @@ export function createEditor(options: CreateEditorOptions): EngineHandle {
     const registry = registerBlocks(editor, options.extraBlocks, options.onDynamicDrop);
     registerMergeTagAction(editor, options.mergeTags);
     editor.on('canvas:frame:load', applyCanvasCss);
+    // Belt and braces: the element made contentEditable by the RTE opts out explicitly too.
+    editor.on('rte:enable', (_view: unknown, rte: { el?: HTMLElement }) => rte.el?.setAttribute('spellcheck', 'false'));
 
     const findDynamic = (dynamicId: string): Component | null => {
         let found: Component | null = null;

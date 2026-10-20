@@ -45,35 +45,39 @@ const useStyles = makeStyles({
     root: {
         display: 'flex',
         flexDirection: 'column',
-        gap: tokens.spacingVerticalS,
+        gap: tokens.spacingVerticalXS,
     },
     option: {
         display: 'flex',
         flexDirection: 'column',
         alignSelf: 'stretch',
-        gap: tokens.spacingVerticalXS,
-        padding: tokens.spacingVerticalS,
+        gap: tokens.spacingVerticalXXS,
+        padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalS}`,
         borderRadius: tokens.borderRadiusMedium,
         border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
     },
     help: {
         color: tokens.colorNeutralForeground3,
         paddingLeft: '32px',
+        '@media (max-width: 480px)': { paddingLeft: 0 },
     },
     fields: {
         display: 'flex',
         flexWrap: 'wrap',
-        gap: tokens.spacingHorizontalM,
+        gap: tokens.spacingHorizontalS,
         paddingLeft: '32px',
+        '@media (max-width: 480px)': { paddingLeft: 0 },
     },
     field: {
-        minWidth: '150px',
+        minWidth: '140px',
+        flexGrow: 1,
     },
     bestTime: {
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalXS,
         paddingLeft: '32px',
+        '@media (max-width: 480px)': { paddingLeft: 0 },
     },
     helpRow: {
         display: 'flex',
@@ -363,11 +367,13 @@ export function SendModeOptions({ value, onChange, allowedModes, disabled, error
             aria-label={c.deliveryOptions}
             onChange={(_, data) => {
                 const mode = data.value as CampaignSendMode;
-                onChange(
-                    mode === 'scheduled' && (value.date === '' || value.time === '')
-                        ? { ...value, ...defaultScheduleSlot(), mode }
-                        : { ...value, mode },
-                );
+                if (mode === value.mode) {
+                    return;
+                }
+                // Each mode only carries its own fields: the default slot belongs to
+                // "Programmer pour plus tard"; every other mode starts without a date
+                // (best time / batches: empty = "start now").
+                onChange({ ...value, ...(mode === 'scheduled' ? defaultScheduleSlot() : { date: '', time: '' }), mode });
             }}
         >
             {MODES.filter((mode) => allowedModes.includes(mode)).map((mode) => (

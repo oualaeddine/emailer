@@ -27,24 +27,34 @@ import {
     type SendModeError,
     type SendModeValue,
 } from '@/Components/Campaigns/SendModeOptions';
-import { apiErrorMessage, apiValidationErrors, formatText } from '@/Components/Campaigns/campaignUi';
+import { apiErrorMessage, apiValidationErrors, formatPlural, formatText } from '@/Components/Campaigns/campaignUi';
 
 const useStyles = makeStyles({
     surface: {
         maxWidth: '640px',
         width: '100%',
+        maxHeight: 'calc(100dvh - 32px)',
+        padding: tokens.spacingHorizontalL,
+        '@media (max-width: 480px)': { padding: tokens.spacingHorizontalM },
+    },
+    // Title and actions stay visible; only the content scrolls on short screens.
+    body: {
+        maxHeight: 'calc(100dvh - 32px - 2 * ' + tokens.spacingHorizontalL + ')',
+        gap: tokens.spacingVerticalS,
     },
     content: {
         display: 'flex',
         flexDirection: 'column',
-        gap: tokens.spacingVerticalM,
+        gap: tokens.spacingVerticalS,
+        overflowY: 'auto',
+        minHeight: 0,
     },
     summary: {
         display: 'grid',
         gridTemplateColumns: 'max-content minmax(0, 1fr)',
         columnGap: tokens.spacingHorizontalL,
-        rowGap: tokens.spacingVerticalS,
-        padding: tokens.spacingVerticalM,
+        rowGap: tokens.spacingVerticalXS,
+        padding: tokens.spacingVerticalS,
         borderRadius: tokens.borderRadiusMedium,
         backgroundColor: tokens.colorNeutralBackground2,
     },
@@ -178,7 +188,7 @@ export function ConfirmSendDialog({ open, campaign, onClose, onDone }: ConfirmSe
     return (
         <Dialog open={open} onOpenChange={(_, data) => !data.open && !busy && onClose()}>
             <DialogSurface className={styles.surface}>
-                <DialogBody>
+                <DialogBody className={styles.body}>
                     <DialogTitle>{c.title}</DialogTitle>
                     <DialogContent className={styles.content}>
                         <Text weight="semibold">{c.summary}</Text>
@@ -193,7 +203,7 @@ export function ConfirmSendDialog({ open, campaign, onClose, onDone }: ConfirmSe
                                 {recipients !== null && (
                                     <>
                                         {' — '}
-                                        <Text weight="semibold">{formatText(c.recipientsCount, recipients)}</Text>
+                                        <Text weight="semibold">{formatPlural(recipients, c.recipientsCountOne, c.recipientsCount)}</Text>
                                     </>
                                 )}
                             </Text>

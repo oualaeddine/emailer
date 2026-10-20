@@ -89,7 +89,7 @@ Les balises fonctionnent dans l'objet, le texte d'aperçu, le contenu et le cham
 1. Cliquez sur **Ajouter des destinataires**. La fenêtre **Choisir les destinataires** s'ouvre.
 2. Dans **Envoyer à**, cochez des [listes](help:lists) (onglet **Listes**) et/ou des [segments](help:segments) (onglet **Segments**). Un champ de recherche aide à retrouver un nom. Maximum : 50 listes et segments.
 3. Facultatif : dans **Exclure**, cochez ce qui ne doit pas être touché (par exemple vos clients actifs).
-4. Le bloc **Audience estimée** se met à jour en direct : nombre de destinataires, d'exclus et d'adresses « en liste noire ». Ces dernières, celles de la [liste de suppression](help:suppression), sont toujours écartées. Un avertissement apparaît si une grande part de l'audience n'a rien ouvert depuis 90 jours.
+4. Les éléments cochés restent visibles sous forme de pastilles au-dessus de la liste (cliquez sur la croix pour en retirer un). Le bloc **Audience estimée** se met à jour en direct : nombre de destinataires, d'exclus et d'adresses « en liste noire » (un contact présent dans plusieurs listes n'est compté qu'une fois ; un client déjà dans une liste exclue est retiré même s'il figure aussi dans la liste choisie). Ces dernières, celles de la [liste de suppression](help:suppression), sont toujours écartées. Un avertissement apparaît si une grande part de l'audience n'a rien ouvert depuis 90 jours.
 5. Facultatif : **Champ « À »** pour personnaliser le nom affiché du destinataire (par exemple `{{ contact.PRENOM }} {{ contact.NOM }}`).
 6. **Enregistrer**.
 
@@ -101,7 +101,7 @@ Dans l'exemple : liste « Prospects BTP & Construction », 130 contacts, dont 13
 
 1. Dans la carte **Design**, cliquez sur **Commencer la conception**. La fenêtre **Choisir un modèle** propose cinq onglets : **Galerie** (modèles prêts à l'emploi, dont **Modèle vierge**), **Mes modèles**, **Campagnes précédentes**, **Coder** (HTML) et **Éditeur de texte enrichi**.
 2. Cliquez sur un modèle, par exemple **Lancement de produit** : l'éditeur glisser-déposer s'ouvre.
-3. Modifiez le contenu : glissez des blocs depuis **Contenu › Blocs** (Titre, Texte, Image, Bouton, Séparateur, colonnes…) ou des sections prêtes à l'emploi (**Sections**), et réglez le bloc sélectionné dans le panneau **Propriétés**. Dans un bloc texte, le menu **Personnaliser…** insère une balise (Prénom, Société, Lien de désinscription…).
+3. Modifiez le contenu : glissez des blocs depuis **Contenu › Blocs** (Titre, Texte, Image, Bouton, Séparateur, colonnes…) ou des sections prêtes à l'emploi (**Sections**), et réglez le bloc sélectionné dans le panneau **Propriétés**. Dans un bloc texte, le menu **Personnaliser…** insère une balise (Prénom, Société, Lien de désinscription…) et place le curseur juste après elle ; le correcteur orthographique du navigateur est désactivé dans le canevas. Dans la barre du haut, **Restaurer une version précédente** est une icône (infobulle au survol).
 4. Cliquez sur **Enregistrer et quitter** pour revenir à la configuration (**Enregistrer** garde l'éditeur ouvert).
 
 ![Éditeur de design](/docs/screenshots/campaign-flow/05-design-editor.png)
@@ -117,11 +117,16 @@ La carte **Paramètres supplémentaires** (bouton **Modifier les paramètres**) 
 - **Page de désinscription** : **Page par défaut** ou **Page personnalisée** (voir [Pages de désinscription](help:unsubscribe-pages)) ;
 - **Tags** et **Dossier**, pour retrouver la campagne dans la liste ;
 - **Suivi Google Analytics (UTM)** : **Activer le suivi UTM** ajoute les paramètres `utm_*` aux liens ;
-- **Suivi des ouvertures et des clics** (activé par défaut), **Lien miroir** (« voir dans le navigateur »).
+- **Suivi des ouvertures et des clics** (activé par défaut), **Lien miroir** (« voir dans le navigateur ») ;
+- **Stratégie SMTP** : **Rotation automatique** (par défaut) ou **Compte unique** (tous les messages par le compte choisi ; s'il est indisponible, l'envoi attend au lieu de basculer sur un autre compte) ;
+- **Plage horaire d'envoi** : jours et heures (fuseau horaire de la campagne) pendant lesquels les messages peuvent partir ; hors plage, l'envoi est reporté à la prochaine ouverture ;
+- **Approbation requise avant l'envoi** : voir « Approbation » ci-dessous.
 
 La carte **Test A/B** (bouton **Activer le test A/B**) sert à comparer deux versions : élément testé (**Objet** ou **Contenu**), taille de l'échantillon (de 5 à 50 % des destinataires), critère du gagnant (taux d'ouverture ou de clic), durée du test et envoi automatique de la version gagnante au reste de l'audience. Les objets (ou contenus) des versions A et B doivent être différents.
 
 Pour un premier envoi, vous pouvez laisser les autres réglages tels quels.
+
+**Approbation.** Avec **Approbation requise avant l'envoi**, la page affiche le bandeau **En attente d'approbation**, la liste de vérification ajoute le point **Approbation** et **Programmer** reste grisé. Un utilisateur qui détient le droit **Approuver les campagnes** (Responsable marketing, Administrateur) clique sur **Approuver** dans le bandeau, ou ⋯ › **Approuver** dans la liste des campagnes ; **Programmer** devient alors disponible. Modifier ensuite l'objet, le contenu, l'expéditeur ou les destinataires retire l'approbation (une campagne programmée repasse en Brouillon) : il faut l'approuver à nouveau. Approbations et retraits sont inscrits dans le journal d'audit.
 
 ## 8. Tester avant d'envoyer
 
@@ -163,8 +168,8 @@ La **Liste de vérification**, à droite de la page, contrôle la campagne avant
 Chaque point porte un badge : **OK**, **Recommandé** (conseil, non bloquant), **À corriger**, **En cours** (vérification en cours) ou **Non vérifié**. Le badge global en haut indique :
 
 - **Bloquée** : au moins un point obligatoire est « À corriger ». **Programmer** est inactif.
-- **Incomplète** : rien ne bloque, mais un conseil reste à traiter (test non envoyé, liens non vérifiés…). Vous pouvez programmer.
-- **Prête** : tout est au vert.
+- **Incomplète** : rien ne bloque, mais un conseil reste à traiter (test non envoyé, liens non vérifiés…). Le message sous le titre devient « Vous pouvez programmer l'envoi ; quelques vérifications recommandées restent à faire. » et **Programmer** reste actif.
+- **Prête** : tout est au vert (« Votre campagne est prête à être envoyée. »).
 
 Cliquez sur **Vérifier les liens** pour contrôler que chaque lien du design répond ; un lien défaillant est signalé (« n lien(s) inaccessible(s) »). Ce contrôle est un conseil : il ne bloque pas l'envoi.
 
@@ -183,7 +188,7 @@ Cliquez sur **Programmer**. La fenêtre **Confirmer l'envoi** s'ouvre : le **Ré
 
 Règles à connaître :
 
-- Pour « meilleur moment » et « par lots », une date et une heure vides signifient « démarrer tout de suite » ; avec une date, la campagne attend ce moment. Attention : la date saisie dans « Programmer pour plus tard » est conservée si vous changez d'option.
+- Pour « meilleur moment » et « par lots », une date et une heure vides signifient « démarrer tout de suite » ; avec une date, la campagne attend ce moment. Chaque option ne garde que ses propres champs : en passant de « Programmer pour plus tard » à « meilleur moment » ou « par lots », la date proposée par défaut est effacée, et la ligne **Envoi prévu** n'affiche une date que si vous en saisissez une. La fenêtre défile à l'intérieur, titre et boutons restant visibles.
 - **Une campagne avec test A/B ne propose que « Envoyer maintenant » et « Programmer pour plus tard »** : l'échantillon doit partir en une fois pour que le gagnant soit choisi sur des données complètes.
 - Si une date est dans le passé, les champs Date et Heure passent en erreur ; si le lot ou l'intervalle sort des bornes, le champ concerné est signalé.
 - Le serveur revérifie la liste de vérification : si un point bloquant a changé entre-temps, la fenêtre affiche « La campagne ne peut pas être programmée : … » avec les points en cause.
@@ -249,7 +254,9 @@ Attendez 48 à 72 heures avant de conclure : ouvertures et clics s'étalent sur 
 - **« La campagne doit avoir un objet et un contenu avant l'envoi d'un test. »** : complétez l'objet et le design avant de tester.
 - **« Vous pouvez saisir au maximum 5 adresses. »** / **« Limite de 10 envois de test par heure atteinte pour cette campagne. »** : réduisez la liste, ou attendez l'heure suivante.
 - **« La campagne ne peut pas être programmée : … »** : un point bloquant est apparu entre l'ouverture de la fenêtre et la validation ; fermez la fenêtre et relisez la liste de vérification.
-- **« Cette campagne doit être approuvée avant de pouvoir être envoyée. »** : l'option **Approbation requise avant l'envoi** est activée dans **Paramètres supplémentaires**. Décochez-la si vous n'avez pas de circuit d'approbation.
+- **« Cette campagne doit être approuvée avant de pouvoir être envoyée. »** / **« En attente d'approbation »** : l'option **Approbation requise avant l'envoi** est activée dans **Paramètres supplémentaires** et personne n'a encore approuvé la campagne (ou l'approbation a été retirée par une modification). Faites-la approuver par un Responsable marketing ou un Administrateur (bouton **Approuver**), ou décochez l'option si vous n'avez pas de circuit d'approbation.
+- **L'envoi ne part que le matin / en semaine** : une **Plage horaire d'envoi** est active. Hors plage, les messages sont retenus jusqu'à la prochaine ouverture ; modifiez la plage dans Paramètres supplémentaires (campagne en brouillon, programmée ou suspendue) si besoin.
+- **« Choisissez le compte SMTP unique à utiliser… »** : la stratégie **Compte unique** est choisie sans compte. Sélectionnez un compte, ou repassez en **Rotation automatique**.
 - **« Seules les campagnes en brouillon peuvent être programmées. »** : la campagne a déjà été lancée ou programmée (par exemple depuis un autre onglet). Rechargez la liste.
 - **Programmer reste grisé alors que tout est au vert** : le test A/B est activé mais incomplet. Ouvrez la carte **Test A/B** et corrigez-la (« Les objets des versions A et B doivent être différents. », « Les versions A et B du test A/B sont obligatoires. »), ou désactivez le test.
 - **La campagne reste « En cours » sans que rien ne parte** : aucun compte SMTP n'est disponible (désactivé, quota atteint). Les messages sont retentés toutes les 5 minutes ; vérifiez les [comptes SMTP](help:smtp).
