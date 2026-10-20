@@ -103,10 +103,10 @@ export async function fetchFormLists(q = ''): Promise<ContactList[]> {
     return response.data.data;
 }
 
-/** §45.4.4 — transactional templates for the double opt-in confirmation e-mail. */
+/** §45.4.4 — any non-archived template (marketing or transactional) for the double opt-in confirmation e-mail. */
 export async function fetchDoiTemplates(): Promise<TemplateV2[]> {
     const response = await axios.get<PaginatedResponse<TemplateV2>>(`${BASE}/templates`, {
-        params: { scope: 'transactional', is_archived: 0, sort: 'name', per_page: LOOKUP_PAGE_SIZE },
+        params: { is_gallery: 0, is_archived: 0, sort: 'name', per_page: LOOKUP_PAGE_SIZE },
     });
 
     return response.data.data;
