@@ -1,100 +1,258 @@
-# Créer et envoyer une campagne
+# Envoyer une campagne pas à pas
 
-Ce guide suit une campagne de bout en bout : préparer ce dont elle a besoin, la créer dans l'assistant, l'envoyer ou la planifier, puis surveiller son déroulement jusqu'à la fin. L'exemple servira de fil rouge : la SARL Bâti-Sud veut annoncer son nouveau catalogue de quincaillerie à 340 menuisiers de la région de Bejaia.
+Ce guide suit une campagne de bout en bout : vérifier ce dont elle a besoin, la configurer, la tester, la programmer, puis lire ses résultats. Fil rouge : l'équipe commerciale de PageJaunes veut présenter son offre de référencement en ligne aux entreprises de la liste « Prospects BTP & Construction ». L'e-mail s'appellera « Guide — campagne exemple ».
+
+## Vue d'ensemble
+
+| Étape | Où | Résultat |
+| --- | --- | --- |
+| 1 | Prérequis | Expéditeur vérifié, contacts en liste, compte SMTP sain |
+| 2 | Campagnes › **Créer une campagne** | Une campagne en **Brouillon** |
+| 3 à 6 | Page de configuration | Cartes Expéditeur, Objet, Destinataires, Design complètes |
+| 7 | **Aperçu & test** | Un e-mail de test relu |
+| 8 | **Liste de vérification** | Plus aucun point « À corriger » |
+| 9 | **Programmer** | Envoi immédiat, programmé, au meilleur moment ou par lots |
+| 10 | Liste des campagnes | Suivi, pause, reprise |
+| 11 | Rapport de campagne | Résultats |
 
 ## 1. Vérifier les prérequis
 
-Avant d'ouvrir l'assistant, assurez-vous d'avoir les trois éléments suivants.
+Trois éléments doivent exister avant de créer la campagne.
 
 | Élément | Où le préparer |
 | --- | --- |
-| Un modèle d'e-mail prêt | [Modèles](help:templates) |
-| Une liste de destinataires constituée | [Destinataires](help:recipients), alimentée par [import](help:recipients-import) |
-| Au moins un compte SMTP en état « Sain » | [Comptes SMTP](help:smtp) |
+| Un **expéditeur vérifié** (nom et adresse du champ « De ») | [Expéditeurs](help:senders), idéalement sur un [domaine authentifié](help:domains) |
+| Des contacts rassemblés dans une **liste** ou un **segment** | [Listes](help:lists), [Segments](help:segments), alimentés par [l'import de contacts](help:recipients-import) |
+| Au moins un compte **SMTP** en bon état | [Comptes SMTP](help:smtp) |
 
-Si le modèle n'existe pas encore, créez-le maintenant : l'assistant ne permet pas d'écrire le contenu, il le reprend du modèle choisi.
+Sans expéditeur vérifié, la carte Expéditeur affiche « Aucun expéditeur vérifié. Ajoutez-en un dans Paramètres › Expéditeurs. ». Sans compte SMTP disponible, la campagne peut être programmée mais aucun message ne partira (voir « En cas de problème »).
 
-## 2. Ouvrir la page Campagnes
+Le contenu n'est pas un prérequis : vous le créerez, ou le choisirez parmi les [modèles](help:templates), pendant la configuration.
 
-Dans le menu de navigation, groupe **Campagnes**, cliquez sur **Campagnes**. Le tableau liste vos campagnes existantes avec leur statut.
+## 2. Créer la campagne
 
-![Liste des campagnes](/docs/screenshots/campaigns/01-campaigns.png)
+Dans le menu, groupe **Marketing**, cliquez sur **E-mails**. La page **Campagnes e-mail** liste vos campagnes, avec des onglets de statut (Toutes, Brouillons, Programmées, En cours, Envoyées, Suspendues, Archivées).
 
-Cliquez sur **Nouvelle campagne**, en haut à droite.
+![Liste des campagnes e-mail](/docs/screenshots/campaign-flow/01-campaigns-list.png)
 
-## 3. Étape « Informations »
+1. Cliquez sur **Créer une campagne** (en haut à droite).
+2. Choisissez le type : **E-mail** (envoi classique) ou **Test A/B** (deux objets ou deux contenus, la meilleure version est envoyée automatiquement). Pour ce guide : **E-mail**, puis **Continuer**.
+3. Saisissez le **Nom interne de la campagne** (visible seulement par vous et votre équipe), par exemple `Guide — campagne exemple`.
+4. Cliquez sur **Créer la campagne**.
 
-![Assistant de campagne](/docs/screenshots/campaigns/03-wizard.png)
+![Fenêtre « Créer une campagne »](/docs/screenshots/campaign-flow/02-create-dialog.png)
 
-Renseignez :
+Vous arrivez sur la page de configuration. La campagne existe déjà en **Brouillon** : vous pouvez la quitter à tout moment avec **Enregistrer et quitter** ou la flèche de retour, puis la rouvrir en cliquant sur son nom dans la liste.
 
-- **Nom de la campagne** : `Catalogue quincaillerie 2026 — menuisiers Bejaia`. Un nom explicite vous fera gagner du temps quand vous chercherez cette campagne dans les rapports, six mois plus tard.
-- **Modèle** : choisissez `Annonce catalogue 2026` dans la liste déroulante.
+## 3. Comprendre la page de configuration
 
-Cliquez sur **Confirmer**.
+![Page de configuration d'une campagne](/docs/screenshots/campaign-flow/03-setup.png)
 
-## 4. Étape « Destinataires »
+L'en-tête affiche le nom (crayon pour le renommer), le statut et trois actions : **Enregistrer et quitter**, **Aperçu & test** et **Programmer**. Ce dernier bouton reste grisé tant que les étapes obligatoires ne sont pas complètes (info-bulle : « Complétez les étapes obligatoires pour programmer la campagne. »).
 
-Choisissez **Liste de destinataires** (l'autre option, **Segment**, s'utilise quand l'audience est définie par des critères plutôt que par une sélection fixe).
+Dessous, des cartes à compléter dans l'ordre : **Expéditeur**, **Objet**, **Destinataires**, **Design**, **Test A/B** (facultatif) et **Paramètres supplémentaires**. Chaque carte affiche une coche verte une fois terminée. À droite, la **Liste de vérification** se met à jour après chaque enregistrement.
 
-Collez ensuite l'identifiant de la liste dans le champ **Identifiant de la liste/du segment**. Vous le récupérez sur la page de la liste concernée.
+Chaque carte s'ouvre avec son bouton (« Sélectionner l'expéditeur », « Ajouter un objet »…) et s'enregistre avec son propre bouton **Enregistrer**.
 
-Vous n'avez rien à filtrer : les adresses de la [liste de suppression](help:suppression) seront écartées automatiquement au moment de l'envoi.
+## 4. Expéditeur et objet
 
-Cliquez sur **Confirmer**.
+**Expéditeur**
 
-## 5. Étape « Envoi »
+1. Cliquez sur **Sélectionner l'expéditeur** et choisissez une identité dans la liste (seuls les expéditeurs vérifiés sont proposés ; le lien **Gérer les expéditeurs** mène à leur page).
+2. Facultatif : **Adresse de réponse**. Laissée vide, c'est l'adresse de l'expéditeur qui reçoit les réponses.
+3. **Enregistrer**.
 
-Deux possibilités :
+**Objet**
 
-| Choix | Effet |
+1. Cliquez sur **Ajouter un objet**.
+2. Saisissez l'**Objet** : `Boostez la visibilité de {{ contact.SOCIETE }} avec PageJaunes`. Un compteur indique le nombre de caractères ; au-delà de 60, un avertissement signale que l'objet risque d'être tronqué (maximum 255).
+3. Facultatif : **Texte d'aperçu**, la ligne grise affichée après l'objet dans la boîte de réception. Le bloc « Aperçu dans la boîte de réception » montre le résultat.
+4. **Enregistrer**.
+
+### Personnaliser avec des balises
+
+Une balise est remplacée, pour chaque destinataire, par une donnée de sa fiche. Les icônes à droite des champs insèrent une balise (icône **Personnaliser**) ou un emoji (**Insérer un emoji**). Syntaxe :
+
+| Balise | Résultat |
 | --- | --- |
-| Envoyer immédiatement | L'envoi démarre à la validation finale. |
-| Planifier | Un champ de date et d'heure apparaît ; l'envoi partira tout seul à ce moment-là. |
+| `{{ contact.PRENOM }}`, `{{ contact.NOM }}`, `{{ contact.SOCIETE }}`, `{{ contact.EMAIL }}` | Données de la fiche contact |
+| `{{ contact.NOM_DE_L_ATTRIBUT }}` | Tout [attribut](help:attributes) personnalisé (par exemple `{{ contact.wilaya }}`) |
+| `{{ contact.PRENOM \| default:"cher client" }}` | Valeur de remplacement quand le champ est vide |
+| `{{ unsubscribe }}` | Lien de désinscription |
+| `{{ mirror }}`, `{{ update_profile }}` | Version en ligne, mise à jour du profil |
+| `{{ campaign.NAME }}`, `{{ sender.NAME }}`… | Nom de la campagne, de l'expéditeur… |
 
-Pour Bâti-Sud, choisissez **Planifier** et fixez le dimanche à 09:00 : en B2B algérien, un envoi en début de matinée de jour ouvré est lu bien plus souvent qu'un envoi du jeudi soir.
+Les balises fonctionnent dans l'objet, le texte d'aperçu, le contenu et le champ « À ». Une balise inconnue (faute de frappe, `{{ prenom }}` au lieu de `{{ contact.PRENOM }}`) bloque la programmation : voir la liste de vérification.
 
-Cliquez sur **Confirmer**.
+## 5. Destinataires
 
-## 6. Étape « Vérification »
+1. Cliquez sur **Ajouter des destinataires**. La fenêtre **Choisir les destinataires** s'ouvre.
+2. Dans **Envoyer à**, cochez des [listes](help:lists) (onglet **Listes**) et/ou des [segments](help:segments) (onglet **Segments**). Un champ de recherche aide à retrouver un nom. Maximum : 50 listes et segments.
+3. Facultatif : dans **Exclure**, cochez ce qui ne doit pas être touché (par exemple vos clients actifs).
+4. Le bloc **Audience estimée** se met à jour en direct : nombre de destinataires, d'exclus et d'adresses « en liste noire ». Ces dernières, celles de la [liste de suppression](help:suppression), sont toujours écartées. Un avertissement apparaît si une grande part de l'audience n'a rien ouvert depuis 90 jours.
+5. Facultatif : **Champ « À »** pour personnaliser le nom affiché du destinataire (par exemple `{{ contact.PRENOM }} {{ contact.NOM }}`).
+6. **Enregistrer**.
 
-Le récapitulatif reprend le nom, le modèle, l'audience et le mode d'envoi. Relisez-le attentivement : c'est le dernier point de contrôle.
+![Choisir les destinataires](/docs/screenshots/campaign-flow/04-recipients.png)
 
-- **Enregistrer comme brouillon** si vous voulez d'abord faire relire le contenu à un collègue.
-- **Planifier** (ou **Envoyer maintenant**) pour valider définitivement.
+Dans l'exemple : liste « Prospects BTP & Construction », 130 contacts, dont 13 en liste noire, soit 117 destinataires.
 
-L'assistant se ferme et la campagne apparaît dans le tableau avec le statut correspondant. Le détail complet de la fenêtre est décrit dans [l'assistant de campagne](help:dialog-campaign-wizard).
+## 6. Design
 
-## 7. Relire le contenu avant le départ
+1. Dans la carte **Design**, cliquez sur **Commencer la conception**. La fenêtre **Choisir un modèle** propose cinq onglets : **Galerie** (modèles prêts à l'emploi, dont **Modèle vierge**), **Mes modèles**, **Campagnes précédentes**, **Coder** (HTML) et **Éditeur de texte enrichi**.
+2. Cliquez sur un modèle, par exemple **Lancement de produit** : l'éditeur glisser-déposer s'ouvre.
+3. Modifiez le contenu : glissez des blocs depuis **Contenu › Blocs** (Titre, Texte, Image, Bouton, Séparateur, colonnes…) ou des sections prêtes à l'emploi (**Sections**), et réglez le bloc sélectionné dans le panneau **Propriétés**. Dans un bloc texte, le menu **Personnaliser…** insère une balise (Prénom, Société, Lien de désinscription…).
+4. Cliquez sur **Enregistrer et quitter** pour revenir à la configuration (**Enregistrer** garde l'éditeur ouvert).
 
-Si vous avez enregistré un brouillon, ouvrez la campagne en cliquant sur son nom : un volet s'ouvre à droite.
+![Éditeur de design](/docs/screenshots/campaign-flow/05-design-editor.png)
 
-![Volet de détail d'une campagne](/docs/screenshots/campaigns/02-detail-drawer.png)
+La carte affiche alors une miniature et trois actions : **Modifier le design**, **Changer de modèle** et **Aperçu**. Les détails de l'éditeur sont dans [Éditeur de design](help:campaign-design).
 
-L'onglet **Contenu** montre le message tel qu'il sera envoyé. Vérifiez l'objet, les liens et la présence du lien de désabonnement. L'onglet **Aperçu** confirme le modèle et l'audience.
+**Lien de désinscription obligatoire.** Le design doit contenir un lien de désinscription : soit la balise `{{ unsubscribe }}` (menu **Personnaliser…** › « Lien de désinscription »), soit un lien vers une adresse `/unsubscribe/…`. Les modèles de la galerie en contiennent déjà un. Sans lui, la programmation est bloquée.
 
-## 8. Surveiller l'envoi
+## 7. Paramètres supplémentaires et test A/B (facultatifs)
 
-Quand l'envoi démarre, le statut passe à **Envoi en cours**. Les messages ne partent pas tous d'un coup : ils sont volontairement étalés pour protéger la réputation de vos adresses d'expédition. Une audience de 340 contacts peut prendre plusieurs dizaines de minutes.
+La carte **Paramètres supplémentaires** (bouton **Modifier les paramètres**) regroupe notamment :
 
-Dans le volet de détail :
+- **Page de désinscription** : **Page par défaut** ou **Page personnalisée** (voir [Pages de désinscription](help:unsubscribe-pages)) ;
+- **Tags** et **Dossier**, pour retrouver la campagne dans la liste ;
+- **Suivi Google Analytics (UTM)** : **Activer le suivi UTM** ajoute les paramètres `utm_*` aux liens ;
+- **Suivi des ouvertures et des clics** (activé par défaut), **Lien miroir** (« voir dans le navigateur »).
 
-- l'onglet **Destinataires** liste chaque adresse avec le statut de son message ;
-- l'onglet **Analyses** donne la taille de l'audience, les ouvertures, les clics et la répartition par statut.
+La carte **Test A/B** (bouton **Activer le test A/B**) sert à comparer deux versions : élément testé (**Objet** ou **Contenu**), taille de l'échantillon (de 5 à 50 % des destinataires), critère du gagnant (taux d'ouverture ou de clic), durée du test et envoi automatique de la version gagnante au reste de l'audience. Les objets (ou contenus) des versions A et B doivent être différents.
 
-Si vous repérez une erreur pendant l'envoi — mauvais lien, erreur de prix — utilisez le menu `…` de la ligne et choisissez **Mettre en pause**. Les messages déjà confiés au serveur partiront, mais les suivants seront retenus. Après correction, **Reprendre** relance l'envoi là où il s'était arrêté ; **Annuler la campagne** l'arrête définitivement.
+Pour un premier envoi, vous pouvez laisser les autres réglages tels quels.
 
-## 9. Après l'envoi
+## 8. Tester avant d'envoyer
 
-Le statut passe à **Envoyée** quand tous les destinataires ont été traités. Laissez ensuite 48 à 72 heures aux ouvertures et aux clics pour s'accumuler avant de conclure quoi que ce soit.
+Cliquez sur **Aperçu & test** dans l'en-tête : un panneau s'ouvre à droite.
 
-Passez alors au guide [Analyser les résultats d'une campagne](help:flow-analyze-results), qui explique comment lire les [Rapports](help:reporting) et quoi faire des rebonds.
+![Aperçu et test](/docs/screenshots/campaign-flow/06-preview-test.png)
 
-Pour relancer l'opération plus tard, ne repartez pas de zéro : utilisez **Dupliquer** dans le menu `…`, qui recrée un brouillon identique sans date planifiée.
+1. Relisez l'**Aperçu dans la boîte de réception**, puis le rendu en mode **Ordinateur** et **Mobile**.
+2. Dans **Adresses de test**, saisissez de 1 à 5 adresses séparées par des virgules, puis cliquez sur **Envoyer un test**. Le message « E-mail de test envoyé. » s'affiche, avec la mention « Dernier test envoyé le … ».
+3. Ouvrez le message reçu : vérifiez l'objet, les images, les liens et la version mobile.
+4. Avec un test A/B actif, le sélecteur **Version du test A/B** (Version A, Version B) bascule l'aperçu et l'envoi de test entre les deux versions.
+
+À savoir :
+
+- **Limite** : 5 adresses par envoi et 10 envois de test par heure et par campagne.
+- Les balises sont remplies avec la fiche du contact **si l'adresse de test correspond à un contact existant**. Sinon elles restent vides, ou prennent leur valeur `default:` : utilisez l'adresse d'un contact de test pour vérifier la personnalisation.
+- Un test ne compte pas dans les statistiques et ne comporte pas les en-têtes de désinscription d'un vrai envoi. Une adresse de test inconnue n'est jamais utilisée comme destinataire de vos campagnes.
+- Le test part par vos comptes SMTP, comme un vrai message.
+
+## 9. Lire la liste de vérification
+
+La **Liste de vérification**, à droite de la page, contrôle la campagne avant l'envoi.
+
+![Liste de vérification](/docs/screenshots/campaign-flow/07-checklist.png)
+
+| Point | Bloquant ? | Ce qui est vérifié |
+| --- | --- | --- |
+| Expéditeur vérifié | Oui | Un expéditeur vérifié est choisi |
+| Destinataires sélectionnés | Oui | Au moins un destinataire une fois exclusions et liste noire déduites |
+| Objet renseigné | Oui | L'objet n'est pas vide |
+| Design prêt | Oui | Le design n'est pas vide |
+| Balises de personnalisation | Oui | Aucune balise inconnue (message : « Balises inconnues : … ») |
+| Lien de désinscription présent | Oui | Voir l'étape 6 |
+| E-mail de test envoyé | Non | Au moins un test envoyé |
+| Liens valides | Non | Résultat du bouton **Vérifier les liens** |
+| Taille de l'e-mail | Non | Avertissement au-delà de 102 Ko (risque de coupure par Gmail) |
+| Score de spam | Non | « Analyse anti-spam non disponible » |
+
+Chaque point porte un badge : **OK**, **Recommandé** (conseil, non bloquant), **À corriger**, **En cours** (vérification en cours) ou **Non vérifié**. Le badge global en haut indique :
+
+- **Bloquée** : au moins un point obligatoire est « À corriger ». **Programmer** est inactif.
+- **Incomplète** : rien ne bloque, mais un conseil reste à traiter (test non envoyé, liens non vérifiés…). Vous pouvez programmer.
+- **Prête** : tout est au vert.
+
+Cliquez sur **Vérifier les liens** pour contrôler que chaque lien du design répond ; un lien défaillant est signalé (« n lien(s) inaccessible(s) »). Ce contrôle est un conseil : il ne bloque pas l'envoi.
+
+## 10. Programmer ou envoyer
+
+Cliquez sur **Programmer**. La fenêtre **Confirmer l'envoi** s'ouvre : le **Récapitulatif** reprend **De**, **À** (avec le nombre de destinataires), **Objet** et **Envoi prévu**. Relisez-le, puis choisissez parmi les **Options d'envoi**.
+
+![Confirmer l'envoi](/docs/screenshots/campaign-flow/08-schedule.png)
+
+| Option | Fonctionnement | Bouton final |
+| --- | --- | --- |
+| **Envoyer maintenant** | La campagne part immédiatement. | **Envoyer maintenant** |
+| **Programmer pour plus tard** | **Date**, **Heure** et **Fuseau horaire** (Africa/Algiers par défaut) obligatoires ; la date doit être dans le futur. Par défaut : demain 9 h. | **Programmer** |
+| **Envoyer au meilleur moment** | Chaque contact reçoit l'e-mail à l'heure où il ouvre habituellement ses messages, dans les 24 heures. L'analyse porte sur ses 10 dernières campagnes ; sans historique, l'heure la plus performante du compte est utilisée. Un résumé indique combien de contacts ont un historique. Date et heure facultatives. | **Programmer au meilleur moment** |
+| **Envoyer par lots** | L'envoi est réparti dans le temps : **Nombre d'e-mails par lot** (50 à 100 000, 500 par défaut) toutes les **Intervalle entre les lots (minutes)** (5 à 1 440, 30 par défaut). Date et heure facultatives. | **Programmer l'envoi par lots** |
+
+Règles à connaître :
+
+- Pour « meilleur moment » et « par lots », une date et une heure vides signifient « démarrer tout de suite » ; avec une date, la campagne attend ce moment. Attention : la date saisie dans « Programmer pour plus tard » est conservée si vous changez d'option.
+- **Une campagne avec test A/B ne propose que « Envoyer maintenant » et « Programmer pour plus tard »** : l'échantillon doit partir en une fois pour que le gagnant soit choisi sur des données complètes.
+- Si une date est dans le passé, les champs Date et Heure passent en erreur ; si le lot ou l'intervalle sort des bornes, le champ concerné est signalé.
+- Le serveur revérifie la liste de vérification : si un point bloquant a changé entre-temps, la fenêtre affiche « La campagne ne peut pas être programmée : … » avec les points en cause.
+
+Une fois validé, un message s'affiche (« Campagne programmée. » ou « Envoi de la campagne lancé. ») et vous revenez à la liste, sur l'onglet **Programmées** ou **En cours**. La campagne n'est plus modifiable tant qu'elle est en cours d'envoi.
+
+## 11. Suivre l'envoi
+
+### Les statuts
+
+| Statut | Signification |
+| --- | --- |
+| **Brouillon** | En préparation, jamais envoyée. |
+| **Programmée** | Une date d'envoi future est enregistrée. À l'heure dite, elle passe à « En cours ». |
+| **En cours** | Les messages sont confiés au moteur d'envoi, par paquets. « Meilleur moment » et « par lots » démarrent directement en « En cours » quand aucune date n'est fixée. |
+| **En pause** | Plus aucun nouveau message n'est libéré. |
+| **Suspendue** | Envoi interrompu ; l'info-bulle du statut donne la raison (quota d'envoi atteint, aucun compte SMTP disponible…). **Reprendre** relance l'envoi. |
+| **Envoyée** | Tous les destinataires ont été traités. |
+| **Annulée** | Envoi arrêté définitivement. |
+| **Archivée** | Campagne rangée hors de l'onglet « Toutes ». |
+
+L'envoi n'est pas instantané : les messages passent par vos comptes SMTP, dans le respect de leurs quotas et de leurs limites par domaine. Une audience de plusieurs centaines de contacts peut demander un certain temps.
+
+### Les actions du menu « Plus d'actions » (icône ⋯)
+
+| Statut | Actions proposées |
+| --- | --- |
+| Brouillon | Modifier, Dupliquer, Envoyer un test, Programmer, Envoyer maintenant, Supprimer |
+| Programmée | Modifier, Dupliquer, Envoyer un test, Déprogrammer, Envoyer maintenant, Annuler l'envoi |
+| En cours | Rapport, Dupliquer, Mettre en pause, Annuler l'envoi |
+| En pause | Rapport, Dupliquer, Reprendre, Annuler l'envoi |
+| Suspendue | Rapport, Modifier, Dupliquer, Reprendre, Annuler l'envoi, Archiver |
+| Envoyée | Rapport, Dupliquer, Envoyer aux nouveaux contacts, Archiver |
+| Annulée | Dupliquer, Archiver, Supprimer (et Rapport si des messages sont partis) |
+
+- **Mettre en pause** : aucune confirmation ; les messages déjà confiés au moteur d'envoi partent, les suivants sont retenus. **Reprendre** repart de là où l'envoi s'était arrêté.
+- **Annuler l'envoi** demande confirmation (« Annuler cette campagne ? ») et n'annule jamais un message déjà parti ; les destinataires non servis sont simplement écartés.
+- **Déprogrammer** ramène la campagne en Brouillon pour la modifier, puis la reprogrammer. Une campagne « Programmée » modifiée doit toujours satisfaire la liste de vérification.
+- **Dupliquer** crée un nouveau Brouillon « Copie de … » avec la même configuration et le même design, sans date : le moyen le plus rapide de relancer une opération réussie.
+- **Envoyer aux nouveaux contacts** (campagne « Envoyée ») crée une nouvelle campagne destinée aux contacts ajoutés aux listes depuis l'envoi.
+
+### Désinscription
+
+Chaque message d'une campagne réelle porte les en-têtes `List-Unsubscribe` et `List-Unsubscribe-Post` (désinscription en un clic proposée par Gmail, Outlook…), en plus du lien du design. Le destinataire arrive sur la page de désinscription (par défaut ou personnalisée) ; son adresse est alors ajoutée à la [liste de suppression](help:suppression) (motif « Désabonnement manuel », ou « Désabonnement global (tout) » s'il choisit de tout quitter) et ne recevra plus aucune campagne.
+
+## 12. Lire les résultats
+
+Dans l'onglet **Envoyées**, cliquez sur le nom de la campagne (ou ⋯ › **Rapport**) pour ouvrir son rapport.
+
+![Rapport de campagne](/docs/screenshots/campaign-flow/09-report.png)
+
+Cinq onglets : **Vue d'ensemble** (Envoyés, Délivrés, Ouvertures uniques, Clics uniques, Désinscriptions, Plaintes, Rebonds, comparés à la moyenne de votre compte), **Délivrabilité**, **Ouvertures**, **Clics** et **Désinscriptions**. Les boutons **Exporter**, **Comparer** et **Voir l'e-mail** complètent la page.
+
+Attendez 48 à 72 heures avant de conclure : ouvertures et clics s'étalent sur plusieurs jours. La lecture détaillée est décrite dans [Analyser les résultats](help:flow-analyze-results) et [Rapport de campagne](help:campaign-report).
 
 ## En cas de problème
 
-- **Le bouton final de l'assistant reste grisé** : un champ obligatoire est vide — nom, modèle, identifiant d'audience, ou date en mode planifié.
-- **La campagne planifiée ne part pas à l'heure prévue** : vérifiez d'abord son statut ; si elle est en **Annulée**, quelqu'un l'a arrêtée. Sinon, contrôlez l'état de vos comptes SMTP dans les [Rapports](help:reporting).
-- **Beaucoup de rejets dès les premières minutes** : mettez la campagne en pause immédiatement et vérifiez la qualité de la liste. Un envoi massif vers des adresses invalides dégrade durablement votre délivrabilité.
-- **Le contenu affiché n'est pas le bon** : le modèle choisi n'était pas celui attendu. Annulez le brouillon, dupliquez-le et corrigez le modèle depuis l'assistant.
+- **Le bouton Programmer est grisé** : une carte obligatoire est incomplète, ou la liste de vérification est « Bloquée ». Passez la souris sur le bouton, puis traitez les points « À corriger » de la liste.
+- **« Aucun expéditeur sélectionné » / « L'expéditeur n'est pas vérifié »** : choisissez un expéditeur vérifié ; sinon vérifiez-le dans [Expéditeurs](help:senders).
+- **« Aucun destinataire »** : les listes sont vides, ou toutes les adresses sont exclues ou en liste noire. Vérifiez l'**Audience estimée**.
+- **« Balises inconnues : {{ prenom }} »** : corrigez la balise (`{{ contact.PRENOM }}`) dans l'objet, le texte d'aperçu, le « À » ou le design. La balise `{{ first_name }}` n'existe pas non plus.
+- **« Le design ne contient pas de lien de désinscription »** : insérez `{{ unsubscribe }}` (menu **Personnaliser…**) ou reprenez un modèle de la galerie.
+- **« La campagne doit avoir un objet et un contenu avant l'envoi d'un test. »** : complétez l'objet et le design avant de tester.
+- **« Vous pouvez saisir au maximum 5 adresses. »** / **« Limite de 10 envois de test par heure atteinte pour cette campagne. »** : réduisez la liste, ou attendez l'heure suivante.
+- **« La campagne ne peut pas être programmée : … »** : un point bloquant est apparu entre l'ouverture de la fenêtre et la validation ; fermez la fenêtre et relisez la liste de vérification.
+- **« Cette campagne doit être approuvée avant de pouvoir être envoyée. »** : l'option **Approbation requise avant l'envoi** est activée dans **Paramètres supplémentaires**. Décochez-la si vous n'avez pas de circuit d'approbation.
+- **« Seules les campagnes en brouillon peuvent être programmées. »** : la campagne a déjà été lancée ou programmée (par exemple depuis un autre onglet). Rechargez la liste.
+- **Programmer reste grisé alors que tout est au vert** : le test A/B est activé mais incomplet. Ouvrez la carte **Test A/B** et corrigez-la (« Les objets des versions A et B doivent être différents. », « Les versions A et B du test A/B sont obligatoires. »), ou désactivez le test.
+- **La campagne reste « En cours » sans que rien ne parte** : aucun compte SMTP n'est disponible (désactivé, quota atteint). Les messages sont retentés toutes les 5 minutes ; vérifiez les [comptes SMTP](help:smtp).
+- **Beaucoup de rebonds dès les premières minutes** : mettez la campagne en pause, puis vérifiez la qualité de la liste. Un envoi massif vers des adresses invalides abîme durablement la délivrabilité.
+- **Le contenu envoyé n'est pas le bon** : une campagne en cours n'est plus modifiable. Annulez l'envoi, dupliquez la campagne, corrigez le design, puis relancez.
+- **Le nombre de destinataires est inférieur à celui de la liste** : les adresses de la [liste de suppression](help:suppression), les doublons et les exclusions sont retirés avant l'envoi.

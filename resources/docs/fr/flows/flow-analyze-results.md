@@ -6,13 +6,13 @@ Une campagne envoyée n'est qu'une moitié du travail. Ce guide explique comment
 
 Ne jugez rien dans l'heure qui suit l'envoi. Les rebonds définitifs arrivent en général dans les minutes qui suivent, mais les ouvertures et les clics s'étalent sur plusieurs jours. Attendez **48 à 72 heures** avant de tirer des conclusions.
 
-## 2. Regarder d'abord le détail de la campagne
+## 2. Regarder d'abord le rapport de la campagne
 
-Ouvrez [Campagnes](help:campaigns) et cliquez sur le nom de la campagne pour ouvrir le volet de détail.
+Ouvrez [Campagnes](help:campaigns), onglet **Envoyées**, puis cliquez sur le nom de la campagne (ou sur ⋯ › **Rapport**) pour ouvrir son [rapport](help:campaign-report).
 
-![Volet de détail d'une campagne](/docs/screenshots/campaigns/02-detail-drawer.png)
+![Rapport d'une campagne](/docs/screenshots/campaign-flow/09-report.png)
 
-L'onglet **Analyses** donne les chiffres essentiels : taille de l'audience, nombre d'ouvertures, nombre de clics, puis la répartition des messages par statut. L'onglet **Destinataires** permet de voir adresse par adresse ce qui s'est passé — c'est là que vous repérez concrètement qui a rebondi.
+L'onglet **Vue d'ensemble** donne les chiffres essentiels : Envoyés, Délivrés, Ouvertures uniques, Clics uniques, Désinscriptions, Plaintes et Rebonds, chacun comparé à la moyenne de votre compte, puis le graphique des ouvertures et clics par heure ou par jour. L'onglet **Délivrabilité** détaille les rebonds et leurs motifs, **Ouvertures** et **Clics** montrent qui a réagi et sur quels liens, et **Désinscriptions** indique qui s'est retiré. Le bouton **Voir les contacts** liste les contacts derrière un chiffre et permet de les enregistrer comme segment.
 
 ## 3. Passer aux Rapports pour la vue d'ensemble
 
@@ -84,11 +84,11 @@ Le détail de cette fenêtre est décrit dans [Ajouter une adresse à la liste d
 
 Le bouton **Exporter** de la page Rapports télécharge les données filtrées au format CSV, pour un compte rendu interne ou une comparaison dans un tableur. Il n'apparaît que si votre rôle dispose du droit d'export.
 
-Concluez par une décision concrète pour la campagne suivante : réécrire l'objet si l'ouverture est faible, revoir l'offre ou le lien si les ouvertures sont bonnes mais les clics rares, nettoyer la base si les rebonds dépassent 2 %. Puis dupliquez la campagne depuis [Campagnes](help:campaigns) et relancez avec [Créer et envoyer une campagne](help:flow-create-send-campaign).
+Concluez par une décision concrète pour la campagne suivante : réécrire l'objet si l'ouverture est faible, revoir l'offre ou le lien si les ouvertures sont bonnes mais les clics rares, nettoyer la base si les rebonds dépassent 2 %. Puis dupliquez la campagne depuis [Campagnes](help:campaigns) et relancez avec [Envoyer une campagne pas à pas](help:flow-create-send-campaign).
 
 ## En cas de problème
 
 - **« Aucune donnée pour cette période »** : la plage de dates ne couvre pas l'envoi, ou le filtre campagne est trop restrictif. Repassez sur « Toutes les campagnes ».
 - **Zéro ouverture alors que la livraison est bonne** : l'objet du message est probablement en cause, ou vos destinataires bloquent massivement les images. Fiez-vous au taux de clic.
 - **Le taux de rejet dépasse 10 %** : arrêtez toute nouvelle campagne, la source de vos adresses est en cause. Reprenez un import propre avant de réessayer.
-- **Les chiffres du volet de détail et ceux des Rapports diffèrent légèrement** : les rapports sont recalculés périodiquement, le détail de campagne est plus immédiat. L'écart se résorbe de lui-même.
+- **Les chiffres du rapport de campagne et ceux de la page Rapports diffèrent légèrement** : les rapports sont recalculés périodiquement, le rapport de campagne est plus immédiat. L'écart se résorbe de lui-même.

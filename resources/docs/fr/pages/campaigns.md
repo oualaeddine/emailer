@@ -1,70 +1,66 @@
 # Campagnes
 
-La page **Campagnes** regroupe tous vos envois de masse : les brouillons en préparation, les envois planifiés, ceux en cours et ceux déjà terminés. C'est depuis cette page que vous créez une campagne, que vous suivez son avancement et que vous la mettez en pause ou l'annulez si nécessaire.
+La page **Campagnes e-mail** (menu **Marketing** › **E-mails**) regroupe tous vos envois de masse : brouillons en préparation, envois programmés, en cours et terminés. C'est depuis cette page que vous créez une campagne, que vous suivez son avancement, que vous la mettez en pause, la dupliquez ou ouvrez son rapport.
 
-![Liste des campagnes](/docs/screenshots/campaigns/01-campaigns.png)
+![Liste des campagnes e-mail](/docs/screenshots/campaign-flow/01-campaigns-list.png)
 
 ## Lire le tableau
 
-Chaque ligne représente une campagne. Les colonnes affichées sont :
+Chaque ligne est une campagne : son nom, son objet en dessous, puis les colonnes ci-dessous. Un clic sur le nom ouvre la page de configuration si la campagne est encore modifiable, sinon son rapport.
 
 | Colonne | Contenu |
 | --- | --- |
-| Nom de la campagne | Le nom que vous avez donné, par exemple « Promo rentrée — menuisiers Bejaia ». Cliquez dessus pour ouvrir le détail. |
-| Statut | L'état actuel de la campagne (voir le tableau ci-dessous). |
-| Modèle | Le modèle d'e-mail utilisé, par exemple « Offre commerciale 2026 ». |
-| Planifiée pour | La date et l'heure d'envoi prévues, ou `—` si l'envoi est immédiat. |
-| Envoyée le | La date à laquelle l'envoi a réellement démarré, ou `—` si rien n'a encore été envoyé. |
-| Actions | Le menu `…` qui propose les actions autorisées par le statut. |
+| Campagne | Nom et objet ; un badge **Test A/B** signale ce type de campagne. |
+| Statut | État actuel de la campagne (voir ci-dessous). |
+| Destinataires | Nombre de destinataires. |
+| Taux d'ouverture, Taux de clic | Résultats, une fois la campagne envoyée. |
+| Dernière modification | Date de modification, ou **Envoyée le** / **Programmée le** selon l'état. |
+| Propriétaire | La personne qui a créé la campagne. |
+| Actions | Le menu ⋯ (**Plus d'actions**), qui propose les actions autorisées par le statut. |
+
+Au-dessus du tableau : les onglets de statut avec leur compteur (**Toutes**, **Brouillons**, **Programmées**, **En cours**, **Envoyées**, **Suspendues**, **Archivées**), la recherche, le tri (**Trier par**), les filtres par **Tags** et par **Type** (E-mail ou Test A/B), et, à gauche, l'arborescence des **Dossiers** pour ranger vos campagnes. En cochant plusieurs lignes, vous pouvez les **Archiver**, les **Déplacer** ou les **Supprimer** en une fois.
 
 ## Les statuts et ce qu'ils permettent
 
-Une campagne suit un cycle de vie strict. Les actions proposées dans le menu `…` dépendent directement du statut.
+Une campagne suit un cycle de vie strict. Les actions du menu ⋯ dépendent du statut.
 
 | Statut | Signification | Actions disponibles |
 | --- | --- | --- |
-| Brouillon | Créée mais jamais envoyée ni planifiée. | Annuler la campagne, Dupliquer |
-| Planifiée | Une date d'envoi future est enregistrée. | Annuler la campagne, Dupliquer |
-| Envoi en cours | Les messages partent en ce moment. | Mettre en pause, Dupliquer |
-| En pause | L'envoi est interrompu, les messages restants attendent. | Reprendre, Annuler la campagne, Dupliquer |
-| Envoyée | Tous les destinataires ont été traités. | Dupliquer |
-| Annulée | L'envoi a été arrêté définitivement. | Dupliquer |
+| Brouillon | Créée, jamais envoyée ni programmée. | Modifier, Dupliquer, Envoyer un test, Programmer, Envoyer maintenant, Supprimer |
+| Programmée | Une date d'envoi future est enregistrée. | Modifier, Dupliquer, Envoyer un test, Déprogrammer, Envoyer maintenant, Annuler l'envoi |
+| En cours | Les messages partent en ce moment. | Rapport, Dupliquer, Mettre en pause, Annuler l'envoi |
+| En pause | Aucun nouveau message n'est libéré. | Rapport, Dupliquer, Reprendre, Annuler l'envoi |
+| Suspendue | Envoi interrompu ; l'info-bulle du statut donne la raison. | Rapport, Modifier, Dupliquer, Reprendre, Annuler l'envoi, Archiver |
+| Envoyée | Tous les destinataires ont été traités. | Rapport, Dupliquer, Envoyer aux nouveaux contacts, Archiver |
+| Annulée | Envoi arrêté définitivement. | Dupliquer, Archiver, Supprimer |
 
 Deux points importants :
 
-- **Mettre en pause** n'annule rien : les messages déjà confiés au serveur d'envoi partent normalement, seuls les suivants sont retenus. **Reprendre** repart exactement là où l'envoi s'était arrêté.
-- **Annuler la campagne** n'annule jamais un envoi déjà parti. Les destinataires non encore servis sont simplement écartés. Une confirmation vous est demandée.
+- **Mettre en pause** n'annule rien : les messages déjà confiés au moteur d'envoi partent normalement, seuls les suivants sont retenus. **Reprendre** repart là où l'envoi s'était arrêté.
+- **Annuler l'envoi** n'annule jamais un message déjà parti. Les destinataires non encore servis sont simplement écartés. Une confirmation vous est demandée. Un **Brouillon** ne s'annule pas : on le **Supprime**.
 
 ## Créer une campagne
 
-Le bouton **Nouvelle campagne**, en haut à droite, ouvre l'assistant en quatre étapes : Informations, Destinataires, Envoi, Vérification. Le détail de chaque étape est décrit dans [l'assistant de campagne](help:dialog-campaign-wizard).
+Le bouton **Créer une campagne**, en haut à droite, ouvre une courte fenêtre : choix du type (**E-mail** ou **Test A/B**), puis **Nom interne de la campagne**. **Créer la campagne** vous conduit à la [page de configuration](help:campaign-setup), où vous complétez l'expéditeur, l'objet, les destinataires et le design, puis programmez l'envoi.
 
-![Assistant de campagne](/docs/screenshots/campaigns/03-wizard.png)
+![Fenêtre « Créer une campagne »](/docs/screenshots/campaign-flow/02-create-dialog.png)
+
+Le parcours complet est décrit dans [Envoyer une campagne pas à pas](help:flow-create-send-campaign).
 
 ## Dupliquer une campagne
 
-**Dupliquer** crée une copie en Brouillon avec le même modèle, le même contenu et la même audience, mais sans date planifiée. C'est la façon la plus rapide de relancer une opération qui a bien fonctionné : dupliquez « Promo rentrée — menuisiers Bejaia », renommez-la, changez la liste et planifiez-la.
+**Dupliquer** crée un Brouillon « Copie de … » avec la même configuration et le même design, sans date programmée. C'est la façon la plus rapide de relancer une opération réussie : dupliquez la campagne, renommez-la, changez la liste, puis programmez-la.
 
-## Le volet de détail
+## Consulter les résultats
 
-Un clic sur le nom d'une campagne ouvre un volet sur la droite avec quatre onglets.
-
-![Volet de détail d'une campagne](/docs/screenshots/campaigns/02-detail-drawer.png)
-
-| Onglet | Ce que vous y trouvez |
-| --- | --- |
-| Aperçu | Modèle utilisé, audience visée, date planifiée, date d'envoi. |
-| Destinataires | La liste des adresses touchées, avec le statut de chaque message (distribué, ouvert, rejeté…). |
-| Contenu | L'aperçu du message tel qu'il est envoyé. |
-| Analyses | Taille de l'audience, nombre d'ouvertures et de clics, puis la répartition des messages par statut. |
-
-Pour une analyse plus large — plusieurs campagnes, plusieurs comptes SMTP, une période donnée — passez plutôt par les [Rapports](help:reporting).
+Pour une campagne envoyée, **Rapport** (ou un clic sur son nom) ouvre le [rapport de campagne](help:campaign-report) : vue d'ensemble, délivrabilité, ouvertures, clics et désinscriptions. Pour une analyse plus large (plusieurs campagnes, plusieurs comptes SMTP, une période donnée), passez par les [Rapports](help:reporting).
 
 ## En cas de problème
 
-- **La campagne reste en « Envoi en cours » très longtemps** : c'est normal sur une grosse audience, l'envoi est volontairement étalé pour protéger la réputation de vos adresses d'expédition. Suivez la progression dans l'onglet **Destinataires**.
-- **Le nombre de destinataires est inférieur à celui de la liste** : les adresses présentes dans la [liste de suppression](help:suppression) sont écartées avant l'envoi, systématiquement et sans exception.
-- **Impossible de mettre en pause** : l'action n'apparaît que pour une campagne en « Envoi en cours ». Une campagne « Planifiée » s'annule, elle ne se met pas en pause.
-- **La colonne Modèle affiche un code** : le modèle a probablement été supprimé. Dupliquez la campagne et choisissez un modèle valide dans les [Modèles](help:templates).
+- **La campagne reste en « En cours » très longtemps** : l'envoi passe par vos comptes SMTP, dans le respect de leurs quotas. Si rien ne bouge, vérifiez qu'au moins un compte est disponible dans les [comptes SMTP](help:smtp).
+- **Le nombre de destinataires est inférieur à celui de la liste** : les adresses de la [liste de suppression](help:suppression) et les exclusions sont écartées avant l'envoi.
+- **Impossible de mettre en pause** : l'action n'apparaît que pour une campagne « En cours ». Une campagne « Programmée » se déprogramme ou s'annule.
+- **Impossible de modifier une campagne** : seules les campagnes Brouillon, Programmée et Suspendue sont modifiables. Dupliquez-la pour repartir de la même base.
+- **Une campagne a disparu de la liste** : elle est peut-être archivée ; ouvrez l'onglet **Archivées** ou réinitialisez les filtres.
 
-> Pas-à-pas complet, de la création au suivi des résultats : [Créer et envoyer une campagne](help:flow-create-send-campaign).
+> Pas-à-pas complet, de la création au suivi des résultats : [Envoyer une campagne pas à pas](help:flow-create-send-campaign).

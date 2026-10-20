@@ -81,7 +81,7 @@ Pour ajouter après coup une entreprise oubliée, inutile de refaire un fichier 
 
 ## 10. Envoyer, puis mesurer la qualité de la source
 
-Créez maintenant votre campagne avec [Créer et envoyer une campagne](help:flow-create-send-campaign). Le premier envoi est le véritable test de la source.
+Créez maintenant votre campagne avec [Envoyer une campagne pas à pas](help:flow-create-send-campaign). Le premier envoi est le véritable test de la source.
 
 Quarante-huit heures plus tard, ouvrez [Rapports](help:reporting) et regardez le taux de rejet :
 
