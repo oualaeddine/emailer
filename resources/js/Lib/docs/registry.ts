@@ -454,14 +454,6 @@ export const docTopics: DocTopic[] = [
         permissions: ['suppression.manage'],
         related: ['suppression'],
     },
-    {
-        slug: 'dialog-campaign-wizard',
-        kind: 'dialogs',
-        title: { fr: 'Assistant — Nouvelle campagne', ar: 'معالج — حملة جديدة' },
-        group: 'marketing',
-        permissions: ['campaigns.create'],
-        related: ['campaigns', 'campaign-setup', 'flow-create-send-campaign'],
-    },
 
     // ---- Flows -----------------------------------------------------------
     {
@@ -494,11 +486,14 @@ export const docTopics: DocTopic[] = [
     {
         slug: 'flow-create-send-campaign',
         kind: 'flows',
-        title: { fr: 'Guide — Créer et envoyer une campagne', ar: 'دليل — إنشاء وإرسال حملة' },
+        title: { fr: 'Guide — Envoyer une campagne pas à pas', ar: 'دليل — إرسال حملة خطوة بخطوة' },
         group: 'flows',
         permissions: ['campaigns.create'],
-        keywords: { fr: ['campagne', 'assistant', 'planifier'], ar: ['حملة', 'جدولة'] },
-        related: ['campaigns', 'campaign-setup', 'campaign-report', 'reporting'],
+        keywords: {
+            fr: ['envoyer', 'campagne', 'étapes', 'pas à pas', 'programmer', 'planifier', 'test', 'aperçu', 'liste de vérification', 'expéditeur', 'destinataires', 'lots', 'meilleur moment', 'pause', 'dupliquer'],
+            ar: ['حملة', 'إرسال', 'خطوات', 'جدولة', 'اختبار', 'معاينة', 'قائمة التحقق', 'المرسل', 'المستلمون', 'دفعات', 'أفضل وقت', 'إيقاف مؤقت', 'مضاعفة'],
+        },
+        related: ['campaigns', 'campaign-setup', 'campaign-design', 'campaign-report', 'flow-analyze-results'],
     },
     {
         slug: 'flow-analyze-results',

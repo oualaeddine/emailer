@@ -75,7 +75,7 @@ Avant toute réécriture importante, cliquez sur **Enregistrer une version** pou
 
 Votre brouillon est désormais dans le dossier **Brouillons** de la [Boîte de réception](help:mailbox). Cliquer dessus le rouvre exactement là où vous l'aviez laissé.
 
-Pour l'adresser à une liste de destinataires, passez par une campagne : l'assistant vous fait choisir le contenu, l'audience et le moment de l'envoi. Le pas-à-pas correspondant est [Créer et envoyer une campagne](help:flow-create-send-campaign) ; les destinataires se préparent au préalable dans [Destinataires](help:recipients), par [import de fichier](help:flow-import-recipients-csv) ou depuis l'[Annuaire PageJaunes](help:flow-source-pagejaunes).
+Pour l'adresser à une liste de destinataires, passez par une campagne : la page de configuration vous fait choisir l'expéditeur, l'audience, le contenu et le moment de l'envoi. Le pas-à-pas correspondant est [Envoyer une campagne pas à pas](help:flow-create-send-campaign) ; les destinataires se préparent au préalable dans [Destinataires](help:recipients), par [import de fichier](help:flow-import-recipients-csv) ou depuis l'[Annuaire PageJaunes](help:flow-source-pagejaunes).
 
 ## Étape 9 — Suivre l'acheminement
 

@@ -47,5 +47,5 @@ Les cartes **Utilisation des quotas SMTP** et **Campagnes récentes** ne s'affic
 
 - **La page reste sur « Chargement… »** : les chiffres proviennent du serveur. Actualisez la page ; si l'attente se prolonge, signalez-le à votre administrateur.
 - **Le volume d'envoi paraît trop faible** : seuls les derniers jours sont comptabilisés. Pour un historique long, utilisez les [Rapports](help:reporting).
-- **« Aucune campagne pour le moment. »** alors que vous en avez créé une : vérifiez qu'elle a bien été enregistrée depuis l'[assistant de campagne](help:dialog-campaign-wizard).
+- **« Aucune campagne pour le moment. »** alors que vous en avez créé une : vérifiez qu'elle apparaît bien dans la page [Campagnes](help:campaigns) (onglet **Brouillons**). Pour la créer et l'envoyer, suivez [Envoyer une campagne pas à pas](help:flow-create-send-campaign).
 - **Un quota est déjà au maximum le matin** : un envoi de la veille a probablement débordé sur la journée. Répartissez la charge sur plusieurs comptes SMTP.
