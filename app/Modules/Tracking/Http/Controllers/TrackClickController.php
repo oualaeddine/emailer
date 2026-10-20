@@ -5,6 +5,7 @@ namespace App\Modules\Tracking\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Tracking\Models\Message;
 use App\Modules\Tracking\Services\TrackingEventRecorder;
+use App\Modules\Tracking\Support\TrackingContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -24,18 +25,31 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * the `message_events.metadata.is_likely_bot` audit trail this WP doesn't
  * build (see TrackingRenderer's docblock); every valid, signed click hit
  * is recorded here.
+ *
+ * WP-70 (doc 43 §43.6.3): the click is written to `message_events` with the
+ * original URL, the link id and the parsed user agent / GeoIP data, and
+ * upserts the campaign's `campaign_links` counters by `link_id` — taken from
+ * an optional signed `lid` query parameter, else derived from the URL exactly
+ * as the rendering pipeline derives `data-link-id` (first 16 hex chars of
+ * sha1(url)). Clicks from bot-looking agents are still counted (doc 21 §21.2)
+ * but flagged `metadata.is_likely_bot`.
  */
 class TrackClickController extends Controller
 {
-    public function __construct(private readonly TrackingEventRecorder $recorder)
-    {
-    }
+    public function __construct(private readonly TrackingEventRecorder $recorder) {}
 
     public function redirect(Request $request, Message $message): RedirectResponse
     {
         $target = $this->sanitizeTargetUrl((string) $request->query('url', ''));
 
-        $this->recorder->recordClick($message);
+        $linkId = $request->query('lid');
+
+        $this->recorder->recordClick(
+            $message,
+            $target,
+            TrackingContext::fromRequest($request),
+            is_string($linkId) ? $linkId : null,
+        );
 
         return redirect()->away($target);
     }

@@ -7,6 +7,7 @@ use App\Modules\Composer\Models\Draft;
 use App\Modules\DeliveryEngine\Models\SendAttempt;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Tracking\Services\TrackingEventRecorder;
 use App\Support\Concerns\HasUuid;
 use Database\Factories\MessageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -58,7 +59,19 @@ class Message extends Model
             'clicked_at' => 'datetime',
             'bounced_at' => 'datetime',
             'failed_at' => 'datetime',
+            'is_test' => 'boolean',
         ];
+    }
+
+    /**
+     * WP-70 — timestamps / terminal statuses stamped directly through
+     * Eloquent are mirrored into `message_events`
+     * ({@see TrackingEventRecorder::syncFromModel()}).
+     */
+    protected static function booted(): void
+    {
+        static::created(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, true));
+        static::updated(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, false));
     }
 
     public function getRouteKeyName(): string
@@ -123,7 +136,23 @@ class Message extends Model
             $this->{$column} = now();
         }
 
-        $this->save();
+        $transitioned = $this->isDirty('status');
+
+        TrackingEventRecorder::withoutModelSync(fn () => $this->save());
+
+        // docs/45 §45.9 (WP-70) — every delivery transition becomes a
+        // `message_events` row (+ MessageEventRecorded, recipient counters).
+        if ($transitioned) {
+            app(TrackingEventRecorder::class)->recordStatusChange($this, $status);
+        }
+    }
+
+    /**
+     * @return HasMany<MessageEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(MessageEvent::class);
     }
 
     protected static function newFactory(): MessageFactory

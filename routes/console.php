@@ -20,3 +20,7 @@ Schedule::job(new SyncPageJaunesCompaniesJob)->daily();
 
 Schedule::command('recipients:recompute-counters')->daily();
 Schedule::command('exports:prune')->daily();
+
+// docs/45 §45.9 — WP-70 campaign stats rollup (fans out per active campaign) and monthly GeoLite2 refresh.
+Schedule::job(new \App\Modules\Reporting\Jobs\RollupCampaignStatsJob)->hourly();
+Schedule::command('geoip:update')->monthly();

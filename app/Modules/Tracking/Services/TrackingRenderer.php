@@ -47,9 +47,7 @@ use App\Modules\Tracking\Support\TrackingUrlGenerator;
  */
 class TrackingRenderer
 {
-    public function __construct(private readonly TrackingUrlGenerator $urls)
-    {
-    }
+    public function __construct(private readonly TrackingUrlGenerator $urls) {}
 
     /**
      * Rewrites `<a href="...">` links first, then injects the open pixel —
@@ -70,9 +68,15 @@ class TrackingRenderer
         $rewritten = preg_replace_callback(
             '/<a\b[^>]*>/i',
             function (array $tagMatch) use ($message): string {
+                // WP-70: a `data-link-id` injected by the rendering pipeline
+                // (WP-63) is carried into the signed click URL.
+                $linkId = preg_match('/\bdata-link-id\s*=\s*(["\'])([A-Za-z0-9_-]{1,16})\1/i', $tagMatch[0], $idMatch) === 1
+                    ? $idMatch[2]
+                    : null;
+
                 $rewrittenTag = preg_replace_callback(
                     '/\bhref\s*=\s*(["\'])(.*?)\1/i',
-                    function (array $hrefMatch) use ($message): string {
+                    function (array $hrefMatch) use ($message, $linkId): string {
                         $quote = $hrefMatch[1];
                         $href = trim(html_entity_decode($hrefMatch[2], ENT_QUOTES));
 
@@ -80,7 +84,7 @@ class TrackingRenderer
                             return $hrefMatch[0];
                         }
 
-                        $trackingUrl = $this->urls->signedClickUrl($message, $href);
+                        $trackingUrl = $this->urls->signedClickUrl($message, $href, null, $linkId);
 
                         return 'href='.$quote.htmlspecialchars($trackingUrl, ENT_QUOTES).$quote;
                     },

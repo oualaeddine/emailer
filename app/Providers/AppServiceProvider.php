@@ -58,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Modules\Recipients\Segments\Contracts\RuleTreeCompiler::class, \App\Modules\Recipients\Segments\Services\RuleTreeCompiler::class);
         // docs/45 §45.3 — WP-57 async operations store (bound at the Wave 2 gate).
         $this->app->bind(\App\Modules\Recipients\Views\Contracts\AsyncOperations::class, \App\Modules\Recipients\Views\Services\AsyncOperationService::class);
+        // docs/45 §45.9 — WP-70 campaign statistics contract + local GeoLite2 resolver (tests bind a fake).
+        $this->app->bind(\App\Modules\Reporting\Contracts\CampaignStats::class, \App\Modules\Reporting\Services\CampaignStatsService::class);
+        $this->app->singleton(\App\Modules\Tracking\Contracts\GeoIpResolver::class, \App\Modules\Tracking\Support\MaxMindGeoIpResolver::class);
     }
 
     /**
@@ -66,5 +69,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        // docs/45 §45.9 — WP-70: final rollup when a campaign completes.
+        \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
     }
 }
