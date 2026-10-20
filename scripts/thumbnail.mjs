@@ -118,8 +118,15 @@ async function main() {
         await page.waitForTimeout(Math.min(Number(settle ?? 2000), 5000));
         let height = 800;
         if (fit) {
-            const content = await page.evaluate(() => Math.ceil(document.documentElement.scrollHeight)).catch(() => 800);
-            height = Math.min(800, Math.max(40, Number(content) || 800));
+            // JavaScript is disabled, so page.evaluate is unavailable; boundingBox
+            // goes through the protocol. Measure the body's children: the body
+            // itself stretches to the viewport in quirks mode (no doctype).
+            let bottom = 0;
+            for (const child of await page.locator('body > *').all().catch(() => [])) {
+                const box = await child.boundingBox().catch(() => null);
+                if (box) bottom = Math.max(bottom, box.y + box.height);
+            }
+            height = bottom > 0 ? Math.min(800, Math.max(40, Math.ceil(bottom))) : 800;
         }
         await page.screenshot({ path: output, type: 'png', clip: { x: 0, y: 0, width: 600, height } });
     } catch (error) {
