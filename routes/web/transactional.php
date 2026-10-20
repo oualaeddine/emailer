@@ -20,3 +20,7 @@ Route::get('transactional/settings', function (Request $request) {
 
     return Inertia::render('Transactional/Settings');
 })->name('transactional.settings');
+
+// docs/43 §43.3 lists "Clés API & webhooks" at /settings/api; the page lives on
+// the API keys tab of the transactional settings page (orchestrator gate decision).
+Route::redirect('settings/api', '/transactional/settings', 302)->name('settings.api');

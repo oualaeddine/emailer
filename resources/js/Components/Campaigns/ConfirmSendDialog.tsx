@@ -198,6 +198,7 @@ export function ConfirmSendDialog({ open, campaign, onClose, onDone }: ConfirmSe
                         <Divider />
                         <Text weight="semibold">{c.deliveryOptions}</Text>
                         <SendModeOptions
+                            campaignId={campaign.id}
                             value={value}
                             onChange={(next) => {
                                 setValue(next);

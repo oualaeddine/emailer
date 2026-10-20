@@ -18,7 +18,7 @@ import { DocsLocaleToggle } from '@/Components/Help/DocsLocaleToggle';
 import { DocContent } from '@/Components/Help/DocContent';
 
 /** Guides first — they answer "how do I do X", which is what most readers arrive with. */
-const groupOrder: DocGroup[] = ['flows', 'general', 'messaging', 'campaigns', 'contacts', 'administration'];
+const groupOrder: DocGroup[] = ['flows', 'general', 'contacts', 'marketing', 'automations', 'transactional', 'messaging', 'campaigns', 'settings', 'administration'];
 
 const useStyles = makeStyles({
     root: {
