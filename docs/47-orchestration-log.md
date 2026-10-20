@@ -126,3 +126,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 4 | 90, 100, 101, 102 | sonnet/medium | Launched | running |
 | 2026-10-20 | 4 | 61, 80, 81, 90U, 91, 91U | opus/high | Launched | running |
 | 2026-10-20 | 4 | WP-102 | sonnet | Returned; 24 guides, 30+ topics, screenshot entries; tsc clean; gate follow-ups: HelpCenter `groupOrder` one-liner (orchestrator), `<PageHelp>` hookups on 16 pages + long-form markdown under resources/docs → one Sonnet "help-hookup" agent after the merges | 3b79545 |
+| 2026-10-20 | 4 | WP-90 | sonnet | Returned; 28 files; 17 form tests green (267 incl. Recipients); gaps: DOI confirm does not update form submissions (`ContactOptInConfirmed` missing) and per-form DOI template/redirect unused → review-fix candidates; captcha fail-open when unconfigured (review to decide) | f906783 |
