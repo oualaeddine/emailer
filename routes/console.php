@@ -29,3 +29,5 @@ Schedule::command('geoip:update')->monthly();
 Schedule::job(new \App\Modules\Automations\Jobs\AdvanceAutomationRunsJob)->everyMinute()->withoutOverlapping();
 // docs/45 §45.7.7 — WP-101 webhook retry safety net + 30-day delivery log pruning.
 Schedule::job(new \App\Modules\Webhooks\Jobs\SweepWebhookDeliveriesJob)->everyFiveMinutes();
+// docs/45 §45.9 — WP-81 nightly precompute of best send hours (contacts + account fallback).
+Schedule::job(new \App\Modules\DeliveryEngine\Scheduling\Jobs\ComputeBestSendHoursJob)->dailyAt('02:17');

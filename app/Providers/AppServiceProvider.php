@@ -63,6 +63,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Modules\Tracking\Contracts\GeoIpResolver::class, \App\Modules\Tracking\Support\MaxMindGeoIpResolver::class);
         // docs/45 §45.9 (WP-100) — the single transactional send path (also called by WP-91 / WP-90).
         $this->app->bind(\App\Modules\Transactional\Contracts\TransactionalSender::class, \App\Modules\Transactional\Services\TransactionalSendService::class);
+        // docs/45 §45.9 — WP-81 send at best time (CampaignService::BEST_SEND_TIME_SERVICE dispatcher hook).
+        $this->app->bind(\App\Modules\DeliveryEngine\Scheduling\Contracts\BestSendTimeService::class, \App\Modules\DeliveryEngine\Scheduling\Services\BestSendTimeService::class);
     }
 
     /**
