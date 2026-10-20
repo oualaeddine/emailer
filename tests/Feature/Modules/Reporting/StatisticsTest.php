@@ -113,6 +113,16 @@ class StatisticsTest extends TestCase
         $r = $this->getJson('/api/v1/statistics/campaigns?date_from=2026-09-01&date_to=2026-10-31&sort=-open_rate');
         $this->assertSame(['Sept', 'Oct'], array_column($r->json('data'), 'name'));
 
+        // Every sortable column also sorts ascending (the table toggles `field` / `-field`).
+        $r = $this->getJson('/api/v1/statistics/campaigns?date_from=2026-09-01&date_to=2026-10-31&sort=open_rate')->assertOk();
+        $this->assertSame(['Oct', 'Sept'], array_column($r->json('data'), 'name'));
+        foreach (['click_rate', '-click_rate', 'sent', '-sent', 'sent_at', '-sent_at', 'name', '-name'] as $sort) {
+            $this->getJson('/api/v1/statistics/campaigns?date_from=2026-09-01&date_to=2026-10-31&sort='.$sort)->assertOk();
+        }
+        $r = $this->getJson('/api/v1/statistics/campaigns?date_from=2026-09-01&date_to=2026-10-31&sort=name');
+        $this->assertSame(['Oct', 'Sept'], array_column($r->json('data'), 'name'));
+        $this->getJson('/api/v1/statistics/campaigns?sort=bogus')->assertStatus(422);
+
         $r = $this->getJson('/api/v1/statistics/campaigns?date_from=2026-09-01&date_to=2026-10-31&tag=promo');
         $this->assertSame(['Sept'], array_column($r->json('data'), 'name'));
 

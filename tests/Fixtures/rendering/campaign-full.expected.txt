@@ -11,4 +11,4 @@ Article [{APP_URL}/t/c/11111111-2222-4333-8444-555555555555?expires=1795082400&l
 - Livraison offerte
 - Retours gratuits
 
-Voir dans le navigateur [{APP_URL}/m/11111111-2222-4333-8444-555555555555?signature={SIG}] | Se désinscrire [{APP_URL}/unsubscribe/YW1pbmFAZXhhbXBsZS5keg?expires=1795082400&signature={SIG}] | Mettre à jour mon profil [{APP_URL}/preferences/YW1pbmFAZXhhbXBsZS5keg?signature={SIG}]
+Voir dans le navigateur [{APP_URL}/m/11111111-2222-4333-8444-555555555555?signature={SIG}] | Se désinscrire [{APP_URL}/unsubscribe/YW1pbmFAZXhhbXBsZS5keg?expires=1795082400&signature={SIG}] | Mettre à jour mon profil [{APP_URL}/preferences/YW1pbmFAZXhhbXBsZS5keg?expires=1795082400&signature={SIG}]

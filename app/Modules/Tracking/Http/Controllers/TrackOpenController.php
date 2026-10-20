@@ -25,7 +25,10 @@ use Illuminate\Http\Response;
  * WP-70 (doc 43 §43.6.5, doc 45 §45.6.4): an Apple Mail Privacy Protection
  * proxy fetch is not filtered as a bot — it is counted (viewed / uniqueViews
  * / appleMppOpens) and flagged `is_proxy_open` on its `message_events` row,
- * which also carries the parsed user agent and GeoIP data.
+ * which also carries the parsed user agent and GeoIP data. The bot-filter
+ * bypass requires the explicit proxy marker in the user agent, or the bare
+ * proxy user agent from Apple's egress ranges
+ * ({@see AppleMppDetector::bypassesBotFilter()}).
  */
 class TrackOpenController extends Controller
 {
@@ -45,7 +48,8 @@ class TrackOpenController extends Controller
     {
         $context = TrackingContext::fromRequest($request);
 
-        if ($this->mppDetector->isProxyOpen($context->userAgent, $context->ip)
+        // Only a genuine proxy fetch (marker UA, or bare proxy UA from Apple's ranges) skips the bot filter.
+        if ($this->mppDetector->bypassesBotFilter($context->userAgent, $context->ip)
             || ! $this->botDetector->isBot($context->userAgent)) {
             $this->recorder->recordOpen($message, $context);
         }

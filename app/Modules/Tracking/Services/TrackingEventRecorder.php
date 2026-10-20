@@ -98,10 +98,7 @@ class TrackingEventRecorder
         $event = $this->write($message, MessageEvent::OPENED, $enriched);
 
         if ($this->countsForRecipient($message)) {
-            $this->touchRecipient((int) $message->recipient_id, array_filter([
-                'last_opened_at' => now(),
-                'opened' => $firstOpen ? DB::raw('opened + 1') : null,
-            ]));
+            $this->touchRecipient((int) $message->recipient_id, ['opened' => $firstOpen ? 1 : 0], ['last_opened_at' => now()], true);
         }
 
         return $event;
@@ -146,10 +143,7 @@ class TrackingEventRecorder
         }
 
         if ($this->countsForRecipient($message)) {
-            $this->touchRecipient((int) $message->recipient_id, array_filter([
-                'last_clicked_at' => now(),
-                'clicked' => $firstClick ? DB::raw('clicked + 1') : null,
-            ]));
+            $this->touchRecipient((int) $message->recipient_id, ['clicked' => $firstClick ? 1 : 0], ['last_clicked_at' => now()], true);
         }
 
         return $event;
@@ -173,25 +167,16 @@ class TrackingEventRecorder
         $event = $this->write($message, $eventType, [], $metadata);
 
         if ($this->countsForRecipient($message)) {
-            $updates = match ($status) {
-                MessageStatus::Accepted => $message->wasChanged('sent_at') ? ['messages_sent' => DB::raw('messages_sent + 1')] : [],
-                MessageStatus::Delivered => $message->wasChanged('delivered_at') ? ['delivered' => DB::raw('delivered + 1')] : [],
-                MessageStatus::Opened => array_filter([
-                    'last_opened_at' => now(),
-                    'opened' => $message->wasChanged('opened_at') ? DB::raw('opened + 1') : null,
-                ]),
-                MessageStatus::Clicked => array_filter([
-                    'last_clicked_at' => now(),
-                    'clicked' => $message->wasChanged('clicked_at') ? DB::raw('clicked + 1') : null,
-                ]),
+            $id = (int) $message->recipient_id;
+            match ($status) {
+                MessageStatus::Accepted => $this->touchRecipient($id, ['messages_sent' => $message->wasChanged('sent_at') ? 1 : 0]),
+                MessageStatus::Delivered => $this->touchRecipient($id, ['delivered' => $message->wasChanged('delivered_at') ? 1 : 0]),
+                MessageStatus::Opened => $this->touchRecipient($id, ['opened' => $message->wasChanged('opened_at') ? 1 : 0], ['last_opened_at' => now()], true),
+                MessageStatus::Clicked => $this->touchRecipient($id, ['clicked' => $message->wasChanged('clicked_at') ? 1 : 0], ['last_clicked_at' => now()], true),
                 default => isset(self::STATUS_COUNTERS[$status->value])
-                    ? [self::STATUS_COUNTERS[$status->value] => DB::raw(self::STATUS_COUNTERS[$status->value].' + 1')]
-                    : [],
+                    ? $this->touchRecipient($id, [self::STATUS_COUNTERS[$status->value] => 1])
+                    : null,
             };
-
-            if ($updates !== []) {
-                $this->touchRecipient((int) $message->recipient_id, $updates);
-            }
         }
 
         return $event;
@@ -358,30 +343,40 @@ class TrackingEventRecorder
     }
 
     /**
-     * @param  array<string, mixed>  $updates
+     * One UPDATE of the recipient's real-time counters. On an open / click
+     * (`$activity`) the `engagement_score` ({@see EngagementScore}, recency =
+     * now, so its full 20 points) is recomputed in the same statement from the
+     * pre-update columns plus the increments — it is listed first so MySQL's
+     * left-to-right SET evaluation and PostgreSQL's old-row semantics agree.
+     * Delivery-only transitions just bump their counter; the score follows on
+     * the next open / click.
+     *
+     * @param  array<string, int>  $increments  counter column => +n
+     * @param  array<string, mixed>  $set  plain column values (last_opened_at / last_clicked_at)
      */
-    private function touchRecipient(int $recipientId, array $updates): void
+    private function touchRecipient(int $recipientId, array $increments, array $set = [], bool $activity = false): void
     {
-        DB::table('recipients')->where('id', $recipientId)->update($updates);
+        $increments = array_filter($increments, fn (int $n): bool => $n > 0);
+        $updates = [];
 
-        $row = DB::table('recipients')->where('id', $recipientId)
-            ->first(['messages_sent', 'delivered', 'opened', 'clicked', 'last_opened_at', 'last_clicked_at']);
-        if ($row === null) {
-            return;
+        if ($activity) {
+            $plus = fn (string $column): string => isset($increments[$column]) ? "({$column} + {$increments[$column]})" : $column;
+            $base = 'GREATEST('.$plus('delivered').', '.$plus('messages_sent').', '.$plus('opened').', 1)';
+            $updates['engagement_score'] = DB::raw(
+                'LEAST(100, ROUND(50 * LEAST(1, '.$plus('opened').' * 1.0 / '.$base.')'
+                .' + 30 * LEAST(1, '.$plus('clicked').' * 1.0 / '.$base.') + 20))',
+            );
         }
 
-        $last = collect([$row->last_opened_at, $row->last_clicked_at])->filter()
-            ->map(fn ($at) => Carbon::parse($at))->sortDesc()->first();
+        foreach ($increments as $column => $n) {
+            $updates[$column] = DB::raw("{$column} + {$n}");
+        }
 
-        DB::table('recipients')->where('id', $recipientId)->update([
-            'engagement_score' => EngagementScore::compute(
-                (int) $row->messages_sent,
-                (int) $row->delivered,
-                (int) $row->opened,
-                (int) $row->clicked,
-                $last,
-            ),
-        ]);
+        $updates += $set;
+
+        if ($updates !== []) {
+            DB::table('recipients')->where('id', $recipientId)->update($updates);
+        }
     }
 
     private function countsForRecipient(Message $message): bool

@@ -19,9 +19,13 @@ use App\Modules\DeliveryEngine\Rendering\Stages\TrackingStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\UtmRewriteStage;
 use App\Modules\DeliveryEngine\Rendering\Support\Links;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Suppression\Preferences\Services\PreferenceTokenService;
+use App\Modules\Tracking\Models\CampaignLink;
 use App\Modules\Tracking\Models\Message;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -35,6 +39,7 @@ class RenderingPipelineTest extends TestCase
     public function test_stage_order_follows_doc_38(): void
     {
         $this->assertSame([
+            LinkIdStage::class,
             MergeTagsStage::class,
             ToFieldStage::class,
             ConditionalBlocksStage::class,
@@ -48,7 +53,7 @@ class RenderingPipelineTest extends TestCase
         ], array_map(fn ($s) => $s::class, app(RenderingPipeline::class)->stages()));
 
         $personalise = array_map(fn ($s) => $s::class, app(RenderingPipeline::class)->stages(RenderingStage::PHASE_PERSONALISE));
-        $this->assertSame([MergeTagsStage::class, ConditionalBlocksStage::class, SignatureStage::class, UtmRewriteStage::class, LinkIdStage::class], $personalise);
+        $this->assertSame([LinkIdStage::class, MergeTagsStage::class, ToFieldStage::class, ConditionalBlocksStage::class, SignatureStage::class, UtmRewriteStage::class, LinkIdStage::class], $personalise);
     }
 
     public function test_data_link_id_is_sha1_prefix_of_the_url_the_click_tracker_receives(): void
@@ -70,6 +75,46 @@ class RenderingPipelineTest extends TestCase
         }
 
         $this->assertSame(substr(sha1('https://example.com/a?x=1&y=2'), 0, 16), $m[0][1]);
+    }
+
+    public function test_link_id_is_computed_on_the_authored_href_before_merge_tags(): void
+    {
+        $campaign = Campaign::factory()->create(['utm_enabled' => true, 'utm_source' => 'nl', 'utm_campaign' => 'promo', 'tracking_enabled' => true]);
+        $authored = 'https://shop.example.com/p?u={{ contact.PRENOM }}';
+        $html = '<p><a href="'.$authored.'">Offre</a> <a href="https://shop.example.com/fixe">Fixe</a> <a href="{{ unsubscribe }}">u</a></p>';
+        $campaign->forceFill(['html_body' => $html])->save();
+        $expected = Links::linkId($authored.'&utm_source=nl&utm_campaign=promo');
+        $pipeline = app(RenderingPipeline::class);
+
+        $hrefs = [];
+        foreach (['Amina', 'Karim'] as $name) {
+            $recipient = Recipient::factory()->create(['first_name' => $name, 'custom_fields' => []]);
+            $message = $pipeline->createMessage(['campaign_id' => $campaign->id, 'recipient_id' => $recipient->id, 'status' => 'queued', 'queued_at' => now()], 'S', $html, $recipient, $campaign);
+
+            // One stable id per authored link, whatever the merged value.
+            $this->assertStringContainsString('<a data-link-id="'.$expected.'" href="https://shop.example.com/p?u='.$name.'&amp;utm_source=nl&amp;utm_campaign=promo"', $message->html_body);
+            $this->assertSame(1, substr_count($message->html_body, 'data-link-id="'.$expected.'"'));
+            $this->assertStringNotContainsString('data-link-id', (string) preg_replace('/<a data-link-id="[0-9a-f]{16}" href="https:\/\/shop[^"]*"/', '', $message->html_body));
+
+            // The click tracker resolves the `lid` of the stored id.
+            preg_match('/href="([^"]*\/t\/c\/[^"]*u%3D'.$name.'[^"]*)"/', $pipeline->render($message)->html, $click);
+            $hrefs[] = html_entity_decode($click[1]);
+        }
+
+        foreach ($hrefs as $href) {
+            $this->get($href)->assertRedirect();
+        }
+        $link = CampaignLink::query()->sole();
+        $this->assertSame($expected, $link->link_id);
+        $this->assertSame(2, (int) $link->total_clicks);
+        $this->assertSame(2, (int) $link->unique_clicks);
+
+        // Report click map HTML: authored HTML + UTM + the same ids, never merged nor tracked.
+        $map = $pipeline->clickMapHtml($campaign);
+        $this->assertStringContainsString('<a data-link-id="'.$expected.'" href="https://shop.example.com/p?u={{ contact.PRENOM }}&amp;utm_source=nl&amp;utm_campaign=promo"', $map);
+        $this->assertStringContainsString('data-link-id="'.Links::linkId('https://shop.example.com/fixe?utm_source=nl&utm_campaign=promo').'"', $map);
+        $this->assertStringNotContainsString('/t/', $map);
+        $this->assertStringContainsString('<a href="{{ unsubscribe }}">', $map);
     }
 
     public function test_utm_is_appended_only_to_http_links_without_utm(): void
@@ -160,6 +205,29 @@ class RenderingPipelineTest extends TestCase
         $html = $pipeline->run(new RenderedEmail('S', '{{ update_profile }}'), new RenderContext($recipient, $message), RenderingStage::PHASE_PERSONALISE)->html;
         $this->assertStringStartsWith(url('preferences').'/', html_entity_decode($html));
         $this->assertStringContainsString('signature=', $html);
+    }
+
+    public function test_update_profile_link_targets_the_campaign_form_and_expires(): void
+    {
+        [$message, $recipient] = $this->message();
+        $formId = DB::table('update_profile_forms')->insertGetId([
+            'uuid' => $formUuid = (string) Str::uuid(), 'name' => 'Profil', 'fields' => '[]', 'list_ids' => '[]',
+            'content' => '{}', 'design' => '{}', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        $campaign = Campaign::factory()->create(['update_profile_form_id' => $formId]);
+
+        $html = $this->pipelineRun('{{ update_profile }}', $recipient, $message, $campaign);
+        $url = html_entity_decode($html);
+
+        $this->assertStringStartsWith(url('preferences').'/', $url);
+        $this->assertStringContainsString('form='.$formUuid, $url);
+        $this->assertStringContainsString('expires='.now()->addDays(PreferenceTokenService::PREFERENCES_TTL_DAYS)->getTimestamp(), $url);
+        $this->get($url)->assertOk();
+    }
+
+    private function pipelineRun(string $html, Recipient $recipient, Message $message, ?Campaign $campaign = null): string
+    {
+        return app(RenderingPipeline::class)->run(new RenderedEmail('S', $html), new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE)->html;
     }
 
     public function test_merge_values_are_escaped_in_html_but_not_in_subject_and_defaults_apply(): void

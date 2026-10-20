@@ -120,6 +120,24 @@ class SendPathRenderingTest extends TestCase
         $this->assertSame('[TEST] Offre pour Amina', self::$sent[0]->getSubject());
     }
 
+    public function test_test_send_to_name_uses_the_merge_contact_and_is_stored(): void
+    {
+        Bus::fake();
+        $campaign = Campaign::factory()->create([
+            'subject' => 'Offre', 'html_body' => '<p>{{ contact.PRENOM }}</p>', 'to_field' => '{{ contact.PRENOM }} {{ contact.NOM }}',
+        ]);
+        $contact = Recipient::factory()->create(['first_name' => 'Amina', 'last_name' => 'Benali', 'custom_fields' => []]);
+
+        app(CampaignService::class)->testSend($campaign, ['qa@example.com'], $contact, null);
+
+        $message = Message::query()->where('is_test', true)->firstOrFail();
+        $this->assertSame('Amina Benali', $message->to_name);
+
+        $this->app->call([new SendEmailJob($message->id), 'handle']);
+        $this->assertSame('qa@example.com', self::$sent[0]->getTo()[0]->getAddress());
+        $this->assertSame('Amina Benali', self::$sent[0]->getTo()[0]->getName());
+    }
+
     public function test_campaign_dispatch_stores_personalised_html(): void
     {
         Bus::fake();

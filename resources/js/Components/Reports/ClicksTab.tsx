@@ -8,12 +8,13 @@ import { ReportSection, TabStack } from '@/Components/Reports/ReportSection';
 import { ViewContactsButton } from '@/Components/Reports/ViewContactsButton';
 import type { ReportClicks } from '@/Lib/types/reports';
 
+/** `report/clicks` also returns `html`: the campaign HTML with UTM + `data-link-id` only, for the click map. */
+type ReportClicksWithHtml = ReportClicks & { html?: string | null };
+
 export interface ClicksTabProps {
-    data: ReportClicks;
+    data: ReportClicksWithHtml;
     campaignId: string;
     campaignName: string;
-    html: string | null;
-    htmlLoading: boolean;
     onError: (message: string) => void;
 }
 
@@ -21,7 +22,7 @@ export interface ClicksTabProps {
  * **Clics** — per-URL table (unique, total, share), **Carte des clics**, by
  * device, **Voir les contacts** (clicked / not clicked, or per link).
  */
-export function ClicksTab({ data, campaignId, campaignName, html, htmlLoading, onError }: ClicksTabProps) {
+export function ClicksTab({ data, campaignId, campaignName, onError }: ClicksTabProps) {
     const t = useText();
     const k = t.campaignReport.kpis;
     const c = t.campaignReport.clicks;
@@ -77,7 +78,7 @@ export function ClicksTab({ data, campaignId, campaignName, html, htmlLoading, o
             </ReportSection>
 
             <ReportSection title={c.clickMap}>
-                <ClickMap html={html} links={data.links} loading={htmlLoading} />
+                <ClickMap html={data.html ?? null} links={data.links} />
             </ReportSection>
 
             <ReportSection title={c.byDevice} subtitle={k.uniqueClicks}>

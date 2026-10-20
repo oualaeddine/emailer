@@ -5,6 +5,7 @@ namespace App\Modules\Tracking\Services;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Segments\Contracts\RuleTreeCompiler;
+use App\Modules\Tracking\Models\Message;
 use Closure;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -20,7 +21,7 @@ use Throwable;
  *
  * One pass over the campaign's non-test messages (chunked by id, events
  * loaded per chunk) fills:
- * - `campaign_stats_hourly` — per UTC hour (and A/B variant): every total
+ * - `campaign_stats_hourly` — per UTC hour (and A/B variant, 0 = none): every total
  *   counter on the hour it happened, every *unique* counter on the hour of
  *   the message's first occurrence, so summing all hours gives the campaign's
  *   unique figures;
@@ -51,7 +52,7 @@ class CampaignStatsAggregator
 
     private const CHUNK = 2000;
 
-    private const NOT_DELIVERED = ['hard_bounced', 'soft_bounced', 'failed', 'rejected'];
+    private const NOT_DELIVERED = Message::NOT_DELIVERED_STATUSES;
 
     private const EVENT_TYPES = ['opened', 'clicked', 'unsubscribed', 'spam_complaint', 'complaint', 'deferred'];
 
@@ -87,6 +88,18 @@ class CampaignStatsAggregator
      * @return array{statsByDomain: array<string, mixed>, statsByDevice: array<string, mixed>, statsByBrowser: array<string, mixed>, statsByCountry: array<string, mixed>, returnBounce: int, computed_at: string}
      */
     public function rollup(Campaign $campaign): array
+    {
+        // Concurrent rollups of one campaign (hourly fan-out, completion job,
+        // inline refresh) are serialised: each one deletes and rewrites the
+        // campaign's rollup rows.
+        return Cache::lock('stats-rollup:'.$campaign->id, 1800)
+            ->block(60, fn (): array => $this->compute($campaign));
+    }
+
+    /**
+     * @return array{statsByDomain: array<string, mixed>, statsByDevice: array<string, mixed>, statsByBrowser: array<string, mixed>, statsByCountry: array<string, mixed>, returnBounce: int, computed_at: string}
+     */
+    private function compute(Campaign $campaign): array
     {
         $this->reset();
         $targets = $this->includeTargets($campaign);
@@ -318,8 +331,9 @@ class CampaignStatsAggregator
         }
 
         $hour = Carbon::parse($at)->utc()->startOfHour()->format('Y-m-d H:i:s');
-        $variant = $variantId !== null ? (int) $variantId : null;
-        $key = $hour.'|'.($variant ?? '');
+        // `variant_id` 0 = no A/B variant (NOT NULL so the unique key holds).
+        $variant = $variantId !== null ? (int) $variantId : 0;
+        $key = $hour.'|'.$variant;
 
         $this->hourly[$key] ??= ['hour' => $hour, 'variant_id' => $variant] + array_fill_keys(self::COUNTERS, 0);
         $this->hourly[$key][$counter] += $n;

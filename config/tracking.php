@@ -23,11 +23,13 @@ return [
     ],
 
     // Apple Mail Privacy Protection proxy opens (counted in viewed / uniqueViews /
-    // appleMppOpens, excluded from trackableViews — doc 45 §45.6.4).
+    // appleMppOpens, excluded from trackableViews — doc 45 §45.6.4). An open
+    // skips the bot filter only with a `user_agent_patterns` marker, or with an
+    // `exact_user_agents` UA coming from the `cidrs` ranges (both required).
     'apple_mpp' => [
         // The proxy fetches images with this bare user agent (exact match, case-insensitive).
         'exact_user_agents' => ['Mozilla/5.0'],
-        // Case-insensitive substrings of a proxy user agent.
+        // Case-insensitive substrings of a proxy user agent (explicit proxy marker).
         'user_agent_patterns' => ['applemailproxy', 'apple-mail-proxy'],
         // Apple-owned egress ranges used by the proxy.
         'cidrs' => array_values(array_filter(explode(',', (string) env('TRACKING_APPLE_MPP_CIDRS', '17.0.0.0/8')))),

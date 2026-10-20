@@ -32,12 +32,35 @@ class UtmRewriteStage implements RenderingStage
         }
 
         return $email->withHtml(Links::mapAnchors($email->html, function (string $tag, ?string $href) use ($params): string {
-            if ($href === null || ! Links::isHttp($href) || ! Links::isTrackable($href) || $this->hasUtm($href)) {
+            if ($href === null) {
                 return $tag;
             }
 
-            return Links::replaceHref($tag, $this->append($href, $params));
+            $rewritten = $this->apply($href, $params);
+
+            return $rewritten === $href ? $tag : Links::replaceHref($tag, $rewritten);
         }));
+    }
+
+    /**
+     * The href as this stage rewrites it (unchanged when no UTM applies) —
+     * used by {@see LinkIdStage} to compute the link id of an authored href.
+     */
+    public function rewriteHref(string $href, RenderContext $context): string
+    {
+        return $this->apply($href, $this->params($context));
+    }
+
+    /**
+     * @param  array<string, string>  $params
+     */
+    private function apply(string $href, array $params): string
+    {
+        if ($params === [] || ! Links::isHttp($href) || ! Links::isTrackable($href) || $this->hasUtm($href)) {
+            return $href;
+        }
+
+        return $this->append($href, $params);
     }
 
     /**

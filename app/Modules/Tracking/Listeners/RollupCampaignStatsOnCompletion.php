@@ -15,7 +15,8 @@ class RollupCampaignStatsOnCompletion
     public function handle(CampaignStatusChanged $event): void
     {
         if ($event->to === 'completed') {
-            RollupCampaignStatsJob::dispatch($event->campaignId);
+            // `final`: own uniqueness key, never swallowed by a queued hourly rollup.
+            RollupCampaignStatsJob::dispatch($event->campaignId, final: true);
         }
     }
 }

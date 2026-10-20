@@ -25,13 +25,14 @@ use Illuminate\Support\Str;
  * the user authored and what is sent (docs/45 §45.6.3, WP-63).
  *
  * Two phases over one ordered stage list:
- *  - `personalise` (stages 2–5b) runs once when the `Message` row is
- *    created ({@see createMessage()}); its output is the stored
+ *  - `personalise` (link ids, stages 2–5b) runs once when the `Message` row
+ *    is created ({@see createMessage()}); its output is the stored
  *    `messages.html_body` — the personalised web version the mirror page
- *    (`/m/{message}`) serves.
- *  - `delivery` (to_field, 5c–8) runs inside `SendEmailJob` on that stored
- *    HTML ({@see render()}); never persisted, so retries re-render the
- *    same bytes and nothing is ever double-wrapped.
+ *    (`/m/{message}`) serves — and `messages.to_name` (the To display name,
+ *    resolved with the merge contact of a test send).
+ *  - `delivery` (5c–8) runs inside `SendEmailJob` on that stored HTML
+ *    ({@see render()}); never persisted, so retries re-render the same bytes
+ *    and nothing is ever double-wrapped.
  * Every stage is additionally idempotent on its own output.
  */
 class RenderingPipeline
@@ -42,12 +43,13 @@ class RenderingPipeline
      * @var list<class-string<RenderingStage>>
      */
     public const STAGES = [
+        LinkIdStage::class,            // 1b data-link-id on the authored hrefs (before merge tags: one id per authored link)
         MergeTagsStage::class,         // 2  merge variables (+ links/campaign/sender tags)
         ToFieldStage::class,           // 2b To display name (header only, docs/45 §45.6.3)
         ConditionalBlocksStage::class, // 3  no-op in v1 (§38.5)
         SignatureStage::class,         // 4  signature
         UtmRewriteStage::class,        // 5a UTM parameters
-        LinkIdStage::class,            // 5b data-link-id (before the click rewrite)
+        LinkIdStage::class,            // 5b data-link-id of links added since 1b (signature), before the click rewrite
         TrackingStage::class,          // 5c pixel + click rewrite (TrackingRenderer)
         CssInlineStage::class,         // 6  CSS inlining
         PlainTextStage::class,         // 7  plain-text alternative
@@ -127,21 +129,50 @@ class RenderingPipeline
         $context = new RenderContext($recipient, $message, $campaign, $draft, $mergeWith);
         $personalised = $this->run(new RenderedEmail($subject, $html), $context, RenderingStage::PHASE_PERSONALISE);
 
-        $message->forceFill(['subject' => $personalised->subject, 'html_body' => $personalised->html])->save();
+        $message->forceFill([
+            'subject' => $personalised->subject,
+            'html_body' => $personalised->html,
+            'to_name' => $personalised->toName,
+        ])->save();
 
         return $message;
     }
 
     /**
      * Send-time rendering (phase `delivery`) of a stored message, called by SendEmailJob.
+     * The To display name is the one stored at creation (`messages.to_name`).
      */
     public function render(Message $message): RenderedEmail
     {
-        return $this->run(
-            new RenderedEmail((string) $message->subject, (string) $message->html_body),
-            $this->contextFor($message),
-            RenderingStage::PHASE_DELIVERY,
-        );
+        $context = $this->contextFor($message);
+        $email = new RenderedEmail((string) $message->subject, (string) $message->html_body, null, $message->getAttribute('to_name'));
+
+        // Messages stored before `to_name` existed: resolve it now (delivery recipient's data).
+        if ($email->toName === null && trim((string) ($context->campaign?->to_field ?? '')) !== '') {
+            $email = $this->container->make(ToFieldStage::class)->process($email, $context);
+        }
+
+        return $this->run($email, $context, RenderingStage::PHASE_DELIVERY);
+    }
+
+    /**
+     * The campaign HTML as authored, with only the UTM rewrite and the
+     * `data-link-id` attributes applied (no merge tags, no tracking): the
+     * ids match the `link_id` of the campaign's click counters, so the
+     * report click map can place them (docs/43 §43.6.3).
+     */
+    public function clickMapHtml(Campaign $campaign): string
+    {
+        $message = new Message;
+        $message->uuid = (string) Str::uuid();
+        $context = new RenderContext(new Recipient(['custom_fields' => []]), $message, $campaign);
+
+        $email = new RenderedEmail((string) $campaign->subject, (string) $campaign->html_body);
+        foreach ([UtmRewriteStage::class, LinkIdStage::class] as $class) {
+            $email = $this->container->make($class)->process($email, $context);
+        }
+
+        return $email->html;
     }
 
     public function contextFor(Message $message): RenderContext

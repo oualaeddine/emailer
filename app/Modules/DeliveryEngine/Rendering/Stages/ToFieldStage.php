@@ -10,7 +10,9 @@ use App\Modules\DeliveryEngine\Rendering\RenderedEmail;
 /**
  * docs/45 §45.6.3 — campaign `to_field` (e.g. `{{ contact.PRENOM }} {{ contact.NOM }}`,
  * Brevo-style `{FNAME} {LNAME}` accepted too) rendered into the To header
- * display name. Header only: never touches the HTML.
+ * display name. Header only: never touches the HTML. Personalise phase, so
+ * a test send uses its merge contact; the result is stored in
+ * `messages.to_name` and reused by the delivery phase.
  */
 class ToFieldStage implements RenderingStage
 {
@@ -20,7 +22,7 @@ class ToFieldStage implements RenderingStage
 
     public function phase(): string
     {
-        return self::PHASE_DELIVERY;
+        return self::PHASE_PERSONALISE;
     }
 
     public function process(RenderedEmail $email, RenderContext $context): RenderedEmail

@@ -11,9 +11,12 @@ use App\Modules\Reporting\Jobs\RollupCampaignStatsJob;
 use App\Modules\Reporting\Services\CampaignStatsService;
 use App\Modules\Tracking\Models\Message;
 use App\Modules\Tracking\Models\MessageEvent;
+use App\Modules\Tracking\Services\CampaignStatsAggregator;
 use Database\Factories\RecipientListFactory;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -310,5 +313,46 @@ class CampaignStatsServiceTest extends TestCase
         Queue::fake();
         (new RollupCampaignStatsJob)->handle($this->stats());
         Queue::assertPushed(RollupCampaignStatsJob::class, fn (RollupCampaignStatsJob $job): bool => $job->campaignId === $this->campaign->id);
+    }
+
+    public function test_completion_rollup_is_not_swallowed_by_a_queued_hourly_rollup(): void
+    {
+        Queue::fake();
+
+        RollupCampaignStatsJob::dispatch($this->campaign->id);
+        RollupCampaignStatsJob::dispatch($this->campaign->id); // hourly duplicate: dropped by ShouldBeUnique
+        CampaignStatusChanged::dispatch($this->campaign->id, 'running', 'completed');
+
+        Queue::assertPushed(RollupCampaignStatsJob::class, 2);
+        Queue::assertPushed(RollupCampaignStatsJob::class, fn (RollupCampaignStatsJob $job): bool => ! $job->final && $job->campaignId === $this->campaign->id);
+        Queue::assertPushed(RollupCampaignStatsJob::class, fn (RollupCampaignStatsJob $job): bool => $job->final && $job->campaignId === $this->campaign->id);
+    }
+
+    public function test_sequential_rollups_never_duplicate_hourly_rows_and_use_variant_zero(): void
+    {
+        $aggregator = app(CampaignStatsAggregator::class);
+        $aggregator->rollup($this->campaign);
+        $first = DB::table('campaign_stats_hourly')->where('campaign_id', $this->campaign->id)->orderBy('hour')->get(['hour', 'variant_id', 'sent', 'opens']);
+        $aggregator->rollup($this->campaign->fresh());
+        $second = DB::table('campaign_stats_hourly')->where('campaign_id', $this->campaign->id)->orderBy('hour')->get(['hour', 'variant_id', 'sent', 'opens']);
+
+        $this->assertEquals($first->all(), $second->all());
+        $this->assertSame([0], $second->pluck('variant_id')->map(fn ($v) => (int) $v)->unique()->values()->all());
+        $this->assertSame($second->count(), $second->unique(fn (object $r): string => $r->hour.'|'.$r->variant_id)->count());
+
+        // The unique key now holds for "no variant" rows.
+        $this->expectException(UniqueConstraintViolationException::class);
+        DB::table('campaign_stats_hourly')->insert(['campaign_id' => $this->campaign->id, 'hour' => $second->first()->hour, 'created_at' => now(), 'updated_at' => now()]);
+    }
+
+    public function test_rollup_waits_for_the_campaign_lock(): void
+    {
+        $lock = Cache::lock('stats-rollup:'.$this->campaign->id, 1800);
+        $this->assertTrue($lock->get());
+        $this->assertFalse(Cache::lock('stats-rollup:'.$this->campaign->id, 1800)->get(), 'held while a rollup runs');
+        $lock->release();
+
+        app(CampaignStatsAggregator::class)->rollup($this->campaign);
+        $this->assertTrue(Cache::lock('stats-rollup:'.$this->campaign->id, 1800)->get(), 'released after the rollup');
     }
 }

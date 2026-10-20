@@ -89,7 +89,9 @@ export interface ClickMapProps {
 /**
  * **Carte des clics** (docs/43 §43.6.3) — the campaign HTML rendered in the
  * sandboxed `EmailFrame`, with a badge per anchor carrying `data-link-id`
- * showing its share of clicks. Anchor positions come from a hidden probe
+ * showing its share of clicks. `html` is the `report/clicks` payload's
+ * `html` (authored HTML with UTM + `data-link-id`, whose ids match the
+ * `link_id` of `links`), not the raw `html_body`. Anchor positions come from a hidden probe
  * iframe this component controls (same-origin srcdoc, scripts still
  * disabled); if it cannot be read, or no anchor matches, the links are shown
  * as a ranked list instead.
