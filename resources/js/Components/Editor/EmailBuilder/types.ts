@@ -2,7 +2,22 @@
  * WP-60 — public props of the EmailBuilder (docs/43 §43.4.4, docs/45 §45.6.1).
  * Type-only: safe to import from pages without pulling the editor chunk.
  */
-import type { EmailDesign } from '@/Lib/types/editor';
+import type { Uuid } from '@/Lib/types/common';
+import type { DynamicContentBlock, EmailDesign } from '@/Lib/types/editor';
+
+/**
+ * WP-61 — one dynamic-content section of a design: the frozen
+ * `DynamicContentBlock` plus the id of its `data-dynamic-rule` marker. The
+ * section's content stays in the design MJML, so `variants` holds exactly
+ * one entry (`condition` = "Afficher si", `mjml` = "") and `fallback_mjml`
+ * is "" (nothing is shown to contacts who do not match).
+ */
+export interface DynamicBlockRecord extends DynamicContentBlock {
+    id: string;
+}
+
+/** `design_json` written by the builder: `EmailDesign` + `dynamic_blocks`. */
+export type EmailDesignWithDynamic = EmailDesign & { dynamic_blocks?: DynamicBlockRecord[] };
 
 /** What the builder hands to its host on save (docs/45 §45.6.1). */
 export interface EmailBuilderSaveResult {
@@ -35,4 +50,11 @@ export interface EmailBuilderProps {
     onSendTest?: (emails: string[]) => Promise<void>;
     /** Shown only when the host has a versions API (templates). */
     restore?: EmailBuilderRestoreOption | null;
+    /**
+     * Template being edited: enables the versions drawer (`GET
+     * /templates/{id}/versions`, restore → editor reloaded). Without it
+     * (campaigns) *Restaurer une version précédente* goes back to the last
+     * design saved in this session.
+     */
+    templateId?: Uuid | null;
 }

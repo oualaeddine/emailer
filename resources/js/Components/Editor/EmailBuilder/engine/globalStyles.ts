@@ -2,8 +2,8 @@
  * WP-60 — storage helpers (docs/46-editor-spike.md §2). No GrapesJS import:
  * pure string/JSON work, shared by the editor and its tests.
  */
-import type { EmailDesign, EmailGlobalStyles } from '@/Lib/types/editor';
-import type { EmailBuilderSource } from '../types';
+import type { EmailGlobalStyles } from '@/Lib/types/editor';
+import type { DynamicBlockRecord, EmailBuilderSource, EmailDesignWithDynamic } from '../types';
 import { text } from '../strings';
 
 export const DEFAULT_GLOBAL_STYLES: EmailGlobalStyles = {
@@ -32,9 +32,45 @@ export function normaliseGlobalStyles(gs: Partial<EmailGlobalStyles> | null | un
     };
 }
 
+/** Font stacks offered by the *Style* tab (web-safe, rendered by every client). */
+export const FONT_FAMILIES: string[] = [
+    'Arial, sans-serif',
+    'Helvetica, Arial, sans-serif',
+    'Verdana, Geneva, sans-serif',
+    'Tahoma, Geneva, sans-serif',
+    "'Trebuchet MS', Helvetica, sans-serif",
+    'Georgia, serif',
+    "'Times New Roman', Times, serif",
+    "'Courier New', Courier, monospace",
+];
+
+function cssValue(value: string): string {
+    return value.replace(/[;{}<>]/g, '');
+}
+
+/**
+ * Mobile settings (*Style › Paramètres mobiles*), applied below 480 px:
+ * text scale through `text-size-adjust` (iOS / Apple Mail), and block
+ * side padding removed when `hide_on_mobile_padding`.
+ */
+export function mobileCss(gs: EmailGlobalStyles): string {
+    const rules: string[] = [];
+    const scale = Number(gs.mobile.font_scale);
+    if (Number.isFinite(scale) && scale > 0 && scale !== 1) {
+        const percent = Math.round(scale * 100);
+        rules.push(`body, table, td, div, p, a { -webkit-text-size-adjust: ${percent}% !important; text-size-adjust: ${percent}% !important; }`);
+    }
+    if (gs.mobile.hide_on_mobile_padding) {
+        rules.push('div.mj-outlook-group-fix > table > tbody > tr > td { padding-left: 0 !important; padding-right: 0 !important; }');
+    }
+
+    return rules.length > 0 ? `@media only screen and (max-width: 480px) { ${rules.join(' ')} }` : '';
+}
+
 /** `global_styles` → `<mj-head>` (mj-attributes + mj-style), applied by every compile. */
 export function globalStylesToMjmlHead(gs: EmailGlobalStyles): string {
     const linkDecoration = gs.link_underline ? 'underline' : 'none';
+    const mobile = mobileCss(gs);
 
     return [
         '<mj-head>',
@@ -44,7 +80,8 @@ export function globalStylesToMjmlHead(gs: EmailGlobalStyles): string {
         `<mj-section background-color="${escapeAttr(gs.content_background_color)}"></mj-section>`,
         `<mj-button background-color="${escapeAttr(gs.button.background_color)}" color="${escapeAttr(gs.button.text_color)}" border-radius="${escapeAttr(gs.button.border_radius)}px" font-weight="${escapeAttr(gs.button.font_weight)}"></mj-button>`,
         '</mj-attributes>',
-        `<mj-style>a { color: ${gs.link_color.replace(/[;{}<>]/g, '')}; text-decoration: ${linkDecoration}; }</mj-style>`,
+        `<mj-style>a { color: ${cssValue(gs.link_color)}; text-decoration: ${linkDecoration}; }</mj-style>`,
+        mobile ? `<mj-style>${mobile}</mj-style>` : '',
         '</mj-head>',
     ].join('');
 }
@@ -111,8 +148,14 @@ export function hasProjectPages(project: unknown): boolean {
 }
 
 export type ResolvedSource =
-    | { kind: 'project'; project: Record<string, unknown>; globalStyles: EmailGlobalStyles }
-    | { kind: 'mjml'; mjml: string; globalStyles: EmailGlobalStyles };
+    | { kind: 'project'; project: Record<string, unknown>; globalStyles: EmailGlobalStyles; dynamicBlocks: DynamicBlockRecord[] }
+    | { kind: 'mjml'; mjml: string; globalStyles: EmailGlobalStyles; dynamicBlocks: DynamicBlockRecord[] };
+
+function readDynamicBlocks(design: EmailDesignWithDynamic | null): DynamicBlockRecord[] {
+    const blocks = design?.dynamic_blocks;
+
+    return Array.isArray(blocks) ? blocks.filter((block) => typeof block === 'object' && block !== null && typeof block.id === 'string') : [];
+}
 
 /**
  * Load order: GrapesJS project (faithful reopen, docs/46 §2 rule 1) → the
@@ -120,22 +163,29 @@ export type ResolvedSource =
  * WP-62) → legacy HTML as an HTML block → blank design.
  */
 export function resolveSource(source: EmailBuilderSource): ResolvedSource {
-    const design = source.design;
+    const design = source.design as EmailDesignWithDynamic | null;
     const globalStyles = normaliseGlobalStyles(design?.global_styles);
+    const dynamicBlocks = readDynamicBlocks(design);
 
     if (design && hasProjectPages(design.project)) {
-        return { kind: 'project', project: design.project, globalStyles };
+        return { kind: 'project', project: design.project, globalStyles, dynamicBlocks };
     }
     if (design && typeof design.mjml === 'string' && design.mjml.trim() !== '') {
-        return { kind: 'mjml', mjml: design.mjml, globalStyles };
+        return { kind: 'mjml', mjml: design.mjml, globalStyles, dynamicBlocks };
     }
     if (source.html && source.html.trim() !== '') {
-        return { kind: 'mjml', mjml: htmlToMjml(source.html, globalStyles), globalStyles };
+        return { kind: 'mjml', mjml: htmlToMjml(source.html, globalStyles), globalStyles, dynamicBlocks: [] };
     }
 
-    return { kind: 'mjml', mjml: blankMjml(globalStyles), globalStyles };
+    return { kind: 'mjml', mjml: blankMjml(globalStyles), globalStyles, dynamicBlocks: [] };
 }
 
-export function buildDesign(mjml: string, project: Record<string, unknown>, gs: EmailGlobalStyles): EmailDesign {
-    return { format: 'grapesjs-mjml', version: 1, mjml, project, global_styles: gs };
+/** `design_json` (docs/45 §45.6.1 `EmailDesign`) + WP-61 `dynamic_blocks`. */
+export function buildDesign(
+    mjml: string,
+    project: Record<string, unknown>,
+    gs: EmailGlobalStyles,
+    dynamicBlocks: DynamicBlockRecord[] = [],
+): EmailDesignWithDynamic {
+    return { format: 'grapesjs-mjml', version: 1, mjml, project, global_styles: gs, dynamic_blocks: dynamicBlocks };
 }

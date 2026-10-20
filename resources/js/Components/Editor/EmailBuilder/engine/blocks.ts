@@ -1,11 +1,13 @@
 /**
  * WP-60 — doc 43 §43.4.4 block set on grapesjs-mjml component types
  * (docs/46-editor-spike.md §3). WP-61 adds `product`, `dynamic_content`,
- * pre-made and saved sections through `registerBlocks(editor, extra)`.
+ * and the pre-made / saved sections, registered at runtime through the
+ * registry returned by `registerBlocks`.
  */
 import type { Component, Editor } from 'grapesjs';
 import type { EmailBlockType } from '@/Lib/types/editor';
 import { format, text } from '../strings';
+import { DYNAMIC_PROP, newDynamicId, renewDynamicIds } from './dynamicContent';
 
 /** Palette sub-tab ("Contenu" › Blocs / Sections / Enregistrés). */
 export type BlockCategory = 'blocks' | 'sections' | 'saved';
@@ -18,8 +20,14 @@ export interface EmailBlockDefinition {
     category: BlockCategory;
     /** Fluent icon key for the palette card (see panels/BlockPalette.tsx). */
     icon: string;
-    /** MJML dropped on the canvas. */
-    content: string;
+    /** MJML (or GrapesJS component JSON, for saved sections) dropped on the canvas. */
+    content: string | Record<string, unknown>;
+    /** Pre-made / saved sections: preview image. */
+    thumbnail?: string | null;
+    /** Pre-made sections: category label (`fr.editor.sectionCategories`). */
+    group?: string;
+    /** Saved sections: `SavedSection.id`. */
+    savedId?: string;
 }
 
 /** Component property set on the dropped root so the properties panel can show block presets. */
@@ -101,6 +109,25 @@ export const EMAIL_BLOCKS: EmailBlockDefinition[] = [
         content: `<mj-image src="https://placehold.co/240x60/FFD400/111111?text=LOGO" width="120px" align="left" alt="${d.logoAlt}"></mj-image>`,
     },
     {
+        id: 'pj-product',
+        key: 'product',
+        label: text.blocks.product,
+        category: 'blocks',
+        icon: 'product',
+        content:
+            '<mj-section><mj-column vertical-align="middle"><mj-image src="https://placehold.co/300x300?text=Image" alt=""></mj-image></mj-column>' +
+            `<mj-column vertical-align="middle"><mj-text font-size="20px" font-weight="700" line-height="1.25">${d.title}</mj-text><mj-text>${d.text}</mj-text>` +
+            `<mj-text font-size="18px" font-weight="700">0 DA</mj-text><mj-button href="https://" align="left">${d.button}</mj-button></mj-column></mj-section>`,
+    },
+    {
+        id: 'pj-dynamic-content',
+        key: 'dynamic_content',
+        label: text.blocks.dynamic_content,
+        category: 'blocks',
+        icon: 'dynamic',
+        content: `<mj-wrapper padding="0px"><mj-section><mj-column><mj-text>${d.text}</mj-text></mj-column></mj-section></mj-wrapper>`,
+    },
+    {
         id: 'pj-navigation',
         key: 'navigation',
         label: text.blocks.navigation,
@@ -111,24 +138,70 @@ export const EMAIL_BLOCKS: EmailBlockDefinition[] = [
 ];
 
 /**
- * Registers the blocks and tags each dropped root with its block key
- * (`BLOCK_PROP`, a GrapesJS component prop — MJML attributes cannot carry it).
+ * Tags a dropped / inserted root: block key prop, fresh ids for the dynamic
+ * sections it contains, and a new rule for a `dynamic_content` block.
  */
-export function registerBlocks(editor: Editor, extra: EmailBlockDefinition[] = []): Map<string, EmailBlockDefinition> {
+export function tagInsertedBlock(cmp: Component, def: EmailBlockDefinition, onDynamicDrop?: (dynamicId: string) => void): void {
+    renewDynamicIds(cmp);
+    if (def.category !== 'sections') {
+        cmp.set(BLOCK_PROP, def.key);
+    }
+    if (def.key === 'dynamic_content') {
+        const id = newDynamicId();
+        cmp.set(DYNAMIC_PROP, { id, condition: null });
+        cmp.set('name', text.dynamicContent.title);
+        onDynamicDrop?.(id);
+    }
+}
+
+export interface BlockRegistry {
+    list(): EmailBlockDefinition[];
+    add(blocks: EmailBlockDefinition[]): void;
+    remove(id: string): void;
+}
+
+/**
+ * Registers the blocks and tags each dropped root with its block key
+ * (`BLOCK_PROP`, a GrapesJS component prop — MJML attributes cannot carry
+ * it). A dropped `dynamic_content` block becomes a dynamic section
+ * (`onDynamicDrop` opens its rule dialog); dynamic sections inside a
+ * dropped saved section get fresh ids.
+ */
+export function registerBlocks(
+    editor: Editor,
+    extra: EmailBlockDefinition[] = [],
+    onDynamicDrop?: (dynamicId: string) => void,
+): BlockRegistry {
     const registry = new Map<string, EmailBlockDefinition>();
 
-    for (const block of [...EMAIL_BLOCKS, ...extra]) {
-        editor.Blocks.add(block.id, { label: block.label, category: block.category, content: block.content });
-        registry.set(block.id, block);
-    }
+    const add = (blocks: EmailBlockDefinition[]) => {
+        for (const block of blocks) {
+            if (editor.Blocks.get(block.id)) {
+                editor.Blocks.remove(block.id);
+            }
+            editor.Blocks.add(block.id, { label: block.label, category: block.category, content: block.content as never });
+            registry.set(block.id, block);
+        }
+    };
+    add([...EMAIL_BLOCKS, ...extra]);
 
     editor.on('block:drag:stop', (dropped: Component | Component[] | undefined, block: { getId(): string } | undefined) => {
         const def = block ? registry.get(block.getId()) : undefined;
         const roots = Array.isArray(dropped) ? dropped : dropped ? [dropped] : [];
-        if (def) {
-            roots.forEach((cmp) => cmp.set(BLOCK_PROP, def.key));
+        if (!def) {
+            return;
         }
+        roots.forEach((cmp) => tagInsertedBlock(cmp, def, onDynamicDrop));
     });
 
-    return registry;
+    return {
+        list: () => Array.from(registry.values()),
+        add,
+        remove(id) {
+            registry.delete(id);
+            if (editor.Blocks.get(id)) {
+                editor.Blocks.remove(id);
+            }
+        },
+    };
 }

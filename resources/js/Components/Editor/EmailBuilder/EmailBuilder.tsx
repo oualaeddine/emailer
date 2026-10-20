@@ -1,12 +1,13 @@
 /**
  * WP-60 — EmailBuilder (doc 43 §43.4.4, docs/46-editor-spike.md §7).
  *
- * Brevo-like three panes inside the Fluent shell: left "Contenu" (Blocs;
- * WP-61 adds Sections / Enregistrés and the "Style" tab), centre GrapesJS
- * canvas with the desktop / mobile toggle, right "Propriétés" (plus the
- * GrapesJS style and layer managers as advanced tabs). Top bar: back, undo /
- * redo, restore the saved version, *Aperçu & test*, *Enregistrer* and
- * *Enregistrer et quitter*.
+ * Brevo-like three panes inside the Fluent shell: left "Contenu" (Blocs /
+ * Sections / Enregistrés) and "Style" (global styles, WP-61), centre
+ * GrapesJS canvas with the desktop / mobile toggle, right "Propriétés"
+ * (dynamic-content rule card, plus the GrapesJS style and layer managers as
+ * advanced tabs). Top bar: back, undo / redo, restore a previous version
+ * (templates: versions drawer; campaigns: last saved design), *Aperçu &
+ * test*, *Enregistrer* and *Enregistrer et quitter*.
  *
  * Reached only through `EmailBuilderLazy` (dynamic import): this module and
  * everything it imports (grapesjs, grapesjs-mjml, CSS) stay out of the main chunk.
@@ -50,15 +51,19 @@ import {
     SaveRegular,
 } from '@fluentui/react-icons';
 import { toDesignSaveError } from '@/Lib/api/editor';
+import { useFieldCatalog } from '@/Components/Contacts/ConditionBuilder';
 import { BlockPalette } from './panels/BlockPalette';
+import { DynamicContentCard, DynamicContentDialog } from './panels/DynamicContentPanel';
 import { PropertiesPanel } from './panels/PropertiesPanel';
+import { StylePanel } from './panels/StylePanel';
+import { VersionsDrawer } from './panels/VersionsDrawer';
 import { PreviewDialog } from './PreviewDialog';
 import { useEmailBuilder } from './useEmailBuilder';
 import type { BuilderDevice } from './engine/createEditor';
 import type { EmailBuilderProps } from './types';
 import { format, text } from './strings';
 
-type LeftTab = 'content';
+type LeftTab = 'content' | 'style';
 type RightTab = 'properties' | 'advanced' | 'layers';
 
 const useStyles = makeStyles({
@@ -120,11 +125,14 @@ const useStyles = makeStyles({
     },
     hidden: { display: 'none' },
     errorList: { margin: 0, paddingLeft: tokens.spacingHorizontalL },
+    propertiesStack: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM },
 });
 
-export default function EmailBuilder({ name, source, onSave, onExit, onSendTest, restore }: EmailBuilderProps) {
+export default function EmailBuilder({ name, source, onSave, onExit, onSendTest, restore, templateId }: EmailBuilderProps) {
     const styles = useStyles();
     const builder = useEmailBuilder({ source, onSave });
+    const { fieldCatalog } = useFieldCatalog();
+    const [versionsOpen, setVersionsOpen] = useState(false);
     const [leftTab, setLeftTab] = useState<LeftTab>('content');
     const [rightTab, setRightTab] = useState<RightTab>('properties');
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -212,15 +220,13 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
                     <Tooltip content={text.redo} relationship="label">
                         <ToolbarButton icon={<ArrowRedoRegular />} disabled={!builder.ready || !builder.canRedo} onClick={builder.redo} />
                     </Tooltip>
-                    {restore && (
-                        <ToolbarButton
-                            icon={<HistoryRegular />}
-                            disabled={!builder.ready || !builder.dirty}
-                            onClick={() => setConfirm('restore')}
-                        >
-                            {text.restorePrevious}
-                        </ToolbarButton>
-                    )}
+                    <ToolbarButton
+                        icon={<HistoryRegular />}
+                        disabled={!builder.ready || (!templateId && !builder.dirty)}
+                        onClick={() => (templateId ? setVersionsOpen(true) : setConfirm('restore'))}
+                    >
+                        {text.restorePrevious}
+                    </ToolbarButton>
                     <ToolbarDivider />
                     <ToolbarRadioGroup aria-label={text.device}>
                         <Tooltip content={text.desktop} relationship="label">
@@ -277,17 +283,27 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
             )}
 
             <div className={mergeClasses('pj-gjs', styles.workspace)}>
-                <aside className={styles.side} aria-label={text.tabs.content}>
-                    {/* WP-61 adds the "Style" tab (global_styles). */}
+                <aside className={styles.side} aria-label={leftTab === 'style' ? text.tabs.style : text.tabs.content}>
                     <TabList selectedValue={leftTab} onTabSelect={(_, data) => setLeftTab(data.value as LeftTab)}>
                         <Tab value="content">{text.tabs.content}</Tab>
+                        <Tab value="style">{text.tabs.style}</Tab>
                     </TabList>
-                    <BlockPalette
-                        blocks={builder.blocks}
-                        disabled={!builder.ready}
-                        onDragStart={builder.startBlockDrag}
-                        onDragEnd={builder.endBlockDrag}
-                    />
+                    {leftTab === 'content' ? (
+                        <BlockPalette
+                            blocks={builder.blocks}
+                            disabled={!builder.ready}
+                            sectionsLoaded={builder.sectionsLoaded}
+                            canSaveSection={builder.selection?.isSection ?? false}
+                            onDragStart={builder.startBlockDrag}
+                            onDragEnd={builder.endBlockDrag}
+                            onInsert={builder.insertBlock}
+                            onSaveSection={builder.saveSection}
+                            onRenameSection={builder.renameSection}
+                            onDeleteSection={builder.deleteSection}
+                        />
+                    ) : (
+                        <StylePanel value={builder.globalStyles} disabled={!builder.ready} onChange={builder.updateGlobalStyles} />
+                    )}
                 </aside>
 
                 <div className={styles.canvas} aria-label={text.canvas}>
@@ -305,7 +321,16 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
                         <Tab value="advanced">{text.advancedStyle}</Tab>
                         <Tab value="layers">{text.layers}</Tab>
                     </TabList>
-                    <div className={mergeClasses(styles.sideBody, rightTab !== 'properties' && styles.hidden)}>
+                    <div className={mergeClasses(styles.sideBody, styles.propertiesStack, rightTab !== 'properties' && styles.hidden)}>
+                        {builder.selection?.dynamic && (
+                            <DynamicContentCard
+                                dynamic={builder.selection.dynamic}
+                                fieldCatalog={fieldCatalog}
+                                disabled={!builder.ready}
+                                onEdit={() => builder.selection?.dynamic && builder.editDynamic({ ...builder.selection.dynamic })}
+                                onRemove={() => builder.selection?.dynamic && builder.removeDynamic(builder.selection.dynamic.id)}
+                            />
+                        )}
                         <PropertiesPanel selection={builder.selection} onChange={builder.setAttributes} />
                     </div>
                     <div ref={builder.refs.styleManagerRef} className={mergeClasses(styles.sideBody, rightTab !== 'advanced' && styles.hidden)} />
@@ -315,12 +340,32 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
 
             <PreviewDialog open={previewOpen} html={previewHtml} onClose={() => setPreviewOpen(false)} onSendTest={sendTest} />
 
+            <DynamicContentDialog
+                editing={builder.dynamicEditing}
+                fieldCatalog={fieldCatalog}
+                onApply={builder.applyDynamicCondition}
+                onCancel={() => builder.editDynamic(null)}
+            />
+
+            {templateId && (
+                <VersionsDrawer
+                    open={versionsOpen}
+                    templateId={templateId}
+                    onClose={() => setVersionsOpen(false)}
+                    onRestored={(detail) => builder.replaceDesign(detail.design_json, detail.html_content)}
+                />
+            )}
+
             <Dialog open={confirm !== null} onOpenChange={(_, data) => !data.open && setConfirm(null)}>
                 <DialogSurface>
                     <DialogBody>
                         <DialogTitle>{confirm === 'restore' ? text.restoreTitle : text.leaveTitle}</DialogTitle>
                         <DialogContent>
-                            {confirm === 'restore' && restore ? format(text.restoreConfirm, restore.versionNumber) : text.leaveConfirm}
+                            {confirm === 'restore'
+                                ? restore
+                                    ? format(text.restoreConfirm, restore.versionNumber)
+                                    : text.common.unsavedChanges
+                                : text.leaveConfirm}
                         </DialogContent>
                         <DialogActions>
                             <Button appearance="secondary" onClick={() => setConfirm(null)}>

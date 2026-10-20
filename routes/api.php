@@ -48,4 +48,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/transactional.php';
     require __DIR__.'/api/webhooks.php';
     require __DIR__.'/api/best-time.php';
+    require __DIR__.'/api/sections.php';
 });
