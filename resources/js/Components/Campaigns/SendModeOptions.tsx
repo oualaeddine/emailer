@@ -1,7 +1,24 @@
-import { useMemo } from 'react';
-import { Dropdown, Field, Input, Option, Radio, RadioGroup, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { useEffect, useMemo, useState } from 'react';
+import {
+    Badge,
+    Dropdown,
+    Field,
+    Input,
+    MessageBar,
+    MessageBarBody,
+    Option,
+    Radio,
+    RadioGroup,
+    Spinner,
+    Text,
+    Tooltip,
+    makeStyles,
+    tokens,
+} from '@fluentui/react-components';
+import { ClockRegular, InfoRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
-import type { CampaignScheduleInput, CampaignSendMode } from '@/Lib/types/campaigns';
+import { fetchBestTimePreview } from '@/Lib/api/bestTime';
+import type { BestTimePreview, CampaignScheduleInput, CampaignSendMode } from '@/Lib/types/campaigns';
 
 export const DEFAULT_TIMEZONE = 'Africa/Algiers';
 const BATCH_SIZE_MIN = 50;
@@ -50,6 +67,29 @@ const useStyles = makeStyles({
     },
     field: {
         minWidth: '150px',
+    },
+    bestTime: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: tokens.spacingVerticalXS,
+        paddingLeft: '32px',
+    },
+    helpRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalXS,
+        color: tokens.colorNeutralForeground3,
+    },
+    infoIcon: {
+        cursor: 'help',
+        flexShrink: 0,
+    },
+    distribution: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalXS,
+        marginTop: tokens.spacingVerticalXS,
     },
 });
 
@@ -178,6 +218,87 @@ export interface SendModeOptionsProps {
     disabled?: boolean;
     /** Field highlighted after a failed submit. */
     error?: SendModeError | null;
+    /** When given, *Envoyer au meilleur moment* explains its plan (`GET /campaigns/{id}/best-time-preview`). */
+    campaignId?: string;
+}
+
+function formatPlaceholders(template: string, ...values: Array<string | number>): string {
+    return values.reduce<string>((text, value) => text.replace(/%[ds]/, String(value)), template);
+}
+
+/** Lazily loaded `BestTimePreview` of one campaign (docs/45 §45.7.3); `undefined` while loading, `null` on error. */
+function useBestTimePreview(campaignId: string | undefined): BestTimePreview | null | undefined {
+    const [state, setState] = useState<{ id: string; preview: BestTimePreview | null } | null>(null);
+
+    useEffect(() => {
+        if (!campaignId || state?.id === campaignId) {
+            return;
+        }
+        let cancelled = false;
+        fetchBestTimePreview(campaignId)
+            .then((preview) => {
+                if (!cancelled) setState({ id: campaignId, preview });
+            })
+            .catch(() => {
+                if (!cancelled) setState({ id: campaignId, preview: null });
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [campaignId, state?.id]);
+
+    return state !== null && state.id === campaignId ? state.preview : undefined;
+}
+
+/**
+ * docs/43 §43.6.4 — help of *Envoyer au meilleur moment*: tooltip with the
+ * method, then (when the campaign is known) the planned distribution, the
+ * account fallback hour and the release window.
+ */
+function BestTimeExplanation({ campaignId }: { campaignId?: string }) {
+    const styles = useStyles();
+    const t = useText();
+    const preview = useBestTimePreview(campaignId);
+
+    return (
+        <div className={styles.bestTime}>
+            <div className={styles.helpRow}>
+                <Tooltip content={t.campaignSetup.bestTimeHelp} relationship="description" withArrow>
+                    <InfoRegular className={styles.infoIcon} aria-label={t.campaignSetup.bestTimeHelp} tabIndex={0} />
+                </Tooltip>
+                <Text size={200}>{t.campaignSetup.bestTimeHelp}</Text>
+            </div>
+            {campaignId && preview === undefined && <Spinner size="extra-tiny" label={t.common.loading} labelPosition="after" />}
+            {campaignId && preview === null && (
+                <MessageBar intent="warning">
+                    <MessageBarBody>{t.common.genericError}</MessageBarBody>
+                </MessageBar>
+            )}
+            {preview && (
+                <MessageBar intent="info" layout="multiline">
+                    <MessageBarBody>
+                        {formatPlaceholders(
+                            t.campaignSetup.bestTimePreview,
+                            preview.contacts_with_history.toLocaleString('fr-FR'),
+                            preview.contacts_fallback.toLocaleString('fr-FR'),
+                            preview.fallback_hour,
+                        )}
+                        <div className={styles.distribution}>
+                            <Badge appearance="outline" color="informative" icon={<ClockRegular />}>
+                                {`${preview.window_hours} h`}
+                            </Badge>
+                            {preview.distribution.map((bucket) => (
+                                <Badge key={bucket.hour} appearance="tint" color={bucket.hour === preview.fallback_hour ? 'brand' : 'subtle'}>
+                                    {`${bucket.hour}h · ${bucket.count.toLocaleString('fr-FR')}`}
+                                </Badge>
+                            ))}
+                        </div>
+                    </MessageBarBody>
+                </MessageBar>
+            )}
+        </div>
+    );
 }
 
 const MODES: CampaignSendMode[] = ['now', 'scheduled', 'best_time', 'batches'];
@@ -187,7 +308,7 @@ const MODES: CampaignSendMode[] = ['now', 'scheduled', 'best_time', 'batches'];
  * Envoyer maintenant · Programmer pour plus tard (date, heure, fuseau) ·
  * Envoyer au meilleur moment · Envoyer par lots (taille + intervalle).
  */
-export function SendModeOptions({ value, onChange, allowedModes, disabled, error }: SendModeOptionsProps) {
+export function SendModeOptions({ value, onChange, allowedModes, disabled, error, campaignId }: SendModeOptionsProps) {
     const styles = useStyles();
     const t = useText();
     const c = t.campaignSetup.confirm;
@@ -257,9 +378,7 @@ export function SendModeOptions({ value, onChange, allowedModes, disabled, error
                     {value.mode === mode && mode === 'scheduled' && dateFields(false)}
                     {value.mode === mode && mode === 'best_time' && (
                         <>
-                            <Text size={200} className={styles.help}>
-                                {t.campaignSetup.bestTimeHelp}
-                            </Text>
+                            <BestTimeExplanation campaignId={campaignId} />
                             {dateFields(true)}
                         </>
                     )}

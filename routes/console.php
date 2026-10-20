@@ -24,3 +24,6 @@ Schedule::command('exports:prune')->daily();
 // docs/45 §45.9 — WP-70 campaign stats rollup (fans out per active campaign) and monthly GeoLite2 refresh.
 Schedule::job(new \App\Modules\Reporting\Jobs\RollupCampaignStatsJob)->hourly();
 Schedule::command('geoip:update')->monthly();
+
+// docs/45 §45.9 — WP-81 nightly precompute of best send hours (contacts + account fallback).
+Schedule::job(new \App\Modules\DeliveryEngine\Scheduling\Jobs\ComputeBestSendHoursJob)->dailyAt('02:17');

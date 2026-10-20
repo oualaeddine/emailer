@@ -61,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
         // docs/45 §45.9 — WP-70 campaign statistics contract + local GeoLite2 resolver (tests bind a fake).
         $this->app->bind(\App\Modules\Reporting\Contracts\CampaignStats::class, \App\Modules\Reporting\Services\CampaignStatsService::class);
         $this->app->singleton(\App\Modules\Tracking\Contracts\GeoIpResolver::class, \App\Modules\Tracking\Support\MaxMindGeoIpResolver::class);
+        // docs/45 §45.9 — WP-81 send at best time (CampaignService::BEST_SEND_TIME_SERVICE dispatcher hook).
+        $this->app->bind(\App\Modules\DeliveryEngine\Scheduling\Contracts\BestSendTimeService::class, \App\Modules\DeliveryEngine\Scheduling\Services\BestSendTimeService::class);
     }
 
     /**
