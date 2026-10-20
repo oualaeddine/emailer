@@ -16,6 +16,7 @@ use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Recipients\Services\RecipientService;
 use App\Modules\Suppression\Preferences\Services\DoubleOptInService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +24,9 @@ use Illuminate\Validation\ValidationException;
 class FormSubmissionService
 {
     public const SOURCE = 'form';
+
+    /** One double opt-in mail per address per this many minutes. */
+    public const DOI_COOLDOWN_MINUTES = 10;
 
     public function __construct(
         private readonly RecipientService $recipients,
@@ -58,29 +62,44 @@ class FormSubmissionService
         }
 
         [$email, $values] = $this->validated($form, $input);
+        $doubleOptIn = ! empty($settings['double_opt_in']);
+
+        // Suppressed / blocklisted addresses get the answer any new address gets (no blocklist
+        // enumeration) and nothing is created, stored or mailed.
+        if ($this->isBlocked($email)) {
+            return $this->result($form, $doubleOptIn ? 'pending_confirmation' : 'subscribed');
+        }
 
         /** @var array{0: FormSubmission, 1: bool, 2: Recipient} $stored */
-        $stored = DB::transaction(function () use ($form, $email, $values, $request, $settings): array {
-            $existing = Recipient::query()->where('email', $email)->exists();
-            $recipient = $this->recipients->createOrMerge(new CreateRecipientData(email: $email, source: RecipientSource::Form));
+        $stored = DB::transaction(function () use ($form, $email, $values, $request, $settings, $doubleOptIn): array {
+            $existing = Recipient::query()->where('email', $email)->first();
+            // With double opt-in every submission waits for the confirmation, also for a contact
+            // opted in earlier: otherwise anyone could add that address to the form's lists or
+            // overwrite its attributes.
+            $pending = $doubleOptIn;
 
-            if ($recipient->status === RecipientStatus::Suppressed->value || $recipient->getAttribute('blocklisted_at') !== null) {
-                throw ValidationException::withMessages(['email' => ["Cette adresse e-mail ne peut pas être inscrite."]]);
-            }
-
-            if ($values !== [] && (! $existing || ($settings['update_existing'] ?? true))) {
-                $this->attributes->apply($recipient, $values, self::SOURCE);
-            }
-
-            foreach (RecipientList::query()->whereIn('uuid', $form->list_ids ?? [])->get() as $list) {
-                $this->lists->add($list, [$recipient->id], self::SOURCE, ['formId' => $form->id]);
-            }
-
-            $pending = ! empty($settings['double_opt_in']) && $recipient->getAttribute('opt_in_at') === null;
             if ($pending) {
-                DB::table('recipients')->where('id', $recipient->id)->update(['opt_in_source' => 'form_pending']);
-            } elseif ($recipient->getAttribute('opt_in_at') === null) {
-                DB::table('recipients')->where('id', $recipient->id)->update(['opt_in_at' => now(), 'opt_in_source' => self::SOURCE]);
+                // Nothing reaches the contact (lists, attributes) before the double opt-in is
+                // confirmed (FormConfirmationService): the values wait in `form_submissions.data`.
+                $this->assertStorable($values);
+                $recipient = $existing ?? $this->recipients->createOrMerge(new CreateRecipientData(email: $email, source: RecipientSource::Form));
+                if ($existing === null || ($existing->getAttribute('opt_in_at') === null && $existing->getAttribute('opt_in_source') === null)) {
+                    DB::table('recipients')->where('id', $recipient->id)->update(['opt_in_source' => 'form_pending']);
+                }
+            } else {
+                $recipient = $this->recipients->createOrMerge(new CreateRecipientData(email: $email, source: RecipientSource::Form));
+
+                if ($values !== [] && ($existing === null || ($settings['update_existing'] ?? true))) {
+                    $this->attributes->apply($recipient, $values, self::SOURCE);
+                }
+
+                foreach (RecipientList::query()->whereIn('uuid', $form->list_ids ?? [])->get() as $list) {
+                    $this->lists->add($list, [$recipient->id], self::SOURCE, ['formId' => $form->id]);
+                }
+
+                if ($recipient->getAttribute('opt_in_at') === null) {
+                    DB::table('recipients')->where('id', $recipient->id)->update(['opt_in_at' => now(), 'opt_in_source' => self::SOURCE]);
+                }
             }
 
             $submission = $this->store($form, $recipient, $pending ? 'pending_confirmation' : 'subscribed', $email, $values, $request);
@@ -94,12 +113,59 @@ class FormSubmissionService
         [$submission, $pending, $recipient] = $stored;
 
         if ($pending) {
-            $this->doubleOptIn->send($recipient->refresh());
+            $this->sendConfirmation($recipient);
         }
 
         FormSubmitted::dispatch($form->id, $submission->id, $recipient->id, $submission->status);
 
         return $this->result($form, $submission->status);
+    }
+
+    /** Suppression entry, or a suppressed / blocklisted contact. */
+    private function isBlocked(string $email): bool
+    {
+        if (DB::table('suppression_entries')->where('email', $email)->exists()) {
+            return true;
+        }
+
+        $recipient = Recipient::query()->where('email', $email)->first();
+
+        return $recipient !== null
+            && ($recipient->status === RecipientStatus::Suppressed->value || $recipient->getAttribute('blocklisted_at') !== null);
+    }
+
+    /**
+     * Validates pending values the way ContactAttributeService::apply() would, without writing.
+     *
+     * @param  array<string, mixed>  $values
+     *
+     * @throws ValidationException
+     */
+    private function assertStorable(array $values): void
+    {
+        $definitions = $this->attributes->definitions();
+        foreach ($values as $name => $value) {
+            $this->attributes->castForStorage($definitions->get($name), $value);
+        }
+    }
+
+    /**
+     * At most one confirmation mail per address per DOI_COOLDOWN_MINUTES (the submission is
+     * still stored and confirmed by any earlier link); queued, and a mail failure never
+     * fails a submission already saved.
+     */
+    private function sendConfirmation(Recipient $recipient): void
+    {
+        $key = 'forms:doi-cooldown:'.hash('sha256', strtolower($recipient->email));
+        if (! Cache::add($key, true, now()->addMinutes(self::DOI_COOLDOWN_MINUTES))) {
+            return;
+        }
+
+        try {
+            $this->doubleOptIn->send($recipient->refresh());
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

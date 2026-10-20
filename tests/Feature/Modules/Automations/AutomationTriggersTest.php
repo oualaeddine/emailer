@@ -29,8 +29,6 @@ use Illuminate\Support\Str;
 use Tests\Feature\Modules\Automations\Concerns\BuildsAutomationFixtures;
 use Tests\TestCase;
 
-require_once __DIR__.'/Fixtures/FormEvents.php';
-
 /**
  * docs/43 §43.4.19 / docs/45 §45.7.5 — every trigger starts a run when its
  * real domain event fires; trigger filter and re-entry rules.

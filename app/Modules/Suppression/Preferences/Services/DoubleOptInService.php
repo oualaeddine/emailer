@@ -4,6 +4,7 @@ namespace App\Modules\Suppression\Preferences\Services;
 
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Settings\Services\SettingsService;
+use App\Modules\Suppression\Preferences\Events\DoubleOptInConfirmed;
 use App\Modules\Suppression\Preferences\Mail\DoubleOptInMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -18,7 +19,7 @@ class DoubleOptInService
         private readonly SettingsService $settings,
     ) {}
 
-    /** Mails the confirmation link; returns it. */
+    /** Queues the confirmation mail; returns the link. */
     public function send(Recipient $recipient): string
     {
         $url = $this->tokens->confirmUrl($recipient->email);
@@ -34,22 +35,28 @@ class DoubleOptInService
             }
         }
 
-        Mail::to($recipient->email)->send(new DoubleOptInMail($url, $html, $subject));
+        Mail::to($recipient->email)->queue(new DoubleOptInMail($url, $html, $subject));
 
         return $url;
     }
 
-    /** Idempotent: the first confirmation timestamp is kept. */
+    /**
+     * Idempotent: the first confirmation timestamp is kept. Fires
+     * DoubleOptInConfirmed on every call so other modules (Forms) can apply
+     * what waited for the confirmation without this module depending on them.
+     */
     public function confirm(Recipient $recipient): Recipient
     {
-        if ($recipient->getAttribute('opt_in_at') === null) {
+        $first = $recipient->getAttribute('opt_in_at') === null;
+        if ($first) {
             DB::table('recipients')->where('id', $recipient->id)->update([
                 'opt_in_at' => now(),
                 'opt_in_source' => self::SOURCE,
             ]);
-            $recipient->refresh();
         }
 
-        return $recipient;
+        DoubleOptInConfirmed::dispatch((int) $recipient->id, $first);
+
+        return $recipient->refresh();
     }
 }

@@ -101,8 +101,12 @@ class PublicFormTest extends TestCase
         $this->assertNull($row->opt_in_at);
         $this->assertSame('form_pending', $row->opt_in_source);
         Mail::assertQueued(DoubleOptInMail::class, 1);
-        $this->assertSame('pending_confirmation', FormSubmission::query()->firstOrFail()->status);
-        $this->assertTrue(DB::table('recipient_list_recipient')->where('recipient_list_id', $this->list->id)->where('recipient_id', $recipient->id)->exists());
+        $submission = FormSubmission::query()->firstOrFail();
+        $this->assertSame('pending_confirmation', $submission->status);
+        $this->assertSame(['PRENOM' => 'Amina'], $submission->data);
+        // Nothing reaches the contact before the confirmation.
+        $this->assertFalse(DB::table('recipient_list_recipient')->where('recipient_id', $recipient->id)->exists());
+        $this->assertNull($recipient->first_name);
     }
 
     public function test_existing_contact_is_merged_not_duplicated(): void
@@ -165,11 +169,32 @@ class PublicFormTest extends TestCase
         $this->submit($form, ['captcha_token' => 'good'])->assertOk();
     }
 
-    public function test_blocklisted_address_is_rejected(): void
+    public function test_blocklisted_address_gets_the_normal_answer_and_nothing_happens(): void
     {
+        Event::fake([FormSubmitted::class]);
+        Mail::fake();
         SuppressionEntry::factory()->create(['email' => 'amina@exemple.dz']);
-        $this->submit($this->form())->assertUnprocessable()->assertJsonValidationErrors(['email']);
+
+        $this->submit($this->form())->assertOk()->assertJsonPath('data.status', 'subscribed');
+        $this->submit($this->form([], ['double_opt_in' => true]))->assertOk()->assertJsonPath('data.status', 'pending_confirmation');
+
         $this->assertSame(0, Recipient::query()->count());
+        $this->assertSame(0, FormSubmission::query()->count());
+        Mail::assertNothingQueued();
+        Event::assertNotDispatched(FormSubmitted::class);
+    }
+
+    public function test_suppressed_contact_gets_the_normal_answer_and_is_left_untouched(): void
+    {
+        Mail::fake();
+        $recipient = Recipient::factory()->create(['email' => 'amina@exemple.dz', 'first_name' => 'Old', 'status' => 'suppressed']);
+
+        $this->submit($this->form())->assertOk()->assertJsonPath('data.status', 'subscribed');
+
+        $this->assertSame('Old', $recipient->fresh()->first_name);
+        $this->assertFalse(DB::table('recipient_list_recipient')->where('recipient_id', $recipient->id)->exists());
+        $this->assertSame(0, FormSubmission::query()->count());
+        Mail::assertNothingQueued();
     }
 
     public function test_html_submit_redirects_to_thank_you_or_custom_url(): void
