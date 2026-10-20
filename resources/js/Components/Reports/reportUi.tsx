@@ -1,4 +1,5 @@
-import { useEffect, useState, type RefObject } from 'react';
+import { type RefObject } from 'react';
+import { useIsDarkTheme } from '@/Theme/ThemeContext';
 import { fr } from '@/Lib/i18n/fr';
 import type { DeviceType, RateSet, ReportCampaignHeader } from '@/Lib/types/reports';
 
@@ -73,42 +74,13 @@ export interface ChartPalette {
 const LIGHT_SERIES: ChartPalette['series'] = ['#2a78d6', '#eb6834', '#1baf7a'];
 const DARK_SERIES: ChartPalette['series'] = ['#3987e5', '#d95926', '#199e70'];
 
-function luminanceOf(color: string): number | null {
-    const value = color.trim();
-    let r: number;
-    let g: number;
-    let b: number;
-    const hex = /^#([0-9a-f]{6})$/i.exec(value);
-    const rgb = /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i.exec(value);
-    if (hex) {
-        const n = parseInt(hex[1], 16);
-        r = (n >> 16) & 255;
-        g = (n >> 8) & 255;
-        b = n & 255;
-    } else if (rgb) {
-        r = Number(rgb[1]);
-        g = Number(rgb[2]);
-        b = Number(rgb[3]);
-    } else {
-        return null;
-    }
-
-    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-}
-
-/** Picks the light or dark steps from the Fluent surface the chart renders on. */
-export function useChartPalette(ref: RefObject<HTMLElement | null>): ChartPalette {
-    const [dark, setDark] = useState(false);
-
-    useEffect(() => {
-        const element = ref.current;
-        if (!element) {
-            return;
-        }
-        const surface = getComputedStyle(element).getPropertyValue('--colorNeutralBackground1');
-        const luminance = luminanceOf(surface);
-        setDark(luminance !== null && luminance < 0.5);
-    }, [ref]);
+/**
+ * Picks the light or dark steps from the active theme (ThemeContext), so the
+ * series follow a live theme switch. `ref` is kept for API compatibility.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function useChartPalette(_ref?: RefObject<HTMLElement | null>): ChartPalette {
+    const dark = useIsDarkTheme();
 
     return { series: dark ? DARK_SERIES : LIGHT_SERIES, dark };
 }

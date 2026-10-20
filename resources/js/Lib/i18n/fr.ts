@@ -169,6 +169,12 @@ export const fr = {
             transactional: 'Transactionnel',
             settings: 'Paramètres',
         },
+        // next-dark
+        theme: 'Thème',
+        themeLight: 'Clair',
+        themeDark: 'Sombre',
+        themeSystem: 'Système',
+        themeOrganization: "Par défaut de l'organisation",
     },
     auth: {
         loginTitle: 'Connexion',
@@ -244,6 +250,8 @@ export const fr = {
         dark: 'Sombre',
         system: 'Système',
         saved: 'Paramètres enregistrés.',
+        // next-dark
+        defaultThemeHint: "S'applique à tous les utilisateurs qui n'ont pas choisi leur propre thème dans le menu du compte. « Système » suit le réglage clair/sombre de l'appareil.",
     },
     pagejaunes: {
         title: 'Annuaire PageJaunes',
