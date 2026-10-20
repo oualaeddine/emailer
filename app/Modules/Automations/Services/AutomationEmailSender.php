@@ -78,6 +78,7 @@ class AutomationEmailSender
             'subject' => $subject,
             'sender_id' => $step->config['sender_id'] ?? null,
             'tags' => ['automation'],
+            'preview_text' => $step->config['preview_text'] ?? null,
         ], fn ($value): bool => $value !== null);
 
         $messages = app(self::TRANSACTIONAL_SENDER)->send($input, [

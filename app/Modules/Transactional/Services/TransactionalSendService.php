@@ -47,7 +47,7 @@ class TransactionalSendService implements TransactionalSender
         $apiKeyId = isset($context['api_key_id']) ? (int) $context['api_key_id'] : null;
 
         $to = $this->recipients($input['to'] ?? []);
-        [$subject, $html, $template] = $this->content($input);
+        [$subject, $html, $template] = $this->content($input, $source);
         $sender = $this->resolveSender($input);
         $params = is_array($input['params'] ?? null) ? $input['params'] : [];
         $subject = $this->mergeParams($subject, $params, false);
@@ -153,7 +153,7 @@ class TransactionalSendService implements TransactionalSender
      * @param  array<string, mixed>  $input
      * @return array{0: string, 1: string, 2: ?Template}
      */
-    private function content(array $input): array
+    private function content(array $input, string $source = 'api'): array
     {
         $hasHtml = filled($input['html_content'] ?? null);
         $hasTemplate = filled($input['template_id'] ?? null);
@@ -169,13 +169,23 @@ class TransactionalSendService implements TransactionalSender
         if ($hasTemplate) {
             $template = Template::query()
                 ->where('uuid', (string) $input['template_id'])
-                ->where('scope', 'transactional')
+                // Automation steps may send any (marketing) template; the API is transactional-only.
+                ->when($source !== 'automation', fn ($q) => $q->where('scope', 'transactional'))
                 ->where('is_archived', false)
                 ->first();
             if ($template === null) {
                 throw ValidationException::withMessages(['template_id' => 'Modèle transactionnel introuvable.']);
             }
             $html = (string) $template->html_content;
+        }
+
+        // Optional hidden preheader (used by automation steps' `preview_text`).
+        $preview = trim((string) ($input['preview_text'] ?? ''));
+        if ($preview !== '') {
+            $div = '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">'.e($preview).'</div>';
+            $count = 0;
+            $html = preg_replace('/<body\b[^>]*>/i', '$0'.$div, $html, 1, $count) ?? $html;
+            $html = $count > 0 ? $html : $div.$html;
         }
 
         $subject = trim((string) ($input['subject'] ?? '')) ?: trim((string) ($template?->subject ?? ''));
