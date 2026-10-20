@@ -208,10 +208,6 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
             return formatText(t.campaignSetup.checklist.brokenLinks, item.details.broken.length);
         }
 
-        if (item.key === 'merge_tags' && item.details && Array.isArray(item.details.unknown) && item.details.unknown.length > 0) {
-            return formatText(t.campaignSetup.checklist.unknownTags, (item.details.unknown as string[]).join(', '));
-        }
-
         return null;
     }
 

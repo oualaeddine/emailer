@@ -1141,8 +1141,6 @@ export const fr = {
             allGood: 'Votre campagne est prête à être envoyée.',
             blocking: 'Corrigez les points bloquants avant de programmer.',
             brokenLinks: '%d lien(s) inaccessible(s)',
-            // next-tags
-            unknownTags: 'Balises inconnues : %s',
         },
         checklistItems: {
             sender_verified: 'Expéditeur vérifié',
