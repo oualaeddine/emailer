@@ -109,6 +109,34 @@ class AudienceResolverTest extends TestCase
         $this->assertSame(2, $estimate->total);
     }
 
+    /**
+     * gap-campaign-ux: a contact that is both excluded and suppressed is counted once (as excluded),
+     * so distinct included = excluded + suppressed + total and the figures shown in the picker add up.
+     */
+    public function test_estimate_figures_add_up_when_exclusion_and_suppression_overlap(): void
+    {
+        $owner = $this->operator();
+        $plain = $this->recipients(5);
+        $excludedOnly = $this->recipients(2);
+        $excludedAndSuppressed = $this->recipients(1)->first();
+        $suppressedOnly = $this->recipients(1)->first();
+
+        app(SuppressionManager::class)->suppress($excludedAndSuppressed->email, SuppressionReason::ManualBlock);
+        app(SuppressionManager::class)->suppress($suppressedOnly->email, SuppressionReason::ManualBlock);
+
+        $included = $this->listWith([...$plain, ...$excludedOnly, $excludedAndSuppressed, $suppressedOnly]);
+        $excluded = $this->listWith([...$excludedOnly, $excludedAndSuppressed]);
+
+        $campaign = $this->campaignWithAudience($owner, ['lists' => [$included->id], 'exclusion_lists' => [$excluded->id]]);
+        $estimate = app(AudienceResolver::class)->estimate($campaign);
+
+        $this->assertSame(9, $estimate->included);
+        $this->assertSame(3, $estimate->excluded);
+        $this->assertSame(1, $estimate->suppressed);
+        $this->assertSame(5, $estimate->total);
+        $this->assertSame($estimate->included - $estimate->duplicates, $estimate->excluded + $estimate->suppressed + $estimate->total);
+    }
+
     public function test_resolve_materialises_rows_once_and_fires_event(): void
     {
         Event::fake([AudienceMaterialised::class]);

@@ -1,6 +1,6 @@
 import { Badge, Text, makeStyles, tokens } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
-import { formatCount, formatRate, formatText } from '@/Components/Campaigns/campaignUi';
+import { formatCount, formatPlural, formatRate } from '@/Components/Campaigns/campaignUi';
 import { ChartDataTable } from '@/Components/Reports/ChartChrome';
 import { ratio } from '@/Components/Reports/reportUi';
 import type { AudienceTargetRef, BrevoCampaignStatsEntry, ReportAudience } from '@/Lib/types/reports';
@@ -38,7 +38,7 @@ function TargetChips({ targets, kind }: { targets: AudienceTargetRef[]; kind: 'l
         <>
             {targets.map((target) => (
                 <Badge key={`${kind}-${target.id}`} appearance="tint" color={kind === 'list' ? 'brand' : 'informative'} shape="rounded">
-                    {target.name} · {formatText(t.campaignSetup.recipients.contactsCount, target.contact_count)}
+                    {target.name} · {formatPlural(target.contact_count, t.campaignSetup.recipients.contactsCountOne, t.campaignSetup.recipients.contactsCount)}
                 </Badge>
             ))}
         </>

@@ -416,6 +416,37 @@ class ReportQueryService
         return $service === null ? [] : array_slice($service->statsByDomain($campaign), 0, 25, true);
     }
 
+    /**
+     * Messages / audience members still to be sent: pending rows not yet dispatched plus
+     * messages still queued or sending. NOT `recipients_count - sent_count`: that also counts
+     * recipients skipped at dispatch (suppressed) and failed ones, which made a finished
+     * campaign look like it still had recipients left.
+     */
+    private function remaining(Campaign $campaign): int
+    {
+        $service = $this->statsService();
+        if ($service !== null) {
+            return $service->remaining($campaign);
+        }
+
+        $queued = DB::table('messages')->where('campaign_id', $campaign->id)->where('is_test', false)
+            ->whereIn('status', ['queued', 'sending'])->count();
+        $pending = $this->hasTable('campaign_recipients')
+            ? DB::table('campaign_recipients')->where('campaign_id', $campaign->id)
+                ->where('status', 'pending')->whereNull('message_id')->count()
+            : 0;
+
+        return $queued + $pending;
+    }
+
+    /** Audience members skipped at dispatch (suppressed / unsubscribed since the audience was frozen). */
+    private function skipped(Campaign $campaign): int
+    {
+        return $this->hasTable('campaign_recipients')
+            ? DB::table('campaign_recipients')->where('campaign_id', $campaign->id)->where('status', 'skipped')->count()
+            : 0;
+    }
+
     // ------------------------------------------------------------------ tabs
 
     /**
@@ -435,7 +466,8 @@ class ReportQueryService
             'averages' => $averages,
             'vs_account_average' => $this->versus($rates, $averages),
             'mirrorClick' => (int) $campaign->mirror_clicks,
-            'remaining' => max(0, (int) $campaign->recipients_count - (int) $campaign->sent_count),
+            'remaining' => $this->remaining($campaign),
+            'skipped' => $this->skipped($campaign),
             'timeseries' => $this->timeseries($campaign),
             'campaignStats' => $this->campaignStats($campaign),
             'audience' => $this->audience($campaign),

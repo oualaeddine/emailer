@@ -627,7 +627,7 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
         topicSlug: 'campaign-setup',
         title: "Configuration d'une campagne",
         purpose:
-            "La page de configuration empile cinq cartes avec coche d'achèvement : Expéditeur, Objet, Destinataires, Design et Paramètres supplémentaires. L'en-tête permet de renommer la campagne, d'ouvrir « Aperçu & test » et de « Programmer ».",
+            "La page de configuration empile des cartes avec coche d'achèvement : Expéditeur, Objet, Destinataires, Design et Paramètres supplémentaires, plus la carte Test A/B quand il est disponible (cinq ou six cartes). L'en-tête permet de renommer la campagne, d'ouvrir « Aperçu & test » et de « Programmer ».",
         howToUse: [
             {
                 step: 1,

@@ -553,4 +553,28 @@ class CampaignV2EndpointsTest extends TestCase
             ->assertJsonPath('data.to', "Amina Benali <{$contact->email}>")
             ->assertJsonPath('data.contact_id', $contact->uuid);
     }
+
+    /** gap-campaign-ux: without `contact_id` the preview renders merge tags with the first audience member. */
+    public function test_preview_without_contact_uses_a_sample_audience_member(): void
+    {
+        $user = $this->operator();
+        $members = $this->recipients(2, ['company_name' => 'Acme']);
+        $list = $this->listWith($members);
+        $campaign = $this->campaignWithAudience($user, ['lists' => [$list->id]]);
+        $campaign->update(['subject' => 'Offre pour {{ contact.SOCIETE }}', 'html_body' => '<p>{{ contact.SOCIETE }}</p>']);
+
+        $this->actingAs($user)->getJson("/api/v1/campaigns/{$campaign->uuid}/preview")
+            ->assertOk()
+            ->assertJsonPath('data.subject', 'Offre pour Acme')
+            ->assertJsonPath('data.html', '<p>Acme</p>')
+            ->assertJsonPath('data.sample', true)
+            ->assertJsonPath('data.contact_id', $members->sortBy('id')->first()->uuid);
+
+        $empty = Campaign::factory()->create(['subject' => 'Offre pour {{ contact.SOCIETE }}']);
+        $this->actingAs($user)->getJson("/api/v1/campaigns/{$empty->uuid}/preview")
+            ->assertOk()
+            ->assertJsonPath('data.subject', 'Offre pour {{ contact.SOCIETE }}')
+            ->assertJsonPath('data.sample', false)
+            ->assertJsonPath('data.contact_id', null);
+    }
 }

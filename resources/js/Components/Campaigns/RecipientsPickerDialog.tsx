@@ -17,6 +17,8 @@ import {
     Spinner,
     Tab,
     TabList,
+    Tag,
+    TagGroup,
     Text,
     makeStyles,
     tokens,
@@ -30,7 +32,7 @@ import {
     type AudienceSourceOption,
 } from '@/Lib/api/campaigns';
 import type { AudienceEstimate, CampaignAudienceInput, CampaignV2Detail } from '@/Lib/types/campaigns';
-import { apiErrorMessage, apiValidationErrors, formatText } from '@/Components/Campaigns/campaignUi';
+import { apiErrorMessage, apiValidationErrors, formatPlural, formatText } from '@/Components/Campaigns/campaignUi';
 
 const MAX_TARGETS = 50;
 
@@ -102,6 +104,13 @@ const useStyles = makeStyles({
     muted: {
         color: tokens.colorNeutralForeground3,
     },
+    chips: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: tokens.spacingHorizontalXS,
+        maxHeight: '72px',
+        overflowY: 'auto',
+    },
 });
 
 interface Selection {
@@ -130,6 +139,11 @@ function TargetPicker({ lists, segments, value, blocked, onChange, loading, limi
     const source = tab === 'lists' ? lists : segments;
     const filtered = source.filter((option) => option.name.toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr')));
     const selected = value[tab];
+    // Selected targets of both tabs stay visible above the (scrollable) list.
+    const chips = [
+        ...value.lists.map((id) => ({ key: `lists:${id}`, kind: 'lists' as const, id, name: lists.find((o) => o.id === id)?.name ?? id })),
+        ...value.segments.map((id) => ({ key: `segments:${id}`, kind: 'segments' as const, id, name: segments.find((o) => o.id === id)?.name ?? id })),
+    ];
 
     function toggle(id: string, checked: boolean) {
         const next = checked ? [...selected, id] : selected.filter((item) => item !== id);
@@ -148,6 +162,31 @@ function TargetPicker({ lists, segments, value, blocked, onChange, loading, limi
                     {value.segments.length > 0 ? ` (${value.segments.length})` : ''}
                 </Tab>
             </TabList>
+            {chips.length > 0 && (
+                <TagGroup
+                    className={styles.chips}
+                    size="small"
+                    aria-label={t.campaignSetup.recipients.selectedTargets}
+                    onDismiss={(_, data) => {
+                        const chip = chips.find((item) => item.key === data.value);
+                        if (chip) {
+                            onChange({ ...value, [chip.kind]: value[chip.kind].filter((id) => id !== chip.id) });
+                        }
+                    }}
+                >
+                    {chips.map((chip) => (
+                        <Tag
+                            key={chip.key}
+                            value={chip.key}
+                            size="small"
+                            dismissible
+                            dismissIcon={{ 'aria-label': formatText(t.campaignSetup.recipients.removeTarget, chip.name) }}
+                        >
+                            {chip.name}
+                        </Tag>
+                    ))}
+                </TagGroup>
+            )}
             <SearchBox
                 size="small"
                 value={query}
@@ -176,7 +215,7 @@ function TargetPicker({ lists, segments, value, blocked, onChange, loading, limi
                                 />
                                 {option.count !== null && (
                                     <Text size={200} className={styles.count}>
-                                        {formatText(t.campaignSetup.recipients.contactsCount, option.count)}
+                                        {formatPlural(option.count, t.campaignSetup.recipients.contactsCountOne, t.campaignSetup.recipients.contactsCount)}
                                     </Text>
                                 )}
                             </div>
@@ -373,7 +412,11 @@ export function RecipientsPickerDialog({ open, campaign, onClose, onSubmit }: Re
                                 ) : estimate ? (
                                     <>
                                         <Text className={styles.big}>{estimate.total.toLocaleString('fr-FR')}</Text>
-                                        <Text>{formatText(t.campaignSetup.recipients.estimatedCount, estimate.total)}</Text>
+                                        <Text>
+                                            {estimate.total <= 1
+                                                ? t.campaignSetup.recipients.estimatedUnitOne
+                                                : t.campaignSetup.recipients.estimatedUnit}
+                                        </Text>
                                         <Text size={200} className={styles.muted}>
                                             {formatText(t.campaignSetup.recipients.excludedCount, estimate.excluded)}
                                         </Text>

@@ -85,14 +85,14 @@ const useStyles = makeStyles({
         boxShadow: tokens.shadow2,
     },
     name: {
-        flex: '1 1 160px',
+        flex: '1 1 96px',
         minWidth: 0,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
     toolbar: { flexWrap: 'wrap', padding: 0 },
-    status: { color: tokens.colorNeutralForeground3 },
+    status: { color: tokens.colorNeutralForeground3, whiteSpace: 'nowrap' },
     workspace: {
         flex: '1 1 auto',
         minHeight: 0,
@@ -203,7 +203,7 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
                     {builder.saving
                         ? text.saving
                         : builder.dirty
-                          ? text.common.unsavedChanges
+                          ? text.unsavedShort
                           : builder.savedAt
                             ? format(text.common.savedAt, builder.savedAt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))
                             : ''}
@@ -220,13 +220,14 @@ export default function EmailBuilder({ name, source, onSave, onExit, onSendTest,
                     <Tooltip content={text.redo} relationship="label">
                         <ToolbarButton icon={<ArrowRedoRegular />} disabled={!builder.ready || !builder.canRedo} onClick={builder.redo} />
                     </Tooltip>
-                    <ToolbarButton
-                        icon={<HistoryRegular />}
-                        disabled={!builder.ready || (!templateId && !builder.dirty)}
-                        onClick={() => (templateId ? setVersionsOpen(true) : setConfirm('restore'))}
-                    >
-                        {text.restorePrevious}
-                    </ToolbarButton>
+                    {/* Icon only (label in the tooltip) so the whole top bar fits on one row from 1280 px. */}
+                    <Tooltip content={text.restorePrevious} relationship="label">
+                        <ToolbarButton
+                            icon={<HistoryRegular />}
+                            disabled={!builder.ready || (!templateId && !builder.dirty)}
+                            onClick={() => (templateId ? setVersionsOpen(true) : setConfirm('restore'))}
+                        />
+                    </Tooltip>
                     <ToolbarDivider />
                     <ToolbarRadioGroup aria-label={text.device}>
                         <Tooltip content={text.desktop} relationship="label">

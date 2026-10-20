@@ -61,6 +61,9 @@ export function registerMergeTagAction(editor: Editor, tags: MergeTag[]): void {
             const el = (action.btn?.querySelector('select') ?? select) as HTMLSelectElement;
             if (el.value) {
                 rte.insertHTML(escapeHtml(el.value));
+                // `insertHTML` re-adds the range that spans the inserted node, so the tag stays
+                // selected and the next keystroke would replace it: collapse after the tag.
+                rte.el.ownerDocument.getSelection()?.collapseToEnd();
                 el.value = '';
             }
         },
