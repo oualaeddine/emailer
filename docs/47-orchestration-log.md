@@ -116,3 +116,5 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 3 | gate | — | Full suite after fixes: **804 passed, 1 skipped, 0 failed**; tsc/build/migrate green | green (pending review) |
 | 2026-10-20 | 3 | review | opus/high | Review: 4 blocking (B1 MJML `mj-include` file read via validate endpoint, B2 thumbnail Chromium SSRF, B3 reports never use the bound CampaignStats contract, B4 MySQL-only SQL in gallery), 12 should-fix, 10 nits. Fix agents: A (Opus, Reporting/Tracking/Rendering/report UI), B (Sonnet, Templates/Preferences/console) | running |
 | 2026-10-20 | 3 | fix-B | sonnet | Returned; B1, B2, B4, S5, S6, S12 (3 parts), N2, N3, N6, N9, N10 fixed; 154 tests green; note: public signed POSTs rely on @csrf in the Blade forms (session cookie present on page view) — verify at merge | c27adb0 |
+| 2026-10-20 | 3 | fix-A | opus | Returned; B3, S1–S4, S7–S11, N1, N4, N5, N7, N8 fixed; 236 tests green; 2 migrations (messages.to_name, stats_hourly.variant_id NOT NULL) | 386cb8a |
+| 2026-10-20 | 3 | merge | — | Merged fix-A (75634ce), fix-B (5031509) without conflicts; tsc + build green; final gate running | running |

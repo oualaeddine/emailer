@@ -256,7 +256,7 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 | 0 | 40, 40N | ✅ merged (brevo/wave-0 → brevo/main); gate green locally (CI unavailable: GitHub billing lock); review findings fixed — see [47](47-orchestration-log.md) |
 | 1 | 41, 41U, 42, 43, 44, 45, 60S | ✅ merged; gate green locally; review: 3 blocking + 15 should-fix + 8 nits fixed; GrapesJS **GO** per [46](46-editor-spike.md) |
 | 2 | 50, 50U, 51, 52, 53, 54, 54U, 55, 56, 57 | ✅ merged; gate green locally; review: 5 blocking + 16 should-fix + 11 nits fixed |
-| 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ⬜ |
+| 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ✅ merged; gate green locally; review: 4 blocking + 12 should-fix + 10 nits fixed |
 | 4 | 61, 80, 81, 90, 90U, 91, 91U, 100, 101, 102 | ⬜ |
 
 ## 44.16 Orchestrator Session Prompt
