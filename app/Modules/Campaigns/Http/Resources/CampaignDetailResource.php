@@ -8,6 +8,7 @@ use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Services\AudienceResolver;
 use App\Modules\Campaigns\Services\CampaignService;
 use App\Modules\Campaigns\Support\ExternalReferences;
+use App\Modules\DeliveryEngine\Rendering\Support\SystemUrls;
 use App\Modules\Recipients\Models\RecipientList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -61,7 +62,8 @@ class CampaignDetailResource extends CampaignResource
                 : null,
             'ab_test' => null,
             'test_sent_at' => self::iso($this->test_sent_at),
-            'share_link' => null,
+            // docs/45 §45.6.3 — anonymous public mirror (`/m/c/{campaign}`) once the campaign was sent.
+            'share_link' => $this->sent_at !== null ? app(SystemUrls::class)->campaignMirror($this->resource) : null,
             'checklist_status' => $this->checklistStatus(),
         ];
     }

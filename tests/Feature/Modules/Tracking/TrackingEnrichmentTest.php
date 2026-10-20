@@ -11,6 +11,8 @@ use App\Modules\Tracking\Models\CampaignLink;
 use App\Modules\Tracking\Models\Message;
 use App\Modules\Tracking\Models\MessageEvent;
 use App\Modules\Tracking\Services\TrackingRenderer;
+use App\Modules\Tracking\Support\AppleMppDetector;
+use App\Modules\Tracking\Support\EngagementScore;
 use App\Modules\Tracking\Support\MaxMindGeoIpResolver;
 use App\Modules\Tracking\Support\TrackingUrlGenerator;
 use App\Modules\Tracking\Support\UserAgentParser;
@@ -129,6 +131,33 @@ class TrackingEnrichmentTest extends TestCase
         $this->assertSame('US', $ipEvent->ip_country);
     }
 
+    public function test_apple_ranges_alone_do_not_bypass_the_bot_filter(): void
+    {
+        $emptyUa = $this->campaignMessage();
+        $scanner = $this->campaignMessage();
+        $proxy = $this->campaignMessage();
+        $marker = $this->campaignMessage();
+
+        // From Apple's ranges but not the proxy user agent: regular bot filtering applies.
+        $this->open($emptyUa, '', '17.58.1.2');
+        $this->open($scanner, 'Barracuda link scanner', '17.58.1.2');
+        // Bare proxy user agent AND Apple IP, or the explicit proxy marker anywhere: counted.
+        $this->open($proxy, 'Mozilla/5.0', '17.58.1.2');
+        $this->open($marker, 'Mozilla/5.0 AppleMailProxy/1.0');
+
+        $this->assertSame(0, $emptyUa->fresh()->open_count);
+        $this->assertSame(0, $scanner->fresh()->open_count);
+        $this->assertSame(1, $proxy->fresh()->open_count);
+        $this->assertTrue(MessageEvent::query()->where('message_id', $proxy->id)->sole()->is_proxy_open);
+        $this->assertSame(1, $marker->fresh()->open_count);
+        $this->assertSame(2, MessageEvent::query()->where('event_type', 'opened')->count());
+
+        $detector = app(AppleMppDetector::class);
+        $this->assertFalse($detector->bypassesBotFilter('Mozilla/5.0', '41.111.10.20'));
+        $this->assertTrue($detector->bypassesBotFilter('Mozilla/5.0', '17.58.1.2'));
+        $this->assertFalse($detector->bypassesBotFilter('curl/8.0', '17.58.1.2'));
+    }
+
     public function test_bot_opens_are_still_filtered_and_write_no_event(): void
     {
         $message = $this->campaignMessage();
@@ -198,6 +227,8 @@ class TrackingEnrichmentTest extends TestCase
         $this->assertSame(1, (int) $recipient->opened, 'a message counts once in opened');
         $afterOpen = (int) $recipient->engagement_score;
         $this->assertGreaterThan(0, $afterOpen);
+        // Same formula as EngagementScore (50 × 1/2 opened + 20 recency), computed inside the one UPDATE.
+        $this->assertSame(EngagementScore::compute(2, 2, 1, 0, now()), $afterOpen);
 
         $this->click($message, 'https://example.com/');
 
@@ -206,6 +237,15 @@ class TrackingEnrichmentTest extends TestCase
         $this->assertSame(1, (int) $recipient->clicked);
         $this->assertGreaterThan($afterOpen, (int) $recipient->engagement_score);
         $this->assertLessThanOrEqual(100, (int) $recipient->engagement_score);
+        $this->assertSame(EngagementScore::compute(2, 2, 1, 1, now()), (int) $recipient->engagement_score);
+
+        // One statement per tracked hit on `recipients` (N4).
+        DB::enableQueryLog();
+        $this->open($message, self::IPHONE_MAIL);
+        $recipientQueries = array_filter(DB::getQueryLog(), fn (array $q): bool => str_contains($q['query'], '`recipients`') && ! str_contains($q['query'], 'join'));
+        $this->assertCount(1, array_filter($recipientQueries, fn (array $q): bool => str_starts_with(strtolower($q['query']), 'update')));
+        $this->assertCount(0, array_filter($recipientQueries, fn (array $q): bool => str_starts_with(strtolower($q['query']), 'select')));
+        DB::disableQueryLog();
     }
 
     public function test_test_sends_do_not_touch_recipient_counters_or_campaign_links(): void

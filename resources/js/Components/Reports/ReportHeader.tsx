@@ -123,10 +123,12 @@ export function ReportHeader({ campaignId, campaign, tab, onCompare, onViewEmail
                     {campaign && (
                         <div className={styles.meta}>
                             {sentAt && <Text>{formatText(t.campaignReport.sentOn, formatDateTime(sentAt))}</Text>}
-                            <Text>
-                                <span className={styles.metaLabel}>{t.campaignReport.from} : </span>
-                                {campaign.sender.name} &lt;{campaign.sender.email}&gt;
-                            </Text>
+                            {campaign.sender && (
+                                <Text>
+                                    <span className={styles.metaLabel}>{t.campaignReport.from} : </span>
+                                    {campaign.sender.name ?? ''} &lt;{campaign.sender.email ?? ''}&gt;
+                                </Text>
+                            )}
                             <Text>
                                 <span className={styles.metaLabel}>{t.campaignReport.subject} : </span>
                                 {campaign.subject}

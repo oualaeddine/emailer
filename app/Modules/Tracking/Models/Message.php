@@ -7,9 +7,11 @@ use App\Modules\Composer\Models\Draft;
 use App\Modules\DeliveryEngine\Models\SendAttempt;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Tracking\Services\CampaignStatsAggregator;
 use App\Modules\Tracking\Services\TrackingEventRecorder;
 use App\Support\Concerns\HasUuid;
 use Database\Factories\MessageFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +37,15 @@ class Message extends Model
 {
     /** @use HasFactory<MessageFactory> */
     use HasFactory, HasUuid;
+
+    /**
+     * Statuses of a sent message that never reached the inbox — the
+     * "delivered" definition shared by the rollup
+     * ({@see CampaignStatsAggregator}) and
+     * the report drill-downs: a provider `delivered_at`, or sent and not
+     * bounced / failed / rejected.
+     */
+    public const NOT_DELIVERED_STATUSES = ['hard_bounced', 'soft_bounced', 'failed', 'rejected'];
 
     protected $fillable = [
         'campaign_id',
@@ -72,6 +83,43 @@ class Message extends Model
     {
         static::created(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, true));
         static::updated(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, false));
+    }
+
+    /**
+     * Constrains `$query` (Eloquent or query builder) to delivered messages;
+     * `$alias` is the table alias of `messages` in the query (`m`), if any.
+     *
+     * @template TQuery of \Illuminate\Contracts\Database\Query\Builder
+     *
+     * @param  TQuery  $query
+     * @return TQuery
+     */
+    public static function whereDelivered($query, string $alias = '')
+    {
+        $p = $alias !== '' ? $alias.'.' : '';
+
+        return $query->where(fn ($w) => $w->whereNotNull($p.'delivered_at')
+            ->orWhere(fn ($x) => $x->whereNotNull($p.'sent_at')->whereNotIn($p.'status', self::NOT_DELIVERED_STATUSES)));
+    }
+
+    /**
+     * SQL boolean expression of {@see whereDelivered()} for aggregates
+     * (`SUM(CASE WHEN … THEN 1 ELSE 0 END)`).
+     */
+    public static function deliveredSql(string $alias = ''): string
+    {
+        $p = $alias !== '' ? $alias.'.' : '';
+        $statuses = implode(', ', array_map(fn (string $s): string => "'{$s}'", self::NOT_DELIVERED_STATUSES));
+
+        return "({$p}delivered_at IS NOT NULL OR ({$p}sent_at IS NOT NULL AND {$p}status NOT IN ({$statuses})))";
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeDelivered($query): void
+    {
+        self::whereDelivered($query, $query->getModel()->getTable());
     }
 
     public function getRouteKeyName(): string

@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\DB;
  * (`CampaignStatusChanged` → `completed`) and by the stats service for large
  * campaigns.
  *
+ * Unique per campaign so the hourly fan-out never stacks; the completion
+ * rollup (`$final`) has its own uniqueness key, so it is never dropped while
+ * an hourly rollup of the same campaign is queued or running (the aggregator
+ * lock serialises the two).
+ *
  * Without a `campaignId` (the hourly schedule, routes/console.php) it fans
  * out one job per active campaign: running / paused campaigns, campaigns
  * sent or completed within `tracking.stats.active_window_days`, and
@@ -31,11 +36,18 @@ class RollupCampaignStatsJob implements ShouldBeUnique, ShouldQueue
 
     public int $uniqueFor = 3600;
 
-    public function __construct(public readonly ?int $campaignId = null) {}
+    public function __construct(
+        public readonly ?int $campaignId = null,
+        public readonly bool $final = false,
+    ) {}
 
     public function uniqueId(): string
     {
-        return $this->campaignId === null ? 'all' : (string) $this->campaignId;
+        if ($this->campaignId === null) {
+            return 'all';
+        }
+
+        return ($this->final ? 'final:' : '').$this->campaignId;
     }
 
     public function handle(CampaignStats $stats): void

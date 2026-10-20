@@ -137,8 +137,8 @@ export default function CampaignReport({ campaignId }: { campaignId: string }) {
         }
     }, [tab, loadTab]);
 
-    // html_body (GET /campaigns/{id}) is needed by the click map and "Voir l'e-mail" only.
-    const needHtml = tab === 'clicks' || emailOpen;
+    // html_body (GET /campaigns/{id}) is needed by "Voir l'e-mail" only (the click map uses report/clicks `html`).
+    const needHtml = emailOpen;
     useEffect(() => {
         if (!needHtml || htmlState !== 'idle') {
             return;
@@ -184,7 +184,7 @@ export default function CampaignReport({ campaignId }: { campaignId: string }) {
                 return payloads.opens ? <OpensTab data={payloads.opens} {...common} /> : null;
             case 'clicks':
                 return payloads.clicks ? (
-                    <ClicksTab data={payloads.clicks} html={html} htmlLoading={htmlState !== 'done'} {...common} />
+                    <ClicksTab data={payloads.clicks} {...common} />
                 ) : null;
             case 'unsubscriptions':
                 return payloads.unsubscriptions ? <UnsubscriptionsTab data={payloads.unsubscriptions} {...common} /> : null;

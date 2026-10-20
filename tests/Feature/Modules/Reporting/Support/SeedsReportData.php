@@ -8,6 +8,7 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Tracking\Models\Message;
+use App\Modules\Tracking\Services\CampaignStatsAggregator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -30,6 +31,7 @@ trait SeedsReportData
             'unique_opens' => 45, 'total_opens' => 80, 'proxy_opens' => 5,
             'unique_clicks' => 18, 'total_clicks' => 30, 'unsubscribes' => 3,
             'hard_bounces' => 4, 'soft_bounces' => 6, 'complaints' => 1, 'mirror_clicks' => 2,
+            'stats_updated_at' => now(),
         ], $attributes));
 
         return $campaign;
@@ -41,9 +43,27 @@ trait SeedsReportData
     private function hourly(Campaign $campaign, string $hour, array $counters): void
     {
         DB::table('campaign_stats_hourly')->insert(array_merge([
-            'campaign_id' => $campaign->id, 'hour' => $hour, 'variant_id' => null,
+            'campaign_id' => $campaign->id, 'hour' => $hour, 'variant_id' => 0,
             'created_at' => now(), 'updated_at' => now(),
         ], $counters));
+    }
+
+    /**
+     * Runs the real rollup once so the breakdown cache (statsByDomain / Device / Browser / Country) reflects
+     * the seeded messages and events, then drops its hourly / by-list rows and restores the seeded counters,
+     * so the hand-written rollup rows seeded afterwards are the only ones.
+     */
+    private function rollupBreakdowns(Campaign $campaign): void
+    {
+        $counters = $campaign->only([
+            'sent_count', 'delivered_count', 'unique_opens', 'total_opens', 'proxy_opens', 'unique_clicks',
+            'total_clicks', 'unsubscribes', 'hard_bounces', 'soft_bounces', 'complaints',
+        ]);
+
+        app(CampaignStatsAggregator::class)->rollup($campaign);
+        DB::table('campaign_stats_hourly')->where('campaign_id', $campaign->id)->delete();
+        DB::table('campaign_stats_by_list')->where('campaign_id', $campaign->id)->delete();
+        $campaign->forceFill($counters + ['stats_updated_at' => now()])->save();
     }
 
     /**

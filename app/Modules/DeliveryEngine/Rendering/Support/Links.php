@@ -98,6 +98,16 @@ final class Links
         return ! self::isSystemLink($href) && ! self::isTrackingUrl($href);
     }
 
+    /**
+     * An authored href that is only a `links` merge tag (`{{ mirror }}`,
+     * `{{ unsubscribe }}`, `{{ unsubscribe_url }}`, `{{ update_profile }}`):
+     * it resolves to a system link, so it gets no `data-link-id`.
+     */
+    public static function isSystemMergeTag(string $href): bool
+    {
+        return preg_match('/^\{\{\s*(mirror|unsubscribe|unsubscribe_url|update_profile)\s*\}\}$/i', $href) === 1;
+    }
+
     public static function isSystemLink(string $href): bool
     {
         foreach (['unsubscribe', 'preferences', 'm'] as $prefix) {

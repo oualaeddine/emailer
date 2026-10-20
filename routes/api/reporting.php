@@ -33,12 +33,9 @@ Route::get('campaigns/{campaign}/report/contacts', [ReportController::class, 'co
 Route::post('campaigns/{campaign}/report/segment', [ReportController::class, 'segment']);
 Route::get('campaigns/{campaign}/report/export', [ReportExportController::class, 'campaign']);
 
-// `campaigns/compare` is a literal path that must win over `campaigns/{campaign}` (docs/45 §45.1), but
-// routes/api/campaigns.php (WP-42, required first) registers `{campaign}` before this file runs: it is moved to the
-// front of the route collection so route matching (first match wins) reaches it.
-$compare = Route::get('campaigns/compare', [ReportController::class, 'compare']);
 // `campaigns/compare` is kept out of `campaigns/{campaign}` by the global UUID
 // pattern registered in AppServiceProvider::boot (Wave 3 gate).
+Route::get('campaigns/compare', [ReportController::class, 'compare']);
 
 // Global statistics (`reporting.view`).
 Route::get('statistics/summary', [StatisticsController::class, 'summary']);

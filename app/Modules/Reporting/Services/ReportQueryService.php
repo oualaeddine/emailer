@@ -5,12 +5,19 @@ namespace App\Modules\Reporting\Services;
 use App\Modules\Audit\Models\AuditLog;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Support\ExternalReferences;
+use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
+use App\Modules\DeliveryEngine\Rendering\Support\SystemUrls;
+use App\Modules\Reporting\Contracts\CampaignStats;
+use App\Modules\Tracking\Models\Message;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
@@ -18,19 +25,18 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * comparison and "voir les contacts" drill-down.
  *
  * Reads the WP-70 rollups (`campaign_stats_hourly`, `campaign_stats_by_list`,
- * `campaign_links`) and the cached counters of `campaigns`. Raw
- * `message_events` / `messages` are only scanned for per-campaign
- * drill-downs, and only up to {@see self::RAW_LIMIT} messages (§45.6.5).
+ * `campaign_links`), the cached counters of `campaigns` and the rollup's
+ * cached breakdowns. Raw `messages` / `message_events` are only read for the
+ * paginated "voir les contacts" drill-down.
  *
- * `CampaignStatsService` (§45.9, WP-70) is used for `globalStats()` and
- * `timeseries()` when it is bound; otherwise the same figures are computed
- * from the counters / rollup tables here.
+ * The {@see CampaignStats} contract (§45.9, WP-70) is used for
+ * `globalStats()`, `timeseries()` and the domain / device / browser / country
+ * breakdowns when it is bound; otherwise the figures come from the counters /
+ * rollup tables here (and the breakdowns are empty).
  */
 class ReportQueryService
 {
-    public const STATS_SERVICE = 'App\\Modules\\Reporting\\Services\\CampaignStatsService';
-
-    public const RAW_LIMIT = 100000;
+    public const STATS_SERVICE = CampaignStats::class;
 
     public const HOURLY_WINDOW_HOURS = 72;
 
@@ -73,7 +79,7 @@ class ReportQueryService
 
     /**
      * @param  array<string, mixed>  $stats  BrevoStats
-     * @return array<string, float>  RateSet (ratios 0–1)
+     * @return array<string, float> RateSet (ratios 0–1)
      */
     public static function rates(array $stats): array
     {
@@ -152,16 +158,11 @@ class ReportQueryService
     }
 
     /**
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     private function messages(Campaign $campaign)
     {
         return DB::table('messages as m')->where('m.campaign_id', $campaign->id)->where('m.is_test', false);
-    }
-
-    private function rawAllowed(Campaign $campaign): bool
-    {
-        return $this->messages($campaign)->limit(self::RAW_LIMIT + 1)->count() <= self::RAW_LIMIT;
     }
 
     /**
@@ -187,14 +188,15 @@ class ReportQueryService
             'tags' => $campaign->tags ?? [],
             'type' => $campaign->type ?? 'classic',
             'thumbnail_url' => $campaign->thumbnail_path !== null
-                ? \Illuminate\Support\Facades\Storage::disk('public')->url($campaign->thumbnail_path) : null,
-            'share_link' => null,
+                ? Storage::disk('public')->url($campaign->thumbnail_path) : null,
+            // docs/45 §45.6.3 — anonymous public mirror (`/m/c/{campaign}`) once the campaign was sent.
+            'share_link' => $campaign->sent_at !== null ? app(SystemUrls::class)->campaignMirror($campaign) : null,
         ];
     }
 
-    private function statsService(): ?object
+    private function statsService(): ?CampaignStats
     {
-        return app()->bound(self::STATS_SERVICE) ? app(self::STATS_SERVICE) : null;
+        return app()->bound(CampaignStats::class) ? app(CampaignStats::class) : null;
     }
 
     /**
@@ -356,7 +358,7 @@ class ReportQueryService
     // ------------------------------------------------------------------ links
 
     /**
-     * @return list<array<string, mixed>>  ReportLinkRow, sorted by unique clicks desc
+     * @return list<array<string, mixed>> ReportLinkRow, sorted by unique clicks desc
      */
     public function links(Campaign $campaign, ?int $limit = null): array
     {
@@ -381,93 +383,36 @@ class ReportQueryService
         return $limit === null ? $mapped : array_slice($mapped, 0, $limit);
     }
 
-    // ------------------------------------------------------------------ engagement breakdowns (raw, guarded)
+    // ------------------------------------------------------------------ engagement breakdowns (rollup cache)
 
     /**
-     * @return array{device: array<string, array<string, array<string, int>>>, browser: array<string, array<string, int>>, country: array<string, array<string, int>>}
+     * Device / browser / country breakdowns cached by the rollup ({@see CampaignStats::statsByDevice()} …).
+     *
+     * @return array{device: array<string, mixed>, browser: array<string, array<string, int>>, country: array<string, array<string, int>>}
      */
     private function engagement(Campaign $campaign): array
     {
-        $empty = ['device' => ['desktop' => [], 'mobile' => [], 'tablet' => [], 'unknown' => []], 'browser' => [], 'country' => []];
-        if (! $this->hasTable('message_events') || ! Schema::hasColumn('message_events', 'device_type') || ! $this->rawAllowed($campaign)) {
-            return $empty;
-        }
-
-        $acc = [];
-        $rows = DB::table('message_events as e')
-            ->join('messages as m', 'm.id', '=', 'e.message_id')
-            ->where('m.campaign_id', $campaign->id)->where('m.is_test', false)
-            ->whereIn('e.event_type', ['opened', 'clicked'])
-            ->select('e.event_type', 'e.message_id', 'e.device_type', 'e.email_client', 'e.ip_country')
-            ->cursor();
-
-        foreach ($rows as $row) {
-            $device = in_array($row->device_type, ['desktop', 'mobile', 'tablet'], true) ? $row->device_type : 'unknown';
-            $client = $row->email_client ?: 'unknown';
-            $country = $row->ip_country ? strtoupper($row->ip_country) : 'unknown';
-            foreach (['d' => [$device, $client], 'b' => [$client], 'c' => [$country]] as $dim => $path) {
-                $key = $dim.'|'.implode('|', $path);
-                $acc[$key] ??= ['path' => $path, 'dim' => $dim, 'viewed' => 0, 'views' => [], 'clicks' => [], 'total_clicks' => 0];
-                if ($row->event_type === 'opened') {
-                    $acc[$key]['viewed']++;
-                    $acc[$key]['views'][$row->message_id] = true;
-                } else {
-                    $acc[$key]['total_clicks']++;
-                    $acc[$key]['clicks'][$row->message_id] = true;
-                }
-            }
-        }
-
-        foreach ($acc as $a) {
-            $b = [
-                'clickers' => count($a['clicks']), 'uniqueClicks' => count($a['clicks']),
-                'viewed' => $a['viewed'], 'uniqueViews' => count($a['views']),
-            ];
-            match ($a['dim']) {
-                'd' => $empty['device'][$a['path'][0]][$a['path'][1]] = $b,
-                'b' => $empty['browser'][$a['path'][0]] = $b,
-                default => $empty['country'][$a['path'][0]] = $b,
-            };
+        $device = ['desktop' => [], 'mobile' => [], 'tablet' => [], 'unknown' => []];
+        $service = $this->statsService();
+        if ($service === null) {
+            return ['device' => array_map(fn (array $v) => self::obj($v), $device), 'browser' => [], 'country' => []];
         }
 
         return [
-            'device' => array_map(fn (array $v) => self::obj($v), $empty['device']),
-            'browser' => $empty['browser'],
-            'country' => $empty['country'],
+            'device' => array_map(fn (array $v) => self::obj($v), $service->statsByDevice($campaign) + $device),
+            'browser' => $service->statsByBrowser($campaign),
+            'country' => $service->statsByCountry($campaign),
         ];
     }
 
     /**
-     * @return array<string, array<string, int>>  BrevoDomainStats keyed by domain (top 25 by sent)
+     * @return array<string, array<string, int>> BrevoDomainStats keyed by domain (top 25 by sent), from the rollup cache
      */
     private function domains(Campaign $campaign): array
     {
-        if (! $this->rawAllowed($campaign)) {
-            return [];
-        }
+        $service = $this->statsService();
 
-        $acc = [];
-        $rows = $this->messages($campaign)->join('recipients as r', 'r.id', '=', 'm.recipient_id')
-            ->select('r.email', 'm.status', 'm.delivered_at', 'm.opened_at', 'm.clicked_at')->cursor();
-        foreach ($rows as $row) {
-            $domain = strtolower(Str::after((string) $row->email, '@'));
-            $d = &$acc[$domain];
-            $d ??= ['sent' => 0, 'delivered' => 0, 'hardBounces' => 0, 'softBounces' => 0, 'complaints' => 0,
-                'unsubscriptions' => 0, 'uniqueViews' => 0, 'uniqueClicks' => 0];
-            $d['sent']++;
-            $d['delivered'] += $row->delivered_at !== null ? 1 : 0;
-            $d['hardBounces'] += $row->status === 'hard_bounced' ? 1 : 0;
-            $d['softBounces'] += $row->status === 'soft_bounced' ? 1 : 0;
-            $d['complaints'] += $row->status === 'spam_complaint' ? 1 : 0;
-            $d['unsubscriptions'] += $row->status === 'unsubscribed' ? 1 : 0;
-            $d['uniqueViews'] += $row->opened_at !== null ? 1 : 0;
-            $d['uniqueClicks'] += $row->clicked_at !== null ? 1 : 0;
-            unset($d);
-        }
-
-        uasort($acc, fn (array $a, array $b): int => $b['sent'] <=> $a['sent']);
-
-        return array_slice($acc, 0, 25, true);
+        return $service === null ? [] : array_slice($service->statsByDomain($campaign), 0, 25, true);
     }
 
     // ------------------------------------------------------------------ tabs
@@ -524,7 +469,7 @@ class ReportQueryService
 
         $smtp = $this->messages($campaign)->leftJoin('smtp_accounts as s', 's.id', '=', 'm.smtp_account_id')
             ->whereNotNull('m.smtp_account_id')
-            ->selectRaw('s.uuid, s.name, COUNT(*) as sent, COUNT(m.delivered_at) as delivered, '
+            ->selectRaw('s.uuid, s.name, COUNT(*) as sent, SUM(CASE WHEN '.Message::deliveredSql('m').' THEN 1 ELSE 0 END) as delivered, '
                 .'SUM(CASE WHEN m.status = \'hard_bounced\' THEN 1 ELSE 0 END) as hard, '
                 .'SUM(CASE WHEN m.status = \'soft_bounced\' THEN 1 ELSE 0 END) as soft')
             ->groupBy('s.uuid', 's.name')->get()
@@ -618,6 +563,8 @@ class ReportQueryService
             'click_map' => array_map(fn (array $l): array => [
                 'link_id' => $l['link_id'], 'url' => $l['url'], 'unique_clicks' => $l['unique_clicks'], 'share' => $l['share'],
             ], $links),
+            // Campaign HTML with UTM + `data-link-id` only (no merge tags, no tracking), probed by the click map.
+            'html' => filled($campaign->html_body) ? app(RenderingPipeline::class)->clickMapHtml($campaign) : null,
             'timeseries' => $this->timeseries($campaign),
             'statsByDevice' => $engagement['device'],
             'statsByBrowser' => self::obj($engagement['browser']),
@@ -659,7 +606,7 @@ class ReportQueryService
     // ------------------------------------------------------------------ overview parts
 
     /**
-     * @return list<array<string, mixed>>  BrevoCampaignStatsEntry per targeted list / segment
+     * @return list<array<string, mixed>> BrevoCampaignStatsEntry per targeted list / segment
      */
     private function campaignStats(Campaign $campaign): array
     {
@@ -785,17 +732,17 @@ class ReportQueryService
             ->whereColumn('e.message_id', 'm.id')->where('e.event_type', $type));
 
         $column = match ($metric) {
-            'sent' => 'm.sent_at', 'delivered' => 'm.delivered_at', 'opened' => 'm.opened_at', 'clicked' => 'm.clicked_at',
+            'sent' => 'm.sent_at', 'delivered' => 'COALESCE(m.delivered_at, m.sent_at)', 'opened' => 'm.opened_at', 'clicked' => 'm.clicked_at',
             'soft_bounced', 'hard_bounced' => 'm.bounced_at', 'blocked' => 'm.failed_at', default => 'm.updated_at',
         };
 
         match ($metric) {
             'sent' => $q->whereNotNull('m.sent_at'),
-            'delivered' => $q->whereNotNull('m.delivered_at'),
+            'delivered' => Message::whereDelivered($q, 'm'),
             'opened' => $q->whereNotNull('m.opened_at'),
-            'not_opened' => $q->whereNotNull('m.delivered_at')->whereNull('m.opened_at'),
+            'not_opened' => Message::whereDelivered($q, 'm')->whereNull('m.opened_at'),
             'clicked' => $linkId !== null && $eventsOk ? $clickedByLink($q) : $q->whereNotNull('m.clicked_at'),
-            'not_clicked' => $q->whereNotNull('m.delivered_at')->whereNull('m.clicked_at'),
+            'not_clicked' => Message::whereDelivered($q, 'm')->whereNull('m.clicked_at'),
             'soft_bounced' => $q->where('m.status', 'soft_bounced'),
             'hard_bounced' => $q->where('m.status', 'hard_bounced'),
             'unsubscribed' => $q->where(fn ($w) => $w->where('m.status', 'unsubscribed')
@@ -898,7 +845,7 @@ class ReportQueryService
             $url = $this->hasTable('campaign_links')
                 ? DB::table('campaign_links')->where('campaign_id', $campaign->id)->where('link_id', $linkId)->value('url') : null;
             if ($url === null) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['link_id' => 'Lien inconnu pour cette campagne.']);
+                throw ValidationException::withMessages(['link_id' => 'Lien inconnu pour cette campagne.']);
             }
         }
 

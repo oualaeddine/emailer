@@ -3,6 +3,7 @@
 namespace App\Modules\Reporting\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +18,10 @@ use Illuminate\Support\Facades\Schema;
  */
 class StatisticsService
 {
-    public const SORTS = ['-sent_at', 'sent_at', 'name', '-name', '-open_rate', '-click_rate', '-sent'];
+    /** Campaign table sorts: every field ascending (`field`) and descending (`-field`). */
+    public const SORTS = [
+        'sent_at', '-sent_at', 'name', '-name', 'open_rate', '-open_rate', 'click_rate', '-click_rate', 'sent', '-sent',
+    ];
 
     public const PERIODS = ['7d' => 7, '30d' => 30, '90d' => 90, '180d' => 180, '365d' => 365];
 
@@ -124,7 +128,7 @@ class StatisticsService
     }
 
     /**
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     private function campaignsQuery(Carbon $from, Carbon $to)
     {
@@ -179,23 +183,22 @@ class StatisticsService
         [$from, $to] = $this->window($input);
         $query = $this->filteredCampaigns($from, $to, $input['tag'] ?? null);
 
-        $sort = $input['sort'] ?? '-sent_at';
+        $sort = (string) ($input['sort'] ?? '-sent_at');
+        $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
         $ratio = fn (string $num) => "COALESCE({$num} * 1.0 / NULLIF(delivered_count, 0), 0)";
-        match ($sort) {
-            'sent_at' => $query->orderBy('sent_at'),
-            'name' => $query->orderBy('name'),
-            '-name' => $query->orderByDesc('name'),
-            '-open_rate' => $query->orderByRaw($ratio('unique_opens').' desc'),
-            '-click_rate' => $query->orderByRaw($ratio('unique_clicks').' desc'),
-            '-sent' => $query->orderByDesc('sent_count'),
-            default => $query->orderByDesc('sent_at'),
+        match (ltrim($sort, '-')) {
+            'name' => $query->orderBy('name', $direction),
+            'open_rate' => $query->orderByRaw($ratio('unique_opens').' '.$direction),
+            'click_rate' => $query->orderByRaw($ratio('unique_clicks').' '.$direction),
+            'sent' => $query->orderBy('sent_count', $direction),
+            default => $query->orderBy('sent_at', in_array($sort, self::SORTS, true) ? $direction : 'desc'),
         };
 
         return $query->orderByDesc('id')->paginate($perPage)->through(fn (object $c): array => $this->campaignRow($c));
     }
 
     /**
-     * @return list<array<string, mixed>>  every campaign of the period (CSV export)
+     * @return list<array<string, mixed>> every campaign of the period (CSV export)
      */
     public function allCampaignRows(array $input): array
     {
@@ -206,7 +209,7 @@ class StatisticsService
     }
 
     /**
-     * @return \Illuminate\Database\Query\Builder
+     * @return Builder
      */
     private function filteredCampaigns(Carbon $from, Carbon $to, ?string $tag)
     {
