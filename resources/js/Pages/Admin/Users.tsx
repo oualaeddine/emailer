@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     Badge,
     Button,
@@ -9,18 +9,36 @@ import {
     DataGridHeader,
     DataGridHeaderCell,
     DataGridRow,
+    Dialog,
+    DialogActions,
+    DialogBody,
+    DialogContent,
+    DialogSurface,
+    DialogTitle,
     Text,
+    Toast,
+    ToastTitle,
+    Toaster,
     Tooltip,
     createTableColumn,
     makeStyles,
     tokens,
+    useId,
+    useToastController,
     type TableColumnDefinition,
 } from '@fluentui/react-components';
-import { AddRegular, EditRegular } from '@fluentui/react-icons';
+import { AddRegular, EditRegular, ShieldKeyholeRegular } from '@fluentui/react-icons';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
-import { createUser, fetchRoles, fetchUsers, updateUser, type CreateUserPayload } from '@/Lib/api/identity';
+import {
+    createUser,
+    fetchRoles,
+    fetchUsers,
+    resetUserTwoFactor,
+    updateUser,
+    type CreateUserPayload,
+} from '@/Lib/api/identity';
 import type { Role, User } from '@/Lib/types/identity';
 import { UserFormDialog, type UserFormValues } from '@/Pages/Admin/UserFormDialog';
 
@@ -69,6 +87,13 @@ export default function Users() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formErrors, setFormErrors] = useState<Partial<Record<string, string>>>({});
+    const [resetTarget, setResetTarget] = useState<User | null>(null);
+    const [resetting, setResetting] = useState(false);
+
+    // Administrators reset someone else's 2FA only (the API answers 422 for self).
+    const authUserId = usePage<{ auth: { user: { id: string } | null } }>().props.auth.user?.id;
+    const toasterId = useId('users-toaster');
+    const { dispatchToast } = useToastController(toasterId);
 
     const loadUsers = useCallback(async () => {
         const response = await fetchUsers();
@@ -118,6 +143,37 @@ export default function Users() {
         }
     }
 
+    async function confirmResetTwoFactor() {
+        if (!resetTarget) {
+            return;
+        }
+        setResetting(true);
+        try {
+            await resetUserTwoFactor(resetTarget.id);
+            setResetTarget(null);
+            dispatchToast(
+                <Toast>
+                    <ToastTitle>{t.users.resetTwoFactor.success}</ToastTitle>
+                </Toast>,
+                { intent: 'success' },
+            );
+        } catch (error) {
+            const data = (error as ValidationErrorResponse).response?.data as
+                | { message?: string; errors?: Record<string, string[]> }
+                | undefined;
+            const message = Object.values(data?.errors ?? {})[0]?.[0] ?? data?.message ?? t.users.resetTwoFactor.failed;
+            setResetTarget(null);
+            dispatchToast(
+                <Toast>
+                    <ToastTitle>{message}</ToastTitle>
+                </Toast>,
+                { intent: 'error' },
+            );
+        } finally {
+            setResetting(false);
+        }
+    }
+
     const columns: TableColumnDefinition<User>[] = [
         createTableColumn<User>({
             columnId: 'name',
@@ -161,12 +217,23 @@ export default function Users() {
             columnId: 'actions',
             renderHeaderCell: () => t.common.actions,
             renderCell: (user) => (
-                <Button
-                    icon={<EditRegular />}
-                    appearance="subtle"
-                    aria-label={t.common.edit}
-                    onClick={() => openEditDialog(user)}
-                />
+                <>
+                    <Button
+                        icon={<EditRegular />}
+                        appearance="subtle"
+                        aria-label={t.common.edit}
+                        onClick={() => openEditDialog(user)}
+                    />
+                    {user.id !== authUserId && (
+                        <Tooltip content={t.users.resetTwoFactor.action} relationship="label">
+                            <Button
+                                icon={<ShieldKeyholeRegular />}
+                                appearance="subtle"
+                                onClick={() => setResetTarget(user)}
+                            />
+                        </Tooltip>
+                    )}
+                </>
             ),
         }),
     ];
@@ -209,6 +276,40 @@ export default function Users() {
                 </DataGrid>
                 </div>
             </div>
+            <Toaster toasterId={toasterId} position="bottom-end" />
+            <Dialog
+                open={resetTarget !== null}
+                onOpenChange={(_, data) => {
+                    if (!data.open && !resetting) {
+                        setResetTarget(null);
+                    }
+                }}
+            >
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>{t.users.resetTwoFactor.title}</DialogTitle>
+                        <DialogContent>
+                            {t.users.resetTwoFactor.body.replace('{name}', resetTarget?.name ?? '')}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button
+                                appearance="secondary"
+                                disabled={resetting}
+                                onClick={() => setResetTarget(null)}
+                            >
+                                {t.common.cancel}
+                            </Button>
+                            <Button
+                                appearance="primary"
+                                disabled={resetting}
+                                onClick={() => void confirmResetTwoFactor()}
+                            >
+                                {t.users.resetTwoFactor.confirm}
+                            </Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
             <UserFormDialog
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}

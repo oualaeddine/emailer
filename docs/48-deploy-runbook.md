@@ -167,6 +167,26 @@ Against the production URL, with a test list containing only internal addresses:
 The automated suite can also be pointed at a **staging** copy (it needs seeded demo
 users, so never at production): `npm run test:e2e` (see `tests/e2e/README.md`).
 
+## 8b. Récupération d'accès / Access recovery
+
+Use these only when an administrator is locked out and no other administrator can use
+*Utilisateurs → Réinitialiser la double authentification* (or reset the password from the user edit dialog).
+Both commands ask for confirmation unless `--force` is given, drop the user's sessions (with the
+`database` session driver) and API tokens, and write an audit entry with no actor
+(`user.two_factor_reset` / `user.password_reset`, `new_values.source = cli`). Secrets are never logged.
+
+```bash
+# Lost phone and recovery codes: wipe the TOTP enrolment; the user sets it up again at next login.
+php artisan users:reset-two-factor admin@example.com [--force]
+
+# Lost password: set a random 20-character password, printed once. The user should change it
+# from the account menu right after signing in.
+php artisan users:reset-password admin@example.com [--force]
+```
+
+An unknown e-mail address prints an error and exits with code 1. The password is only shown in the
+terminal output: don't run the command through a shared or logged session.
+
 ## 9. Monitoring
 
 - Horizon dashboard `/horizon` (administrators only) and the in-app *Files d'attente* page.

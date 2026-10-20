@@ -6,6 +6,7 @@ use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
 use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
+use App\Domain\Events\UserTwoFactorReset;
 use App\Modules\Identity\DataTransferObjects\CreateUserData;
 use App\Modules\Identity\DataTransferObjects\UpdateUserData;
 use App\Modules\Identity\Models\Role;
@@ -13,6 +14,7 @@ use App\Modules\Identity\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 /**
  * docs/29-api-specification.md §29.2 — Identity & Auth: /api/v1/users.
@@ -104,6 +106,60 @@ class UserService
 
         $user->tokens()->delete();
         $this->forgetOtherSessions($user, $keepSessionId);
+    }
+
+    /**
+     * docs/28-security.md §28.1 — wipe a user's TOTP enrolment (secret, recovery
+     * codes, confirmation). Their next login lands on the mandatory setup again.
+     * Sessions and API tokens are dropped like an administrator password reset,
+     * so whoever held the old device or a stolen session is cut off.
+     *
+     * `$resetBy` is null for the CLI recovery (`users:reset-two-factor`).
+     */
+    public function resetTwoFactor(User $user, ?User $resetBy): void
+    {
+        DB::transaction(function () use ($user, $resetBy): void {
+            $user->forceFill([
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            $user->tokens()->delete();
+            $this->forgetOtherSessions($user);
+
+            UserTwoFactorReset::dispatch($user, $resetBy);
+        });
+    }
+
+    /**
+     * CLI recovery (`users:reset-password`): set a random strong password and
+     * return it so the operator can hand it over once. Sessions and tokens are
+     * dropped. The plain value is never logged or audited.
+     */
+    public function resetPasswordToRandom(User $user): string
+    {
+        do {
+            $password = Str::password(20);
+        } while (! preg_match('/\p{Lu}/u', $password)
+            || ! preg_match('/\p{Ll}/u', $password)
+            || ! preg_match('/\d/', $password));
+
+        DB::transaction(function () use ($user, $password): void {
+            // 'hashed' cast hashes it.
+            $user->forceFill([
+                'password' => $password,
+                'remember_token' => Str::random(60),
+            ])->save();
+
+            $user->tokens()->delete();
+            $this->forgetOtherSessions($user);
+
+            UserPasswordChanged::dispatch($user, null, true);
+        });
+
+        return $password;
     }
 
     /**

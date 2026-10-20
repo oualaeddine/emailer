@@ -10,6 +10,7 @@ use App\Domain\Events\UserLoggedIn;
 use App\Domain\Events\UserLoginFailed;
 use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
+use App\Domain\Events\UserTwoFactorReset;
 use App\Modules\Audit\Services\AuditLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -78,6 +79,18 @@ class AuditListener implements ShouldQueue
             $event->isReset ? 'user.password_reset' : 'user.password_changed',
             $event->user,
             $event->changedBy,
+            newValues: $event->changedBy === null ? ['source' => 'cli'] : null,
+        );
+    }
+
+    public function handleUserTwoFactorReset(UserTwoFactorReset $event): void
+    {
+        // Never log the secret or the recovery codes; a null actor means the CLI recovery.
+        $this->auditLogger->record(
+            'user.two_factor_reset',
+            $event->user,
+            $event->resetBy,
+            newValues: $event->resetBy === null ? ['source' => 'cli'] : null,
         );
     }
 

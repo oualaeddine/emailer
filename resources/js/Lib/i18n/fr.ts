@@ -202,7 +202,16 @@ export const fr = {
             recoveryCodesTitle: 'Codes de récupération',
             recoveryCodesIntro:
                 'Conservez ces codes à usage unique en lieu sûr. Ils permettent de vous connecter si vous perdez l’accès à votre application d’authentification. Ils ne seront plus affichés.',
-            recoveryCodesContinue: 'J’ai enregistré mes codes — continuer',
+            recoveryCodesAcknowledge: 'J’ai conservé mes codes en lieu sûr',
+            recoveryCodesContinue: 'Continuer',
+            copyCodes: 'Copier les codes',
+            codesCopied: 'Codes copiés dans le presse-papiers.',
+            codesCopyFailed: 'Copie automatique impossible : les codes sont sélectionnés, appuyez sur Ctrl+C (ou ⌘+C).',
+            downloadCodes: 'Télécharger (.txt)',
+            codesFileName: 'pagejaunes-mailer-codes-recuperation.txt',
+            codesFileHeader: 'PageJaunes Mailer — codes de récupération (usage unique)',
+            logout: 'Se déconnecter',
+            backToLogin: 'Retour à la connexion',
         },
     },
     dashboard: {
@@ -236,6 +245,16 @@ export const fr = {
         password: 'Mot de passe',
         newPassword: 'Nouveau mot de passe (laisser vide pour ne pas changer)',
         passwordConfirmation: 'Confirmer le nouveau mot de passe',
+        resetTwoFactor: {
+            action: 'Réinitialiser la double authentification',
+            title: 'Réinitialiser la double authentification ?',
+            // `{name}` is replaced with the user's name.
+            body:
+                'La double authentification de {name} sera supprimée : ses codes de récupération deviennent inutilisables, ses sessions sont fermées et ses clés API sont révoquées. À sa prochaine connexion, cette personne devra configurer de nouveau son application d’authentification.',
+            confirm: 'Réinitialiser',
+            success: 'Double authentification réinitialisée.',
+            failed: 'La réinitialisation a échoué. Réessayez.',
+        },
         changePassword: {
             menu: 'Changer le mot de passe',
             title: 'Changer le mot de passe',
