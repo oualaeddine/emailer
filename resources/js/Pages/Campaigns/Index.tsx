@@ -14,10 +14,6 @@ import {
     DataGridHeader,
     DataGridHeaderCell,
     DataGridRow,
-    Drawer,
-    DrawerBody,
-    DrawerHeader,
-    DrawerHeaderTitle,
     Dropdown,
     Link,
     Option,
@@ -51,7 +47,6 @@ import {
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { PageHelp } from '@/Components/Help/PageHelp';
-import { HelpButton } from '@/Components/Help/HelpButton';
 import { useText } from '@/Hooks/useText';
 import {
     archiveCampaign,
@@ -97,7 +92,6 @@ import {
     formatRate,
     formatText,
 } from '@/Components/Campaigns/campaignUi';
-import { CampaignDetail } from '@/Pages/Campaigns/CampaignDetail';
 
 const STATUS_TABS: CampaignStatusTab[] = ['all', 'draft', 'scheduled', 'running', 'sent', 'suspended', 'archived'];
 
@@ -294,7 +288,7 @@ export default function CampaignsIndex() {
     const [confirm, setConfirm] = useState<ConfirmState | null>(null);
     const [move, setMove] = useState<MoveState | null>(null);
     const [testSendId, setTestSendId] = useState<string | null>(null);
-    const [reportId, setReportId] = useState<string | null>(null);
+    const setReportId = (id: string) => router.visit(`/campaigns/${id}/report`);
     const requestRef = useRef(0);
 
     const notify = useCallback(
@@ -958,19 +952,6 @@ export default function CampaignsIndex() {
                 }}
             />
             <TestSendDialog open={testSendId !== null} campaignId={testSendId} onClose={() => setTestSendId(null)} />
-
-            {/* "Rapport" — legacy detail drawer until the Wave 3 report page (docs/43 §43.4.15). */}
-            <Drawer
-                open={reportId !== null}
-                onOpenChange={(_, data) => !data.open && setReportId(null)}
-                position="end"
-                style={{ width: 'min(640px, 100vw)' }}
-            >
-                <DrawerHeader>
-                    <DrawerHeaderTitle action={<HelpButton topic="campaigns" />}>{t.campaigns.actions.report}</DrawerHeaderTitle>
-                </DrawerHeader>
-                <DrawerBody>{reportId && <CampaignDetail campaignId={reportId} onChange={load} />}</DrawerBody>
-            </Drawer>
         </AppShell>
     );
 }
