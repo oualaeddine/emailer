@@ -104,7 +104,7 @@ function CreateForm({ onClose }: { onClose: () => void }) {
                         </MessageBar>
                     )}
                     <Field label={t.automations.name} required validationMessage={nameError} validationState={nameError ? 'error' : 'none'}>
-                        <Input value={name} maxLength={255} autoFocus onChange={(_, data) => setName(data.value)} />
+                        <Input value={name} maxLength={150} autoFocus onChange={(_, data) => setName(data.value)} />
                     </Field>
                     <Text className={styles.muted}>{t.automations.editor.create.chooseTrigger}</Text>
                     <TriggerConfigEditor trigger={trigger} onChange={setTrigger} errors={errors} showRequired={attempted} hideFilter disabled={saving} />

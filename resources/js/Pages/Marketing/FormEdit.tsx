@@ -391,7 +391,7 @@ export default function FormEdit({ uuid }: FormEditProps) {
                                     validationMessage={errors.name}
                                     validationState={errors.name ? 'error' : 'none'}
                                 >
-                                    <Input value={draft.name} maxLength={255} onChange={(_, d) => change({ name: d.value })} />
+                                    <Input value={draft.name} maxLength={150} onChange={(_, d) => change({ name: d.value })} />
                                 </Field>
                                 <SettingsPanel
                                     key={form.id}

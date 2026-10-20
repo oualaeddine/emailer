@@ -42,10 +42,12 @@ import {
     PauseRegular,
     PlayRegular,
     SearchRegular,
+    ShieldKeyholeRegular,
 } from '@fluentui/react-icons';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
+import { CaptchaSettingsDialog } from '@/Components/Forms/CaptchaSettingsDialog';
 import { CreateFormDialog } from '@/Components/Forms/CreateFormDialog';
 import { useText } from '@/Hooks/useText';
 import { apiErrorMessage, apiErrorStatus, deleteForm, duplicateForm, fetchForms, publishForm, unpublishForm } from '@/Lib/api/forms';
@@ -134,7 +136,9 @@ export default function Forms() {
     const [debouncedQ, setDebouncedQ] = useState('');
     const [status, setStatus] = useState<SubscriptionFormStatus | null>(null);
     const [page, setPage] = useState(1);
+    const canSettings = hasPermission(props.auth?.permissions ?? [], 'settings.manage');
     const [createOpen, setCreateOpen] = useState(false);
+    const [captchaOpen, setCaptchaOpen] = useState(false);
     const [deleting, setDeleting] = useState<SubscriptionForm | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -204,6 +208,11 @@ export default function Forms() {
                 title={t.forms.title}
                 actions={
                     <>
+                        {canSettings && (
+                            <Button appearance="secondary" icon={<ShieldKeyholeRegular />} onClick={() => setCaptchaOpen(true)}>
+                                {t.forms.captchaSettings.button}
+                            </Button>
+                        )}
                         {createButton}
                     </>
                 }
@@ -374,6 +383,11 @@ export default function Forms() {
                 </>
             )}
 
+            <CaptchaSettingsDialog
+                open={captchaOpen}
+                onOpenChange={setCaptchaOpen}
+                onSaved={(text) => setNotice({ intent: 'success', text })}
+            />
             <CreateFormDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={(form) => router.visit(editUrl(form.id))} />
 
             <Dialog open={deleting !== null} onOpenChange={(_, d) => !d.open && setDeleting(null)}>

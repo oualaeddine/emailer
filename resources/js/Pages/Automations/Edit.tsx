@@ -546,7 +546,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
                         validationMessage={fieldErrors.name ?? (attempted && nameMissing ? t.automations.editor.editor.nameRequired : undefined)}
                         validationState={fieldErrors.name || (attempted && nameMissing) ? 'error' : 'none'}
                     >
-                        <Input value={name} maxLength={255} disabled={busy} onChange={(_, data) => changeMeta(setName, ['name'])(data.value)} />
+                        <Input value={name} maxLength={150} disabled={busy} onChange={(_, data) => changeMeta(setName, ['name'])(data.value)} />
                     </Field>
                     <Field
                         label={`${t.automations.description} (${t.common.optional})`}
