@@ -14,6 +14,7 @@ import {
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
 import { BrandMark } from '@/Components/Shell/BrandMark';
+import { PageHelp } from '@/Components/Help/PageHelp';
 
 const useStyles = makeStyles({
     page: {
@@ -137,6 +138,9 @@ export default function TwoFactorChallenge() {
                     </div>
                 </form>
             </Card>
+            <div style={{ width: '100%', maxWidth: '480px' }}>
+                <PageHelp topic="two-factor" hideHeaderRow />
+            </div>
         </div>
     );
 }

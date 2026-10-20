@@ -42,6 +42,7 @@ import { AutomationLookupsProvider, useAutomationLookups } from '@/Components/Au
 import { ReentrySettings } from '@/Components/Automations/ReentrySettings';
 import { StepEditorDrawer } from '@/Components/Automations/StepEditorDrawer';
 import { apiErrorMessage, apiStatus, apiValidationErrors } from '@/Components/Campaigns/campaignUi';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import {
     activateAutomation,
@@ -458,6 +459,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
     return (
         <>
             <Head title={`${pageTitle} — ${t.automations.title}`} />
+            <PageHelp topic="automation-edit" hideHeaderRow />
             <div className={styles.header}>
                 <div className={styles.titleBlock}>
                     <Button appearance="subtle" icon={<ArrowLeftRegular />} aria-label={t.common.back} onClick={() => router.visit('/automations')} />

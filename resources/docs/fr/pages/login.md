@@ -12,7 +12,7 @@ La page **Connexion** est la porte d'entrée de PageJaunes Mailer. Elle vérifie
 4. Cochez éventuellement **Se souvenir de moi**.
 5. Cliquez sur **Se connecter**.
 
-Une fois la connexion réussie, vous arrivez sur le [Tableau de bord](help:dashboard).
+Une fois la connexion réussie, vous arrivez sur le [Tableau de bord](help:dashboard). Si votre compte est protégé par la double authentification — c'est obligatoire —, un second écran vous demande d'abord un code à 6 chiffres : voir [Double authentification](help:two-factor).
 
 ## Les champs du formulaire
 
@@ -33,6 +33,10 @@ Dans tous les cas, terminez votre journée par **Se déconnecter**, dans le menu
 ## Ce que vous voyez après la connexion
 
 Les pages accessibles dépendent de votre rôle. Un **Opérateur marketing** rédige et envoie, mais n'accède pas à la gestion des utilisateurs ; un **Lecteur** consulte les résultats sans pouvoir modifier quoi que ce soit. Si une rubrique attendue n'apparaît pas dans le menu, c'est une question de droits : contactez votre administrateur, qui les ajuste depuis la page [Utilisateurs](help:admin-users).
+
+## Double authentification
+
+Après le mot de passe, l'application demande un code généré par votre téléphone. À la toute première connexion, vous devez d'abord activer cette protection en scannant un QR code et en notant vos codes de récupération. Toute la marche à suivre, y compris le cas du téléphone perdu, est dans la page [Double authentification](help:two-factor).
 
 ## Changer votre mot de passe
 

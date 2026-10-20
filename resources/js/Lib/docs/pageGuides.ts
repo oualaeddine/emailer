@@ -959,4 +959,88 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
             },
         ],
     },
+    'two-factor': {
+        topicSlug: 'two-factor',
+        title: 'Double authentification',
+        purpose:
+            "La double authentification est obligatoire : après votre mot de passe, un code à 6 chiffres généré par une application sur votre téléphone confirme que c'est bien vous.",
+        howToUse: [
+            {
+                step: 1,
+                title: 'Scanner le QR code',
+                description: "À la première connexion, ajoutez le compte dans votre application d'authentification en scannant le QR code, ou saisissez la clé manuellement.",
+            },
+            {
+                step: 2,
+                title: 'Confirmer avec un code',
+                description: "Saisissez le code à 6 chiffres affiché par l'application, puis cliquez sur « Activer ».",
+            },
+            {
+                step: 3,
+                title: 'Noter les codes de récupération',
+                description: 'Les 8 codes à usage unique ne sont affichés qu’une seule fois : conservez-les en lieu sûr.',
+            },
+            {
+                step: 4,
+                title: 'Se connecter ensuite',
+                description: "À chaque connexion, saisissez le code courant puis « Vérifier », ou utilisez un code de récupération si votre téléphone est indisponible.",
+            },
+        ],
+    },
+    'automation-edit': {
+        topicSlug: 'automation-edit',
+        title: "Éditeur d'automatisation",
+        purpose:
+            "L'éditeur construit le scénario d'une automatisation : le déclencheur qui fait entrer un contact, puis les étapes qu'il parcourt (e-mails, attentes, conditions, listes, attributs).",
+        howToUse: [
+            {
+                step: 1,
+                title: 'Configurer le déclencheur',
+                description: "Dans l'onglet Flux, cliquez sur la carte Déclencheur et complétez ses réglages (liste, formulaire, campagne, attribut ou date).",
+            },
+            {
+                step: 2,
+                title: 'Ajouter les étapes',
+                description: "Utilisez le bouton « + » pour insérer un e-mail, une attente, une condition oui/non, un ajout ou retrait de liste, ou une mise à jour d'attribut.",
+            },
+            {
+                step: 3,
+                title: 'Régler les paramètres',
+                description: "Dans Paramètres, vérifiez le nom, la description et la réentrée des contacts.",
+            },
+            {
+                step: 4,
+                title: 'Activer et suivre',
+                description: "« Activer » démarre le scénario ; l'onglet Activité montre les contacts entrés et la performance de chaque e-mail. Mettez en pause pour modifier le flux.",
+            },
+        ],
+    },
+    'form-edit': {
+        topicSlug: 'form-edit',
+        title: "Éditeur de formulaire d'inscription",
+        purpose:
+            "L'éditeur règle les champs, le design, les listes cibles et le comportement d'un formulaire d'inscription, avec un aperçu en direct, puis le publie et fournit le lien et les codes à intégrer.",
+        howToUse: [
+            {
+                step: 1,
+                title: 'Choisir les champs',
+                description: "Dans Champs, ajoutez des attributs, réglez libellés et champs obligatoires, et activez au besoin la case de consentement RGPD.",
+            },
+            {
+                step: 2,
+                title: 'Régler les paramètres',
+                description: "Dans Paramètres, choisissez les listes de destination, la double confirmation, le message de remerciement ou la redirection.",
+            },
+            {
+                step: 3,
+                title: 'Publier',
+                description: "« Publier » enregistre et active le formulaire ; « Désactiver » le retire. Une liste cible est obligatoire.",
+            },
+            {
+                step: 4,
+                title: 'Partager',
+                description: "Dans Partager, copiez le lien public, le code iframe ou le code HTML à intégrer dans votre site.",
+            },
+        ],
+    },
 };

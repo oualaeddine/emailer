@@ -5,7 +5,7 @@ La page **Formulaires** liste vos formulaires d'inscription avec leurs listes ci
 ## Créer un formulaire
 
 1. Cliquez sur **Créer un formulaire d'inscription**.
-2. Dans le constructeur, parcourez les quatre volets : **Champs**, **Design**, **Paramètres**, **Partager**.
+2. Dans le constructeur, parcourez les quatre volets : **Champs**, **Design**, **Paramètres**, **Partager** (détail dans l'[Éditeur de formulaire](help:form-edit)).
 
 | Volet | Ce que vous y réglez |
 | --- | --- |
@@ -16,7 +16,7 @@ La page **Formulaires** liste vos formulaires d'inscription avec leurs listes ci
 
 ## Double confirmation
 
-Quand elle est activée, le visiteur reçoit un e-mail de confirmation et n'est ajouté à la [liste](help:lists) qu'après avoir cliqué. C'est la meilleure protection contre les fausses adresses et les inscriptions non consenties.
+Quand elle est activée, le visiteur reçoit un e-mail de confirmation et n'est ajouté à la [liste](help:lists) qu'après avoir cliqué. C'est la meilleure protection contre les fausses adresses et les inscriptions non consenties. Le choix de l'e-mail de confirmation et de la redirection se fait dans l'onglet **Paramètres** de l'[éditeur](help:form-edit).
 
 ## Partager le formulaire
 
