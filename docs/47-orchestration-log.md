@@ -101,3 +101,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 3 | 60, 63, 70, 71 | opus/high | Launched (Packagist/npm reachable: WP-60 adds spatie/mjml-php + mjml, WP-70 adds matomo/device-detector + geoip2/geoip2 inside their worktrees) | running |
 | 2026-10-20 | 3 | — | — | **Contract fixed in prompts:** `data-link-id` = first 16 hex chars of sha1(absolute URL); WP-63 injects, WP-70 reads; `message_events` created by WP-70 with base columns + Slot L | applied |
 | 2026-10-20 | 3 | WP-73 | sonnet | Returned; owned + 1 append-only; tsc clean; 3 route tests; legacy `/statistics` line in routes/web/reporting.php to drop at gate | 1251b5d |
+| 2026-10-20 | 3 | WP-62 | sonnet | Returned; 68 files; 59 template tests green; tsc clean; 12 original gallery designs; gaps: template_versions has no design_json (restore loses design) → candidate contract-fix; relayed gallery design_json shape to WP-60 | 5e4d815 |
