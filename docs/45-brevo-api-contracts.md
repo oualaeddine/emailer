@@ -1192,6 +1192,19 @@ false), `tracking.utm_default_source` (string, "pagesjaunes-mailer"), `tracking.
 account default. No WP owns a dedicated page in doc 44; the nav entry stays hidden until one is
 assigned (§45.12).
 
+### 45.6.8 Additions recorded at the Wave 3 gate (orchestrator)
+
+| Method | Path | Permission | Notes |
+|---|---|---|---|
+| GET/PATCH/DELETE | `/unsubscribe-pages/{id}`, `/update-profile-forms/{id}` | `settings.manage` | Full CRUD (WP-74); `POST …/{id}/default`, `GET …/{id}/preview` as well. |
+| GET | `/campaigns/{id}/report/unsubscribes` | `reporting.view` | Alias of `report/unsubscriptions` (WP-72). |
+| GET | `/statistics/overview` | `reporting.view` | Alias of `statistics/summary` (WP-72). |
+| POST | `/templates/{id}/unarchive` | `templates.manage` | WP-62. |
+| POST | `/templates/mjml/validate` | `templates.manage` \| `campaigns.create` | MJML validation (WP-60); invalid MJML → `200 {valid:false, errors[]}`; 422 only for a malformed request. |
+| GET | `web:/m/c/{campaign}` | signed | Campaign share link (WP-63). |
+
+Deviations: the rendering pipeline runs its personalise phase at message creation and its delivery phase in `SendEmailJob` (doc 38 order kept); `message_events.event_type` uses the `MessageStatus` values (`spam_complaint`, `hard_bounced`, `soft_bounced`, …); `CampaignStats` contract gained `links`, `statsByCountry`, `statistics`, `rates`, `accountAverages`, `rollup`.
+
 ## 45.7 Wave 4 — Advanced sending, forms, automation, transactional
 
 ### 45.7.1 WP-61 Saved sections (`Lib/types/editor.ts`)
