@@ -246,6 +246,64 @@ class AbTestService
     }
 
     /**
+     * Html sent for a version with the version's `preview_text` injected as
+     * a hidden preheader right after `<body>` (same markup as the
+     * transactional / automation paths).
+     */
+    public function htmlWithPreviewFor(Campaign $campaign, ?AbTestVariant $variant): string
+    {
+        return self::withPreheader($this->htmlFor($campaign, $variant), $variant?->preview_text);
+    }
+
+    /** Hidden preheader div inserted after `<body>` (prepended when the html has none). */
+    public static function withPreheader(string $html, ?string $previewText): string
+    {
+        $text = trim((string) $previewText);
+        if ($text === '') {
+            return $html;
+        }
+
+        $div = '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">'.e($text).'</div>';
+
+        $count = 0;
+        $html = preg_replace('/<body\b[^>]*>/i', '$0'.$div, $html, 1, $count) ?? $html;
+
+        return $count > 0 ? $html : $div.$html;
+    }
+
+    /**
+     * "Envoyer aux nouveaux contacts" of an A/B campaign whose winner is
+     * picked: the child is a classic campaign carrying the winner's subject,
+     * preview text and content (no new test). `null` while no winner exists
+     * (the child then copies the test as is).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function winnerCopyAttributes(Campaign $campaign): ?array
+    {
+        if (! $campaign->ab_test_enabled || $campaign->winner_variant_id === null) {
+            return null;
+        }
+
+        $winner = $campaign->abTestVariants()->whereKey($campaign->winner_variant_id)->first();
+        if ($winner === null) {
+            return null;
+        }
+
+        $ownContent = filled($winner->html_body);
+
+        return [
+            'type' => CampaignType::Classic->value,
+            'ab_test_enabled' => false,
+            'ab_test_config' => null,
+            'subject' => $this->subjectFor($campaign, $winner),
+            'preview_text' => filled($winner->preview_text) ? $winner->preview_text : $campaign->preview_text,
+            'html_body' => $this->htmlFor($campaign, $winner),
+            'design_json' => $ownContent && $winner->design_json !== null ? $winner->design_json : $campaign->design_json,
+        ];
+    }
+
+    /**
      * Copies versions A/B onto a duplicate / child campaign (winner and
      * sample sizes reset). Config and `ab_test_enabled` travel with
      * `Campaign::COPYABLE_COLUMNS`.

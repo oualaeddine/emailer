@@ -34,13 +34,13 @@ use Illuminate\Support\Carbon;
  *
  * 1. test phase (`winner_variant_id` null): only the sample rows
  *    (`campaign_recipients.variant_id` set by {@see VariantAssigner}) are
- *    released, each with its version's subject / html (`messages.variant_id`
- *    set). `sent_at` marks the start of the test. When the last sample row
+ *    released, each with its version's subject / html / preview text
+ *    (hidden preheader, `messages.variant_id` set). `sent_at` marks the start of the test. When the last sample row
  *    is released, {@see PickAbWinnerJob} is scheduled at
  *    `sent_at + test_duration_minutes`; the remainder waits (status stays
  *    `running`).
  * 2. after the pick: the remainder (`variant_id` null) is released with the
- *    winner's subject / html, then the campaign completes.
+ *    winner's subject / html / preview text, then the campaign completes.
  */
 class AbTestDispatcher
 {
@@ -188,7 +188,7 @@ class AbTestDispatcher
             'status' => MessageStatus::Queued->value,
             'queued_at' => now(),
             'variant_id' => $variantId,
-        ], $this->abTests->subjectFor($campaign, $variant), $this->abTests->htmlFor($campaign, $variant), $recipient, $campaign);
+        ], $this->abTests->subjectFor($campaign, $variant), $this->abTests->htmlWithPreviewFor($campaign, $variant), $recipient, $campaign);
 
         SendEmailJob::dispatch($message->id);
 

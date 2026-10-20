@@ -37,6 +37,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * docs/15-campaign-management.md — Campaign Management module, extended by
@@ -65,6 +66,12 @@ class CampaignService
     public const BEST_SEND_TIME_SERVICE = 'App\\Modules\\DeliveryEngine\\Scheduling\\Contracts\\BestSendTimeService';
 
     public const DEFAULT_TIMEZONE = 'Africa/Algiers';
+
+    /**
+     * docs/45 §45.7.2 — delivery options an A/B test campaign cannot use
+     * (`422` with `errors.mode`): both spread the sample over time.
+     */
+    public const AB_TEST_EXCLUDED_MODES = ['best_time', 'batches'];
 
     public function __construct(
         private readonly RenderingPipeline $rendering,
@@ -264,6 +271,15 @@ class CampaignService
 
         if (! in_array($campaign->statusEnum(), $allowed, true) || $campaign->isArchived()) {
             throw new CampaignStateConflictException('Seules les campagnes en brouillon peuvent être programmées.');
+        }
+
+        // docs/45 §45.7.2 — an A/B test sends its whole sample at once and the
+        // remainder after the pick: per-contact best time and batch spreading
+        // would release the sample over hours and pick on partial data.
+        if (in_array($mode, self::AB_TEST_EXCLUDED_MODES, true) && $campaign->ab_test_enabled) {
+            throw ValidationException::withMessages([
+                'mode' => ['L’envoi au meilleur moment et l’envoi par lots ne sont pas disponibles pour une campagne avec test A/B.'],
+            ]);
         }
 
         $this->assertReadyToDispatch($campaign);
@@ -490,7 +506,8 @@ class CampaignService
      * docs/45 §45.4.2 — child draft (`parent_campaign_id`) whose audience is
      * the parent's audience minus everyone in the parent's
      * `campaign_recipients` (applied by the resolver at resolution time, so
-     * contacts added until the child is sent are included).
+     * contacts added until the child is sent are included). An A/B parent
+     * with a picked winner yields a classic child with the winner's content.
      */
     public function sendToNewContacts(Campaign $campaign, User $createdBy, ?string $name = null): Campaign
     {
@@ -498,9 +515,15 @@ class CampaignService
             throw new CampaignStateConflictException('Seules les campagnes envoyées peuvent être renvoyées aux nouveaux contacts.');
         }
 
-        return DB::transaction(function () use ($campaign, $createdBy, $name): Campaign {
+        $abTests = app(AbTestService::class);
+        // docs/45 §45.7.2 — once the A/B winner is picked, new contacts get the
+        // winner as a classic campaign instead of a new test.
+        $winner = $abTests->winnerCopyAttributes($campaign);
+
+        return DB::transaction(function () use ($campaign, $createdBy, $name, $abTests, $winner): Campaign {
             $child = Campaign::query()->create([
                 ...$campaign->only(Campaign::COPYABLE_COLUMNS),
+                ...($winner ?? []),
                 'name' => $name ?? $campaign->name.' — nouveaux contacts',
                 'status' => CampaignStatus::Draft->value,
                 'parent_campaign_id' => $campaign->id,
@@ -508,7 +531,9 @@ class CampaignService
             ]);
 
             $this->copyAudienceRows($campaign, $child);
-            app(AbTestService::class)->copyVariants($campaign, $child);
+            if ($winner === null) {
+                $abTests->copyVariants($campaign, $child);
+            }
 
             return $child->fresh();
         });
