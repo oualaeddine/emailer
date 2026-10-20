@@ -1,5 +1,5 @@
 /*
- * WP-60S — GrapesJS restyled with Fluent tokens (docs/46-editor-spike.md §5).
+ * WP-60 (from the WP-60S spike) — GrapesJS restyled with Fluent tokens (docs/46-editor-spike.md §5).
  *
  * FluentProvider exposes every token as a CSS custom property on its root
  * element (e.g. tokens.colorNeutralBackground1 === "var(--colorNeutralBackground1)"),
@@ -172,4 +172,9 @@
     max-width: 160px;
     padding: 0 var(--spacingHorizontalXS);
     font-size: var(--fontSizeBase200);
+}
+
+/* The RTE toolbar and modals are appended to the editor container, which sits inside .pj-gjs. */
+.pj-gjs .gjs-rte-toolbar .pj-merge-select {
+    height: 24px;
 }

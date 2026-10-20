@@ -22,6 +22,11 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks(id) {
+                    // WP-60 — GrapesJS + grapesjs-mjml (bundles mjml-browser): only reached
+                    // through the lazy EmailBuilder chunk (docs/46-editor-spike.md §7).
+                    if (/node_modules\/(grapesjs|grapesjs-mjml|backbone|backbone-undo|underscore)\//.test(id)) {
+                        return 'grapesjs';
+                    }
                     if (id.includes('node_modules/@fluentui/') || id.includes('node_modules/@griffel/')) {
                         return 'fluentui';
                     }
