@@ -61,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
         // docs/45 §45.9 — WP-70 campaign statistics contract + local GeoLite2 resolver (tests bind a fake).
         $this->app->bind(\App\Modules\Reporting\Contracts\CampaignStats::class, \App\Modules\Reporting\Services\CampaignStatsService::class);
         $this->app->singleton(\App\Modules\Tracking\Contracts\GeoIpResolver::class, \App\Modules\Tracking\Support\MaxMindGeoIpResolver::class);
+        // docs/45 §45.9 (WP-100) — the single transactional send path (also called by WP-91 / WP-90).
+        $this->app->bind(\App\Modules\Transactional\Contracts\TransactionalSender::class, \App\Modules\Transactional\Services\TransactionalSendService::class);
     }
 
     /**
@@ -72,5 +74,7 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Route::pattern('campaign', '[0-9a-fA-F-]{36}');
         // docs/45 §45.9 — WP-70: final rollup when a campaign completes.
         \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
+        // docs/45 §45.1 (WP-100) — API keys accepted as `Authorization: Bearer` or Brevo-style `api-key` header.
+        \Laravel\Sanctum\Sanctum::getAccessTokenFromRequestUsing(fn (\Illuminate\Http\Request $request): ?string => \App\Modules\Transactional\Services\ApiKeyService::tokenFromRequest($request));
     }
 }

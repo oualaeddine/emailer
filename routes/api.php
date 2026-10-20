@@ -43,4 +43,5 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/recipient-timeline.php';
     require __DIR__.'/api/preferences.php';
     require __DIR__.'/api/editor.php';
+    require __DIR__.'/api/transactional.php';
 });
