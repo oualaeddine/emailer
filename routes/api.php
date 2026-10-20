@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 | declaration order for a stable route-list output.
 */
 
-Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
+// docs/45 §45.7.6 — API keys only reach routes tagged with RequireApiScope.
+Route::prefix('v1')->middleware(['auth:sanctum', \App\Http\Middleware\RestrictApiKeysToTaggedRoutes::class])->group(function (): void {
     require __DIR__.'/api/identity.php';
     require __DIR__.'/api/settings.php';
     require __DIR__.'/api/pagejaunes.php';

@@ -15,7 +15,6 @@ use App\Modules\Tracking\Services\TrackingEventRecorder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Modules\Automations\Concerns\BuildsAutomationFixtures;
 use Tests\TestCase;
 
@@ -34,7 +33,7 @@ class AutomationApiTest extends TestCase
     private function actingAsManager(): User
     {
         $user = $this->manager();
-        Sanctum::actingAs($user);
+        $this->actingAs($user);
 
         return $user;
     }
@@ -44,7 +43,7 @@ class AutomationApiTest extends TestCase
         $automation = Automation::factory()->create();
 
         foreach ([RoleName::MarketingOperator, RoleName::Viewer] as $role) {
-            Sanctum::actingAs(User::factory()->withRole($role)->create());
+            $this->actingAs(User::factory()->withRole($role)->create());
             $this->getJson('/api/v1/automations')->assertForbidden();
             $this->getJson("/api/v1/automations/{$automation->uuid}")->assertForbidden();
             $this->postJson('/api/v1/automations', ['name' => 'X', 'trigger' => ['type' => 'list_added', 'config' => ['list_ids' => []]]])->assertForbidden();
@@ -56,7 +55,7 @@ class AutomationApiTest extends TestCase
         }
 
         foreach ([RoleName::Administrator, RoleName::MarketingManager] as $role) {
-            Sanctum::actingAs(User::factory()->withRole($role)->create());
+            $this->actingAs(User::factory()->withRole($role)->create());
             $this->getJson('/api/v1/automations')->assertOk();
         }
     }

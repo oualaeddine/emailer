@@ -71,6 +71,8 @@ class UserService
 
             if ($data->isActive === false && $wasActive === true) {
                 UserDeactivated::dispatch($user, $updatedBy);
+                // docs/45 §45.7.6 — a deactivated user's API keys are revoked.
+                $user->tokens()->delete();
             }
 
             return $user->fresh('role');

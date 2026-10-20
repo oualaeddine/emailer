@@ -23,7 +23,8 @@ Route::get('recipient-lists/exports/{operation}/download', [ListExportController
 Route::get('recipient-lists/{id}', [ListController::class, 'show']);
 Route::patch('recipient-lists/{id}', [ListController::class, 'update']);
 Route::delete('recipient-lists/{id}', [ListController::class, 'destroy']);
-Route::post('recipient-lists/{id}/contacts', [ListMembershipController::class, 'update']);
+Route::post('recipient-lists/{id}/contacts', [ListMembershipController::class, 'update'])
+    ->middleware(\App\Modules\Transactional\Http\Middleware\RequireApiScope::class.':contacts:write');
 Route::post('recipient-lists/{id}/export', [ListExportController::class, 'store']);
 
 Route::get('list-folders', [ListFolderController::class, 'index']);

@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 | Literal sub-paths are registered before the `{campaign}` routes (§45.1).
 */
 
-Route::get('campaigns', [CampaignController::class, 'index']);
+Route::get('campaigns', [CampaignController::class, 'index'])
+    ->middleware(\App\Modules\Transactional\Http\Middleware\RequireApiScope::class.':campaigns:read');
 Route::post('campaigns', [CampaignController::class, 'store']);
 Route::post('campaigns/bulk', [CampaignController::class, 'bulk']);
 
