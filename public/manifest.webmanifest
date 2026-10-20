@@ -76,7 +76,7 @@
       "name": "Destinataires",
       "short_name": "Contacts",
       "description": "Gérer la base de contacts",
-      "url": "/recipients",
+      "url": "/contacts",
       "icons": [
         {
           "src": "/icons/icon-192x192.png",

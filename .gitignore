@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# End-to-end suite output (screenshots, server log, captured mails)
+/tests/e2e/artifacts/

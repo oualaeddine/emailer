@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 | declaration order for a stable route-list output.
 */
 
-Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
+// docs/45 §45.7.6 — API keys only reach routes tagged with RequireApiScope.
+Route::prefix('v1')->middleware(['auth:sanctum', \App\Http\Middleware\RestrictApiKeysToTaggedRoutes::class])->group(function (): void {
     require __DIR__.'/api/identity.php';
     require __DIR__.'/api/settings.php';
     require __DIR__.'/api/pagejaunes.php';
@@ -34,4 +35,19 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function (): void {
     require __DIR__.'/api/audit.php';
     require __DIR__.'/api/reporting.php';
     require __DIR__.'/api/notifications.php';
+    require __DIR__.'/api/senders.php';
+    require __DIR__.'/api/campaign-checklist.php';
+    require __DIR__.'/api/attributes.php';
+    require __DIR__.'/api/segments.php';
+    require __DIR__.'/api/lists.php';
+    require __DIR__.'/api/contacts.php';
+    require __DIR__.'/api/recipient-timeline.php';
+    require __DIR__.'/api/preferences.php';
+    require __DIR__.'/api/editor.php';
+    require __DIR__.'/api/automations.php';
+    require __DIR__.'/api/forms.php';
+    require __DIR__.'/api/transactional.php';
+    require __DIR__.'/api/webhooks.php';
+    require __DIR__.'/api/best-time.php';
+    require __DIR__.'/api/sections.php';
 });

@@ -14,6 +14,9 @@ import {
     MessageBarBody,
     MessageBarTitle,
     Spinner,
+    Tab,
+    TabList,
+    Text,
     createTableColumn,
     makeStyles,
     tokens,
@@ -29,6 +32,8 @@ import {
 import { AppShell } from '@/Components/Shell/AppShell';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
+import { fetchReportingBySmtpAccount } from '@/Lib/api/reporting';
+import type { ReportingSmtpAccountRow } from '@/Lib/types/reporting';
 import { createSmtpAccount, fetchSmtpAccounts, testSmtpAccount, type CreateSmtpAccountPayload } from '@/Lib/api/smtp';
 import type { SmtpAccount } from '@/Lib/types/smtp';
 import { SmtpAccountFormDialog } from '@/Pages/Smtp/SmtpAccountFormDialog';
@@ -55,6 +60,15 @@ const useStyles = makeStyles({
     },
     dataGrid: {
         width: '100%',
+    },
+    perfRow: {
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+        gap: tokens.spacingHorizontalM,
+        padding: tokens.spacingVerticalXS,
+        borderBottomWidth: tokens.strokeWidthThin,
+        borderBottomStyle: 'solid',
+        borderBottomColor: tokens.colorNeutralStroke2,
     },
     bannerWrapper: {
         marginBottom: tokens.spacingVerticalM,
@@ -99,6 +113,14 @@ export default function SmtpIndex() {
     const [testingAccountId, setTestingAccountId] = useState<string | null>(null);
     const [activeResultDialog, setActiveResultDialog] = useState<ActiveResultDialogState | null>(null);
     const [bannerMessage, setBannerMessage] = useState<BannerMessageState | null>(null);
+    const [tab, setTab] = useState<'accounts' | 'performance'>('accounts');
+    const [performance, setPerformance] = useState<ReportingSmtpAccountRow[] | null>(null);
+
+    useEffect(() => {
+        if (tab === 'performance' && performance === null) {
+            void fetchReportingBySmtpAccount().then(setPerformance);
+        }
+    }, [tab, performance]);
 
     const load = useCallback(async () => {
         setAccounts(await fetchSmtpAccounts());
@@ -307,6 +329,41 @@ export default function SmtpIndex() {
                 </div>
             )}
 
+            <TabList selectedValue={tab} onTabSelect={(_, d) => setTab(d.value as 'accounts' | 'performance')}>
+                <Tab value="accounts">{t.smtp.title}</Tab>
+                <Tab value="performance">{t.statistics.smtpPerformance}</Tab>
+            </TabList>
+
+            {tab === 'performance' && (
+                <div className={styles.card}>
+                    {performance === null ? (
+                        <Spinner label={t.common.loading} />
+                    ) : performance.length === 0 ? (
+                        <Text>{t.reporting.noData}</Text>
+                    ) : (
+                        <div className={styles.gridScroll}>
+                            <div className={styles.perfRow}>
+                                <Text weight="semibold">{t.reporting.bySmtpAccountName}</Text>
+                                <Text weight="semibold">{t.reporting.sent}</Text>
+                                <Text weight="semibold">{t.reporting.delivered}</Text>
+                                <Text weight="semibold">{t.reporting.bounced}</Text>
+                                <Text weight="semibold">{t.reporting.healthStatus}</Text>
+                            </div>
+                            {performance.map((row) => (
+                                <div className={styles.perfRow} key={row.smtp_account_id ?? row.smtp_account_name}>
+                                    <Text>{row.smtp_account_name}</Text>
+                                    <Text>{row.sent}</Text>
+                                    <Text>{row.delivered}</Text>
+                                    <Text>{row.bounced}</Text>
+                                    <Text>{row.health_status ? t.smtp[row.health_status] : '—'}</Text>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {tab === 'accounts' && (
             <div className={styles.card}>
                 <div className={styles.gridScroll}>
                     <DataGrid
@@ -331,6 +388,7 @@ export default function SmtpIndex() {
                     </DataGrid>
                 </div>
             </div>
+            )}
 
             <SmtpAccountFormDialog open={dialogOpen} onOpenChange={setDialogOpen} onSubmit={handleCreate} />
 

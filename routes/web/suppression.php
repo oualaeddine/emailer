@@ -13,6 +13,8 @@ use Inertia\Inertia;
 | group (routes/web.php).
 */
 
-Route::get('suppression', fn () => Inertia::render('Suppression/Index'))
-    ->middleware('can:suppression.view')
-    ->name('suppression.index');
+// docs/47 — `/contacts/blocklist` is served by routes/web/blocklist.php since Wave 2
+// (Contacts/Blocklist replaces Suppression/Index).
+
+// docs/43 §43.3 — legacy URL, permanent redirect for one release.
+Route::redirect('suppression', '/contacts/blocklist', 301);

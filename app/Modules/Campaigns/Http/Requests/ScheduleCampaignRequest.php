@@ -4,14 +4,12 @@ namespace App\Modules\Campaigns\Http\Requests;
 
 use App\Domain\Enums\PermissionName;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
- * docs/15-campaign-management.md §15.3 — Scheduling: a single future
- * `scheduled_at`. Scheduling starts the same dispatch chain as sending
- * immediately (just deferred), so it is gated by the same base
- * `campaigns.send`/`campaigns.send_any` permissions here; the precise
- * own-vs-any `CampaignPolicy::send` check runs in the controller via
- * `$this->authorize()`.
+ * docs/45-brevo-api-contracts.md §45.4.2 `CampaignScheduleInput` — the four
+ * delivery options of "Confirmer l'envoi". Without `mode` the legacy
+ * payload (`scheduled_at` only) means `scheduled`.
  */
 class ScheduleCampaignRequest extends FormRequest
 {
@@ -28,8 +26,28 @@ class ScheduleCampaignRequest extends FormRequest
      */
     public function rules(): array
     {
+        $mode = $this->input('mode', 'scheduled');
+
         return [
-            'scheduled_at' => ['required', 'date', 'after:now'],
+            'mode' => ['sometimes', Rule::in(['now', 'scheduled', 'best_time', 'batches'])],
+            'scheduled_at' => [$mode === 'scheduled' ? 'required' : 'nullable', 'date', 'after:now'],
+            'timezone' => ['sometimes', 'nullable', 'timezone:all'],
+            'batch_size' => [$mode === 'batches' ? 'required' : 'nullable', 'integer', 'between:50,100000'],
+            'batch_interval_minutes' => [$mode === 'batches' ? 'required' : 'nullable', 'integer', 'between:5,1440'],
+        ];
+    }
+
+    /**
+     * @return array{mode: string, scheduled_at: string|null, timezone: string|null, batch_size: int|null, batch_interval_minutes: int|null}
+     */
+    public function options(): array
+    {
+        return [
+            'mode' => $this->validated('mode') ?? 'scheduled',
+            'scheduled_at' => $this->validated('scheduled_at'),
+            'timezone' => $this->validated('timezone'),
+            'batch_size' => $this->validated('batch_size') !== null ? (int) $this->validated('batch_size') : null,
+            'batch_interval_minutes' => $this->validated('batch_interval_minutes') !== null ? (int) $this->validated('batch_interval_minutes') : null,
         ];
     }
 }

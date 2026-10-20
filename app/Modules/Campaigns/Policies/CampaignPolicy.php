@@ -7,19 +7,12 @@ use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Identity\Models\User;
 
 /**
- * docs/15-campaign-management.md §15.9 — Permissions. Discovered by
- * Laravel's default policy-guessing convention (Campaign lives under
- * `App\Modules\Campaigns\Models`, this class under
- * `App\Modules\Campaigns\Policies`) — this work package must not touch
- * `AuthServiceProvider` (outside `app/Modules/Campaigns/**`), so it relies
- * on that convention instead of an explicit `$policies` entry, exactly the
- * same mechanism that already backs `RecipientPolicy`/`DraftPolicy` there.
+ * docs/15-campaign-management.md §15.9 — Permissions, extended by
+ * docs/45-brevo-api-contracts.md §45.2/§45.4.2. Discovered by Laravel's
+ * policy-guessing convention.
  *
- * `campaigns.send` (own campaigns only) vs. `campaigns.send_any` mirrors
- * the `composer.send` + `mailbox.view_own`/`view_all` ownership pattern
- * seen in `DraftPolicy::send` — except here the RBAC matrix already
- * encodes "own" vs. "any" as two distinct permissions, so no secondary
- * scope permission is needed.
+ * `campaigns.send` (own campaigns only) vs. `campaigns.send_any`;
+ * edits are `campaigns.create` (own) | `campaigns.send_any`.
  */
 class CampaignPolicy
 {
@@ -38,23 +31,25 @@ class CampaignPolicy
         return $user->hasPermission(PermissionName::CampaignsCreate->value);
     }
 
+    /**
+     * docs/45 §45.4.2 PATCH / design / DELETE: `campaigns.create` (own) | `campaigns.send_any`.
+     */
     public function update(User $user, Campaign $campaign): bool
     {
-        if (! $user->hasPermission(PermissionName::CampaignsCreate->value)) {
-            return false;
-        }
-
         if ($user->hasPermission(PermissionName::CampaignsSendAny->value)) {
             return true;
         }
 
-        return $campaign->created_by === $user->id;
+        return $user->hasPermission(PermissionName::CampaignsCreate->value) && $campaign->created_by === $user->id;
+    }
+
+    public function delete(User $user, Campaign $campaign): bool
+    {
+        return $this->update($user, $campaign);
     }
 
     /**
-     * §15.9 — "campaigns.send (own) vs. campaigns.send_any" distinction.
-     * Also gates `schedule()` (§15.3), since scheduling starts the same
-     * dispatch chain, just deferred.
+     * §15.9 — also gates schedule/unschedule and send-to-new-contacts.
      */
     public function send(User $user, Campaign $campaign): bool
     {
@@ -65,11 +60,6 @@ class CampaignPolicy
         return $user->hasPermission(PermissionName::CampaignsSend->value) && $campaign->created_by === $user->id;
     }
 
-    /**
-     * §15.6 Pause/Resume/Cancel — a single `campaigns.cancel_pause`
-     * permission with no "_own"/"_any" pair (unlike `send`), so it is
-     * global for anyone holding it, per the RBAC matrix.
-     */
     public function cancelPause(User $user, Campaign $campaign): bool
     {
         return $user->hasPermission(PermissionName::CampaignsCancelPause->value);
@@ -81,11 +71,23 @@ class CampaignPolicy
     }
 
     /**
-     * §15.7 Cloning produces a new draft campaign, so it is gated the same
-     * as `create`.
+     * §15.7 duplicate / clone produce a new draft — gated like `create`.
      */
     public function clonable(User $user, Campaign $campaign): bool
     {
         return $user->hasPermission(PermissionName::CampaignsCreate->value);
+    }
+
+    /**
+     * docs/45 §45.4.2 audience estimate / test send / move: `campaigns.create`.
+     */
+    public function prepare(User $user, Campaign $campaign): bool
+    {
+        return $user->hasPermission(PermissionName::CampaignsCreate->value);
+    }
+
+    public function archive(User $user, Campaign $campaign): bool
+    {
+        return $user->hasPermission(PermissionName::CampaignsArchive->value);
     }
 }

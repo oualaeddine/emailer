@@ -1,0 +1,10 @@
+{
+  "slug": "invitation-evenement",
+  "name": "Invitation à un événement",
+  "gallery_category": "event",
+  "description": "Invitation avec date, lieu et bouton d’inscription.",
+  "subject": "Invitation à un événement",
+  "scope": "marketing",
+  "accent_color": "#0B6A6A",
+  "background_color": "#F5F5F5"
+}

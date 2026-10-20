@@ -5,7 +5,9 @@ namespace App\Modules\Tracking\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Tracking\Models\Message;
 use App\Modules\Tracking\Services\TrackingEventRecorder;
+use App\Modules\Tracking\Support\AppleMppDetector;
 use App\Modules\Tracking\Support\BotUserAgentDetector;
+use App\Modules\Tracking\Support\TrackingContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -19,6 +21,14 @@ use Illuminate\Http\Response;
  * counted (a bot-filtered request must look identical to the requester —
  * silently not counting it, not erroring or omitting the image, is the
  * whole point of §21.5's bot filtering).
+ *
+ * WP-70 (doc 43 §43.6.5, doc 45 §45.6.4): an Apple Mail Privacy Protection
+ * proxy fetch is not filtered as a bot — it is counted (viewed / uniqueViews
+ * / appleMppOpens) and flagged `is_proxy_open` on its `message_events` row,
+ * which also carries the parsed user agent and GeoIP data. The bot-filter
+ * bypass requires the explicit proxy marker in the user agent, or the bare
+ * proxy user agent from Apple's egress ranges
+ * ({@see AppleMppDetector::bypassesBotFilter()}).
  */
 class TrackOpenController extends Controller
 {
@@ -31,13 +41,17 @@ class TrackOpenController extends Controller
     public function __construct(
         private readonly TrackingEventRecorder $recorder,
         private readonly BotUserAgentDetector $botDetector,
-    ) {
-    }
+        private readonly AppleMppDetector $mppDetector,
+    ) {}
 
     public function open(Request $request, Message $message): Response
     {
-        if (! $this->botDetector->isBot($request->userAgent())) {
-            $this->recorder->recordOpen($message);
+        $context = TrackingContext::fromRequest($request);
+
+        // Only a genuine proxy fetch (marker UA, or bare proxy UA from Apple's ranges) skips the bot filter.
+        if ($this->mppDetector->bypassesBotFilter($context->userAgent, $context->ip)
+            || ! $this->botDetector->isBot($context->userAgent)) {
+            $this->recorder->recordOpen($message, $context);
         }
 
         $pixel = base64_decode(self::PIXEL_GIF_BASE64, true) ?: '';

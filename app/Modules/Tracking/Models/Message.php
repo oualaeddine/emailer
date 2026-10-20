@@ -7,8 +7,11 @@ use App\Modules\Composer\Models\Draft;
 use App\Modules\DeliveryEngine\Models\SendAttempt;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Tracking\Services\CampaignStatsAggregator;
+use App\Modules\Tracking\Services\TrackingEventRecorder;
 use App\Support\Concerns\HasUuid;
 use Database\Factories\MessageFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,11 +32,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $status
  * @property int $open_count
  * @property int $click_count
+ * @property int|null $variant_id A/B test variant of a test-sample message (docs/45 §45.8 Slot O)
+ * @property int|null $sender_id verified sender of a non-campaign message (next-sender)
+ * @property array<string, mixed>|null $delivery_options {reply_to, cc[], bcc[], headers{}, attachments[]} (next-sender)
  */
 class Message extends Model
 {
     /** @use HasFactory<MessageFactory> */
     use HasFactory, HasUuid;
+
+    /**
+     * Statuses of a sent message that never reached the inbox — the
+     * "delivered" definition shared by the rollup
+     * ({@see CampaignStatsAggregator}) and
+     * the report drill-downs: a provider `delivered_at`, or sent and not
+     * bounced / failed / rejected.
+     */
+    public const NOT_DELIVERED_STATUSES = ['hard_bounced', 'soft_bounced', 'failed', 'rejected'];
 
     protected $fillable = [
         'campaign_id',
@@ -46,6 +61,8 @@ class Message extends Model
         'queued_at',
         'provider_message_id',
         'last_provider_response',
+        'sender_id',
+        'delivery_options',
     ];
 
     protected function casts(): array
@@ -58,7 +75,57 @@ class Message extends Model
             'clicked_at' => 'datetime',
             'bounced_at' => 'datetime',
             'failed_at' => 'datetime',
+            'is_test' => 'boolean',
+            'delivery_options' => 'array',
         ];
+    }
+
+    /**
+     * WP-70 — timestamps / terminal statuses stamped directly through
+     * Eloquent are mirrored into `message_events`
+     * ({@see TrackingEventRecorder::syncFromModel()}).
+     */
+    protected static function booted(): void
+    {
+        static::created(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, true));
+        static::updated(fn (Message $message) => app(TrackingEventRecorder::class)->syncFromModel($message, false));
+    }
+
+    /**
+     * Constrains `$query` (Eloquent or query builder) to delivered messages;
+     * `$alias` is the table alias of `messages` in the query (`m`), if any.
+     *
+     * @template TQuery of \Illuminate\Contracts\Database\Query\Builder
+     *
+     * @param  TQuery  $query
+     * @return TQuery
+     */
+    public static function whereDelivered($query, string $alias = '')
+    {
+        $p = $alias !== '' ? $alias.'.' : '';
+
+        return $query->where(fn ($w) => $w->whereNotNull($p.'delivered_at')
+            ->orWhere(fn ($x) => $x->whereNotNull($p.'sent_at')->whereNotIn($p.'status', self::NOT_DELIVERED_STATUSES)));
+    }
+
+    /**
+     * SQL boolean expression of {@see whereDelivered()} for aggregates
+     * (`SUM(CASE WHEN … THEN 1 ELSE 0 END)`).
+     */
+    public static function deliveredSql(string $alias = ''): string
+    {
+        $p = $alias !== '' ? $alias.'.' : '';
+        $statuses = implode(', ', array_map(fn (string $s): string => "'{$s}'", self::NOT_DELIVERED_STATUSES));
+
+        return "({$p}delivered_at IS NOT NULL OR ({$p}sent_at IS NOT NULL AND {$p}status NOT IN ({$statuses})))";
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeDelivered($query): void
+    {
+        self::whereDelivered($query, $query->getModel()->getTable());
     }
 
     public function getRouteKeyName(): string
@@ -71,7 +138,9 @@ class Message extends Model
      */
     public function recipient(): BelongsTo
     {
-        return $this->belongsTo(Recipient::class);
+        // Test sends may target a soft-deleted contact (Wave 1 review S9):
+        // the message must still resolve its recipient for delivery.
+        return $this->belongsTo(Recipient::class)->withTrashed();
     }
 
     /**
@@ -121,7 +190,23 @@ class Message extends Model
             $this->{$column} = now();
         }
 
-        $this->save();
+        $transitioned = $this->isDirty('status');
+
+        TrackingEventRecorder::withoutModelSync(fn () => $this->save());
+
+        // docs/45 §45.9 (WP-70) — every delivery transition becomes a
+        // `message_events` row (+ MessageEventRecorded, recipient counters).
+        if ($transitioned) {
+            app(TrackingEventRecorder::class)->recordStatusChange($this, $status);
+        }
+    }
+
+    /**
+     * @return HasMany<MessageEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(MessageEvent::class);
     }
 
     protected static function newFactory(): MessageFactory

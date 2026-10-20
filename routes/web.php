@@ -47,7 +47,11 @@ Route::middleware(['auth', 'two-factor.enrol'])->group(function (): void {
 */
 Route::middleware('signed')->group(function (): void {
     Route::get('unsubscribe/{token}', [UnsubscribeController::class, 'show'])->name('unsubscribe.show');
-    Route::post('unsubscribe/{token}', [UnsubscribeController::class, 'confirm'])->name('unsubscribe.confirm');
+    // RFC 8058 one-click: mail clients POST here with no session or CSRF token;
+    // the signed URL is the protection.
+    Route::post('unsubscribe/{token}', [UnsubscribeController::class, 'confirm'])
+        ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+        ->name('unsubscribe.confirm');
 });
 
 /*
@@ -80,3 +84,7 @@ Route::middleware('signed')->group(function (): void {
         ->whereUuid('message')
         ->name('tracking.click');
 });
+
+require __DIR__.'/web/mirror.php';
+require __DIR__.'/web/preferences.php';
+require __DIR__.'/web/forms.php';

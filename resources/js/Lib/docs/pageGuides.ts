@@ -98,113 +98,113 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
     },
     campaigns: {
         topicSlug: 'campaigns',
-        title: 'Campagnes d’e-mailing',
+        title: "Campagnes",
         purpose:
-            'Le module Campagnes permet de piloter vos diffusions massives vers vos segments de prospects : création guidée en 4 étapes, planification horaire, suivi en direct et duplication en un clic.',
+            "La page Campagnes liste vos campagnes e-mail avec des onglets de statut (Toutes, Brouillons, Programmées, En cours, Envoyées, Suspendues, Archivées), la recherche, et pour chaque ligne le taux d'ouverture et de clic.",
         howToUse: [
             {
                 step: 1,
-                title: 'Créer une campagne',
-                description: 'Cliquez sur « Nouvelle campagne » pour lancer l’assistant (nom, audience, modèle, planification).',
+                title: "Créer une campagne",
+                description: "« Créer une campagne » demande un nom interne puis ouvre la page de configuration.",
             },
             {
                 step: 2,
-                title: 'Sélectionner l’audience',
-                description: 'Ciblez vos contacts par étiquettes, wilayas ou critères géographiques spécifiques.',
+                title: "Agir sur une ligne",
+                description: "Le menu « Plus d'actions » propose Modifier, Rapport, Dupliquer, Envoyer un test, Envoyer aux nouveaux contacts, Reprendre, Déplacer, Archiver, Supprimer.",
             },
             {
                 step: 3,
-                title: 'Piloter l’envoi en cours',
-                description: 'Utilisez le menu d’action pour mettre en pause, reprendre ou annuler une campagne.',
+                title: "Suivre les statuts",
+                description: "Utilisez les onglets pour retrouver les brouillons à terminer ou les envois en cours.",
             },
             {
                 step: 4,
-                title: 'Cloner une campagne existante',
-                description: 'Dupliquez une campagne performante pour réutiliser sa structure sans la recréer.',
+                title: "Ouvrir le rapport",
+                description: "Cliquez sur l'icône de rapport d'une campagne envoyée pour analyser ses résultats.",
             },
         ],
     },
     templates: {
         topicSlug: 'templates',
-        title: 'Modèles d’e-mails',
+        title: "Modèles",
         purpose:
-            'Le gestionnaire de modèles standardise votre communication commerciale grâce à des gabarits réutilisables, intégrant la charte graphique de votre entreprise et les champs de fusion dynamiques.',
+            "La page Modèles affiche vos modèles d'e-mails sous forme de grille avec aperçu, dans les onglets « Mes modèles » et « Galerie ». Le menu de chaque carte propose Modifier, Dupliquer, Envoyer un test, Déplacer, Archiver et Supprimer.",
         howToUse: [
             {
                 step: 1,
-                title: 'Ajouter un nouveau modèle',
-                description: 'Cliquez sur « Nouveau modèle » et nommez votre gabarit selon votre typologie d’offre.',
+                title: "Créer un modèle",
+                description: "« Créer un modèle » ouvre le sélecteur : galerie, mes modèles, campagnes précédentes, code HTML ou texte enrichi.",
             },
             {
                 step: 2,
-                title: 'Structurer le contenu',
-                description: 'Rédigez le message type avec les balises {{company_name}}, {{wilaya_label}} et un bouton d’action.',
+                title: "Modifier ou dupliquer",
+                description: "Ouvrez l'éditeur pour modifier ; dupliquez pour décliner un modèle sans toucher à l'original.",
             },
             {
                 step: 3,
-                title: 'Organiser par catégorie',
-                description: 'Classez vos modèles (Prospection, Relance, Devis, Partenariat) pour les retrouver facilement.',
+                title: "Envoyer un test",
+                description: "Envoyez le modèle à vos adresses pour contrôler le rendu réel.",
             },
             {
                 step: 4,
-                title: 'Archiver les versions obsolètes',
-                description: 'Archivez les anciens modèles sans supprimer l’historique des campagnes qui les ont utilisés.',
+                title: "Organiser",
+                description: "Classez dans des dossiers, recherchez par nom, archivez les versions obsolètes.",
             },
         ],
     },
     recipients: {
         topicSlug: 'recipients',
-        title: 'Gestion des destinataires',
+        title: "Contacts",
         purpose:
-            'Cette page constitue votre référentiel de contacts B2B : centralisation des fiches prospects, suivi de leur état de délivrabilité (actif, supprimé, invalide) et segmentation par étiquettes métiers.',
+            "La page Contacts liste toutes vos fiches sous forme de tableau, organisé en vues : « Tous les contacts », « Mes contacts » et vos vues enregistrées. Vous y retrouvez l'e-mail, le nom, la société, le statut et les attributs de votre choix, et vous pouvez agir sur plusieurs contacts à la fois.",
         howToUse: [
             {
                 step: 1,
-                title: 'Rechercher un prospect',
-                description: 'Filtrez instantanément par nom d’entreprise, commune ou adresse e-mail.',
+                title: "Filtrer et charger une liste",
+                description: "Utilisez la recherche, « Charger une liste ou un segment » ou « Ajouter un filtre » pour réduire le tableau. « Enregistrer comme segment » conserve le filtre pour vos campagnes.",
             },
             {
                 step: 2,
-                title: 'Ajouter un contact manuel',
-                description: 'Cliquez sur « Nouveau destinataire » pour saisir une fiche individuelle qualifiée.',
+                title: "Créer ou importer des contacts",
+                description: "« Créer un contact » ouvre une fiche individuelle ; « Importer des contacts » lance l'assistant d'import (fichier CSV/Excel ou annuaire PageJaunes).",
             },
             {
                 step: 3,
-                title: 'Gérer les étiquettes',
-                description: 'Associez des tags (ex. BTP, Grossiste, Alger) pour cibler précisément vos futures campagnes.',
+                title: "Agir sur la sélection",
+                description: "Cochez des lignes pour les ajouter à une liste, les retirer, les mettre en liste noire, mettre à jour un attribut, exporter ou supprimer.",
             },
             {
                 step: 4,
-                title: 'Vérifier la délivrabilité',
-                description: 'Repérez les badges de statut pour écarter les adresses signalées ou obsolètes.',
+                title: "Personnaliser les colonnes",
+                description: "« Personnaliser les colonnes » affiche n'importe quel attribut ; « Enregistrer comme vue » mémorise filtres, colonnes et tri.",
             },
         ],
     },
     'recipients-import': {
         topicSlug: 'recipients-import',
-        title: 'Import de fichiers (CSV / Excel)',
+        title: "Assistant d'import de contacts",
         purpose:
-            'L’assistant d’import permet d’intégrer rapidement des bases de prospects externes (.csv, .xlsx) avec détection automatique des colonnes, prévisualisation et élimination des doublons.',
+            "L'assistant guide l'import en cinq étapes : Fichier, Correspondance, Listes, Paramètres, Lancer. Il accepte les fichiers CSV, XLSX et TXT, le collage de texte et la recherche dans l'annuaire PageJaunes.",
         howToUse: [
             {
                 step: 1,
-                title: 'Téléverser votre fichier',
-                description: 'Glissez-déposez ou sélectionnez votre fichier tableur (.csv, .txt ou .xlsx).',
+                title: "Charger le fichier",
+                description: "Déposez votre fichier ou collez vos adresses. Un aperçu des premières lignes s'affiche.",
             },
             {
                 step: 2,
-                title: 'Mapper les colonnes',
-                description: 'Faites correspondre les colonnes de votre fichier avec l’e-mail, le nom et l’entreprise.',
+                title: "Faire correspondre les colonnes",
+                description: "Associez chaque colonne à un attribut, utilisez « Créer un attribut » pour un champ manquant, ou ignorez la colonne.",
             },
             {
                 step: 3,
-                title: 'Valider les lignes',
-                description: 'Passez en revue le rapport d’intégrité (lignes valides, erreurs de syntaxe, doublons).',
+                title: "Choisir les listes et paramètres",
+                description: "Ajoutez les contacts à des listes existantes ou nouvelles ; indiquez s'il faut mettre à jour les contacts existants ou les traiter comme en liste noire.",
             },
             {
                 step: 4,
-                title: 'Confirmer l’import',
-                description: 'Cliquez sur « Importer » pour insérer définitivement les contacts dans votre base.',
+                title: "Lancer l'import",
+                description: "Vérifiez le récapitulatif puis « Lancer » ; suivez ensuite le résultat dans l'historique des imports.",
             },
         ],
     },
@@ -238,57 +238,57 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
     },
     suppression: {
         topicSlug: 'suppression',
-        title: 'Liste de suppression & Désabonnements',
+        title: "Liste noire",
         purpose:
-            'La liste de suppression garantit votre conformité légale et protège la réputation de votre nom de domaine en bloquant automatiquement tout envoi vers les adresses désabonnées, erronées ou ayant signalé du spam.',
+            "La liste noire regroupe les adresses auxquelles plus rien n'est envoyé. Deux onglets : « Contacts en liste noire » (désabonnement, plainte, blocage manuel) et « Rebonds » (rebonds durs et doux).",
         howToUse: [
             {
                 step: 1,
-                title: 'Consulter les motifs de blocage',
-                description: 'Identifiez la raison du blocage : rebond définitif, plainte spam, désabonnement global ou blocage manuel.',
+                title: "Rechercher une adresse",
+                description: "Saisissez tout ou partie de l'adresse, ou filtrez par motif.",
             },
             {
                 step: 2,
-                title: 'Ajouter un blocage préventif',
-                description: 'Cliquez sur « Nouvelle entrée » pour inscrire manuellement une adresse concurrente ou sensible.',
+                title: "Ajouter une adresse",
+                description: "« Ajouter une adresse » bloque immédiatement une adresse, par exemple après une demande téléphonique.",
             },
             {
                 step: 3,
-                title: 'Rechercher dans la liste noire',
-                description: 'Vérifiez si une adresse spécifique est bloquée à l’aide du champ de recherche rapide.',
+                title: "Réactiver",
+                description: "L'action de réactivation retire l'adresse de la liste : à réserver aux erreurs avérées, jamais aux plaintes ou rebonds durs.",
             },
             {
                 step: 4,
-                title: 'Débloquer une adresse',
-                description: 'Supprimez une entrée manuelle légitime après confirmation explicite de votre prospect.',
+                title: "Comprendre l'effet",
+                description: "Une adresse bloquée est écartée de toutes les campagnes, quelle que soit la liste ou le segment ciblé.",
             },
         ],
     },
     reporting: {
         topicSlug: 'reporting',
-        title: 'Rapports & Statistiques avancées',
+        title: "Statistiques",
         purpose:
-            'Le centre de rapports analyse la performance de délivrabilité et l’engagement de vos campagnes : taux d’ouverture, clics, rebonds et répartition détaillée par compte SMTP ou par campagne.',
+            "La page Statistiques synthétise vos envois sur la période choisie : envoyés, délivrés, ouvertures, clics, désinscriptions, rebonds et plaintes, avec un graphique dans le temps et le tableau des performances par campagne.",
         howToUse: [
             {
                 step: 1,
-                title: 'Définir la plage de dates',
-                description: 'Sélectionnez la période d’analyse souhaitée (30 derniers jours, trimestre ou personnalisé).',
+                title: "Choisir la période",
+                description: "Utilisez le sélecteur de période pour recalculer tous les indicateurs.",
             },
             {
                 step: 2,
-                title: 'Filtrer par campagne ou SMTP',
-                description: 'Isolez une campagne spécifique ou comparez l’efficacité de vos différents relais SMTP.',
+                title: "Comparer les campagnes",
+                description: "Le tableau « Performance des campagnes » se trie par taux d'ouverture ou de clic.",
             },
             {
                 step: 3,
-                title: 'Analyser les indicateurs clés',
-                description: 'Examinez les cartes KPI : taux de délivrance, taux d’ouverture unique et taux de clic.',
+                title: "Analyser par liste",
+                description: "La performance par liste montre quelles audiences réagissent le mieux.",
             },
             {
                 step: 4,
-                title: 'Exporter les données',
-                description: 'Cliquez sur « Exporter » pour télécharger un fichier tableur complet pour vos bilans.',
+                title: "Aller au détail",
+                description: "Cliquez sur une campagne pour ouvrir son Rapport complet.",
             },
         ],
     },
@@ -424,6 +424,538 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
                 step: 3,
                 title: 'Accéder à l’espace',
                 description: 'Cliquez sur « Se connecter » pour accéder directement au tableau de bord.',
+            },
+        ],
+    },
+    'contact-detail': {
+        topicSlug: 'contact-detail',
+        title: "Fiche contact",
+        purpose:
+            "La fiche contact réunit tout ce que l'application sait d'une personne : identité, société, statut d'abonnement, historique d'activité, attributs, listes d'appartenance et notes d'équipe. Elle s'ouvre en cliquant sur une ligne du tableau Contacts.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Lire l'activité",
+                description: "L'onglet Activité affiche la chronologie des envois, ouvertures, clics, rebonds, désinscriptions, imports et ajouts à une liste.",
+            },
+            {
+                step: 2,
+                title: "Modifier les attributs",
+                description: "L'onglet Attributs présente un formulaire généré depuis vos définitions d'attributs. Enregistrez pour mettre à jour la fiche.",
+            },
+            {
+                step: 3,
+                title: "Gérer les listes",
+                description: "L'onglet Listes montre les listes du contact ; ajoutez-le à une liste ou retirez-le en un clic.",
+            },
+            {
+                step: 4,
+                title: "Mettre en liste noire",
+                description: "Le commutateur « Liste noire » de la carte d'identité bloque tout envoi futur vers ce contact. Les notes servent à consigner le contexte commercial.",
+            },
+        ],
+    },
+    lists: {
+        topicSlug: 'lists',
+        title: "Listes",
+        purpose:
+            "Une liste est un regroupement statique de contacts que vous ciblez dans vos campagnes. La page Listes affiche, par dossier, le nom, le nombre de contacts, la date de création et le dernier import de chaque liste.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer une liste",
+                description: "Cliquez sur « Créer une liste », saisissez un nom et choisissez un dossier.",
+            },
+            {
+                step: 2,
+                title: "Alimenter la liste",
+                description: "Ouvrez la liste puis « Importer dans cette liste », ou ajoutez des contacts depuis le tableau Contacts avec l'action « Ajouter à une liste ».",
+            },
+            {
+                step: 3,
+                title: "Exporter ou supprimer",
+                description: "Depuis le détail, « Exporter » télécharge les contacts ; « Supprimer la liste » retire la liste sans supprimer les contacts.",
+            },
+            {
+                step: 4,
+                title: "Utiliser dans une campagne",
+                description: "Dans l'étape Destinataires d'une campagne, cochez la liste à cibler ou à exclure.",
+            },
+        ],
+    },
+    'list-detail': {
+        topicSlug: 'list-detail',
+        title: "Détail d'une liste",
+        purpose:
+            "Le détail d'une liste affiche le tableau des contacts appartenant à cette liste, avec les mêmes outils de recherche et de filtre que la page Contacts, plus les actions propres à la liste.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Parcourir les membres",
+                description: "Recherchez ou filtrez les contacts de la liste ; cliquez sur une ligne pour ouvrir la fiche.",
+            },
+            {
+                step: 2,
+                title: "Importer dans cette liste",
+                description: "« Importer dans cette liste » lance l'assistant d'import avec la liste déjà sélectionnée à l'étape Listes.",
+            },
+            {
+                step: 3,
+                title: "Retirer des contacts",
+                description: "Cochez des lignes puis « Retirer d'une liste » : les contacts restent dans votre base.",
+            },
+            {
+                step: 4,
+                title: "Exporter ou supprimer",
+                description: "« Exporter » produit un fichier des membres ; « Supprimer la liste » est définitif pour la liste uniquement.",
+            },
+        ],
+    },
+    segments: {
+        topicSlug: 'segments',
+        title: "Segments",
+        purpose:
+            "Un segment est une audience dynamique définie par des conditions : il se recalcule à chaque utilisation. La page Segments liste vos segments avec leur effectif, leur dossier et leur date de modification.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer un segment",
+                description: "Cliquez sur « Créer un segment » pour ouvrir le constructeur de conditions.",
+            },
+            {
+                step: 2,
+                title: "Consulter les membres",
+                description: "Ouvrez un segment pour voir les contacts qui correspondent aujourd'hui à ses conditions.",
+            },
+            {
+                step: 3,
+                title: "Utiliser dans une campagne",
+                description: "L'action « Utiliser dans une campagne » crée une campagne ciblant ce segment ; vous pouvez aussi le choisir à l'étape Destinataires.",
+            },
+            {
+                step: 4,
+                title: "Dupliquer ou supprimer",
+                description: "Dupliquez un segment pour en tester une variante ; la suppression ne touche pas les contacts.",
+            },
+        ],
+    },
+    'segment-edit': {
+        topicSlug: 'segment-edit',
+        title: "Constructeur de segment",
+        purpose:
+            "Le constructeur assemble des conditions en groupes ET / OU. Chaque condition associe un champ, un opérateur et une valeur, parmi : Attributs du contact, Listes, Engagement e-mail, Dates et PagesJaunes.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Ajouter des conditions",
+                description: "Cliquez sur « Ajouter une condition », choisissez la catégorie (par exemple « Engagement e-mail » : a ouvert, a cliqué, n'a pas ouvert dans les N derniers jours).",
+            },
+            {
+                step: 2,
+                title: "Combiner avec ET / OU",
+                description: "Regroupez les conditions et basculez ET / OU pour affiner l'audience.",
+            },
+            {
+                step: 3,
+                title: "Compter en direct",
+                description: "Le bouton de calcul affiche le nombre de contacts correspondants avant d'enregistrer.",
+            },
+            {
+                step: 4,
+                title: "Enregistrer",
+                description: "Donnez un nom (et un dossier) puis « Enregistrer » ; le segment devient disponible dans les campagnes.",
+            },
+        ],
+    },
+    attributes: {
+        topicSlug: 'attributes',
+        title: "Attributs",
+        purpose:
+            "Les attributs sont les champs personnalisés de vos contacts. Le tableau liste leur nom, type, nombre de contacts concernés et date de création. Ils alimentent les colonnes, les filtres, les segments et les balises de personnalisation.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer un attribut",
+                description: "« Créer un attribut » : nom en lettres majuscules, chiffres et tirets bas (50 caractères max), puis un type : Texte, Nombre, Date, Booléen, Catégorie, Choix multiple ou Utilisateur.",
+            },
+            {
+                step: 2,
+                title: "Définir les options",
+                description: "Pour une Catégorie ou un Choix multiple, saisissez la liste des valeurs autorisées.",
+            },
+            {
+                step: 3,
+                title: "Respecter les attributs système",
+                description: "EMAIL, PRENOM, NOM et SOCIETE sont en lecture seule : ils ne peuvent ni être modifiés ni supprimés.",
+            },
+            {
+                step: 4,
+                title: "Utiliser les attributs",
+                description: "Ils apparaissent dans la correspondance des colonnes à l'import, dans « Personnaliser les colonnes » et dans le menu de personnalisation des e-mails.",
+            },
+        ],
+    },
+    imports: {
+        topicSlug: 'imports',
+        title: "Historique des imports",
+        purpose:
+            "L'historique recense chaque import de contacts : fichier, date, utilisateur, statut et compteurs (importés, mis à jour, en échec). Il permet de vérifier un import terminé et de récupérer les erreurs.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Suivre un import",
+                description: "Le statut passe de « En cours » à « Terminé » ; actualisez la page pour voir les compteurs évoluer.",
+            },
+            {
+                step: 2,
+                title: "Télécharger les erreurs",
+                description: "Pour un import avec échecs, téléchargez le fichier CSV des erreurs, corrigez-le et réimportez-le.",
+            },
+            {
+                step: 3,
+                title: "Lancer un nouvel import",
+                description: "Cliquez sur « Importer des contacts » pour ouvrir l'assistant en cinq étapes.",
+            },
+            {
+                step: 4,
+                title: "Retrouver les contacts",
+                description: "Depuis une ligne, ouvrez les listes concernées pour contrôler le résultat.",
+            },
+        ],
+    },
+    'campaign-setup': {
+        topicSlug: 'campaign-setup',
+        title: "Configuration d'une campagne",
+        purpose:
+            "La page de configuration empile cinq cartes avec coche d'achèvement : Expéditeur, Objet, Destinataires, Design et Paramètres supplémentaires. L'en-tête permet de renommer la campagne, d'ouvrir « Aperçu & test » et de « Programmer ».",
+        howToUse: [
+            {
+                step: 1,
+                title: "Compléter les cartes",
+                description: "Choisissez l'expéditeur vérifié ; saisissez l'objet et le texte d'aperçu ; sélectionnez les listes et segments à cibler, et ceux à exclure, avec le nombre de destinataires en direct.",
+            },
+            {
+                step: 2,
+                title: "Concevoir le message",
+                description: "La carte Design ouvre le sélecteur de modèles puis l'éditeur ; réglez ensuite page de désinscription, tags, suivi UTM et pièce jointe dans les paramètres supplémentaires.",
+            },
+            {
+                step: 3,
+                title: "Envoyer un test",
+                description: "« Aperçu & test » affiche le rendu bureau et mobile et envoie un test à cinq adresses au plus.",
+            },
+            {
+                step: 4,
+                title: "Programmer",
+                description: "Une fois la checklist verte, « Programmer » ouvre la confirmation : envoyer maintenant, programmer plus tard, envoyer au meilleur moment ou par lots.",
+            },
+        ],
+    },
+    'campaign-design': {
+        topicSlug: 'campaign-design',
+        title: "Éditeur de design",
+        purpose:
+            "L'éditeur glisser-déposer compose l'e-mail à partir de blocs. Le panneau gauche propose Contenu (Blocs, Sections, Enregistrés) et Style (polices, couleurs, boutons) ; le centre affiche le rendu bureau ou mobile ; le panneau droit règle le bloc sélectionné.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Ajouter des blocs",
+                description: "Glissez un bloc (titre, texte, image, bouton, colonnes…) ou une section prête à l'emploi vers le canevas.",
+            },
+            {
+                step: 2,
+                title: "Personnaliser",
+                description: "Dans un bloc texte, le menu de personnalisation insère des balises comme le prénom ou la société ; le style global s'applique à tout l'e-mail.",
+            },
+            {
+                step: 3,
+                title: "Contrôler le rendu",
+                description: "Basculez entre bureau et mobile, annulez ou rétablissez, puis ouvrez « Aperçu & test ».",
+            },
+            {
+                step: 4,
+                title: "Enregistrer",
+                description: "« Enregistrer et quitter » renvoie à la configuration de la campagne.",
+            },
+        ],
+    },
+    'campaign-report': {
+        topicSlug: 'campaign-report',
+        title: "Rapport de campagne",
+        purpose:
+            "Le rapport détaille les résultats d'une campagne envoyée en cinq onglets : Vue d'ensemble, Délivrabilité, Ouvertures, Clics et Désinscriptions, avec comparaison à la moyenne du compte.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Lire la vue d'ensemble",
+                description: "Les indicateurs Envoyés, Délivrés, Ouvertures uniques, Clics uniques, Désinscriptions et Plaintes sont comparés à votre moyenne ; le graphique suit l'activité par heure puis par jour.",
+            },
+            {
+                step: 2,
+                title: "Analyser clics et ouvertures",
+                description: "L'onglet Clics classe les liens par clics ; Ouvertures détaille domaines, appareils et pays.",
+            },
+            {
+                step: 3,
+                title: "Agir sur les contacts",
+                description: "« Voir les contacts » crée un segment (par exemple « a ouvert la campagne X ») à cibler de nouveau.",
+            },
+            {
+                step: 4,
+                title: "Exporter ou comparer",
+                description: "« Exporter » télécharge l'onglet en CSV ; « Comparer » met plusieurs campagnes côte à côte.",
+            },
+        ],
+    },
+    forms: {
+        topicSlug: 'forms',
+        title: "Formulaires d'inscription",
+        purpose:
+            "La page Formulaires liste vos formulaires d'inscription avec leurs listes cibles, le nombre d'inscriptions et leur statut. Chaque formulaire dispose d'un lien public (/f/…) et d'un code d'intégration.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer un formulaire",
+                description: "« Créer un formulaire d'inscription » ouvre le constructeur : Champs (attributs, champs obligatoires, case RGPD), Design, Paramètres, Partager.",
+            },
+            {
+                step: 2,
+                title: "Régler l'inscription",
+                description: "Choisissez les listes cibles, activez ou non la double confirmation, le message de remerciement ou la redirection.",
+            },
+            {
+                step: 3,
+                title: "Partager",
+                description: "Copiez le lien public ou le code d'intégration (iframe ou HTML) pour votre site.",
+            },
+            {
+                step: 4,
+                title: "Suivre les inscriptions",
+                description: "Le compteur de la liste des formulaires indique les inscriptions reçues.",
+            },
+        ],
+    },
+    'template-edit': {
+        topicSlug: 'template-edit',
+        title: "Édition d'un modèle",
+        purpose:
+            "La page d'édition ouvre le modèle dans le même éditeur glisser-déposer que les campagnes. L'historique des versions permet de revenir à un état antérieur.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Modifier le contenu",
+                description: "Ajoutez ou réorganisez les blocs et sections, réglez le style global.",
+            },
+            {
+                step: 2,
+                title: "Prévisualiser",
+                description: "Contrôlez le rendu bureau et mobile avant d'enregistrer.",
+            },
+            {
+                step: 3,
+                title: "Restaurer une version",
+                description: "Le bouton de restauration rouvre une version précédente du modèle.",
+            },
+            {
+                step: 4,
+                title: "Enregistrer",
+                description: "Enregistrez pour que le modèle à jour soit proposé dans les campagnes.",
+            },
+        ],
+    },
+    'transactional-logs': {
+        topicSlug: 'transactional-logs',
+        title: "Journaux transactionnels",
+        purpose:
+            "Les journaux affichent en temps réel les messages transactionnels et leurs événements : envoyé, délivré, ouvert, cliqué, rebond, invalide, différé, plainte, désinscrit, bloqué, erreur.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Filtrer par événement",
+                description: "Choisissez un type d'événement pour isoler par exemple les rebonds ou les erreurs.",
+            },
+            {
+                step: 2,
+                title: "Rechercher",
+                description: "Cherchez par destinataire, objet ou identifiant de message.",
+            },
+            {
+                step: 3,
+                title: "Déplier une ligne",
+                description: "Une ligne se déplie pour afficher la chronologie complète des événements.",
+            },
+            {
+                step: 4,
+                title: "Diagnostiquer",
+                description: "Croisez avec la Liste noire et les Domaines pour comprendre un blocage.",
+            },
+        ],
+    },
+    'transactional-settings': {
+        topicSlug: 'transactional-settings',
+        title: "SMTP & API",
+        purpose:
+            "Cette page rassemble la configuration technique des envois transactionnels : instructions du relais SMTP, clés API et webhooks sortants.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer une clé API",
+                description: "Créez une clé avec ses autorisations ; copiez-la immédiatement, elle ne sera plus affichée.",
+            },
+            {
+                step: 2,
+                title: "Révoquer",
+                description: "Révoquez toute clé compromise ou inutilisée.",
+            },
+            {
+                step: 3,
+                title: "Configurer un webhook",
+                description: "Indiquez l'URL, les événements à recevoir et le secret de signature ; le journal de livraison montre les tentatives.",
+            },
+            {
+                step: 4,
+                title: "Envoyer par API",
+                description: "Utilisez la clé pour appeler le point d'envoi transactionnel depuis vos applications.",
+            },
+        ],
+    },
+    senders: {
+        topicSlug: 'senders',
+        title: "Expéditeurs",
+        purpose:
+            "Les expéditeurs sont les identités (nom et adresse) utilisables dans le champ « De » des campagnes. Le tableau indique le domaine, l'état de vérification et l'expéditeur par défaut.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Ajouter un expéditeur",
+                description: "Saisissez le nom et l'adresse ; un e-mail de vérification est envoyé, sauf si le domaine est déjà authentifié.",
+            },
+            {
+                step: 2,
+                title: "Vérifier",
+                description: "Cliquez sur le lien reçu pour valider l'expéditeur.",
+            },
+            {
+                step: 3,
+                title: "Définir par défaut",
+                description: "Marquez l'expéditeur proposé d'office dans les nouvelles campagnes.",
+            },
+            {
+                step: 4,
+                title: "Authentifier le domaine",
+                description: "Passez par la page Domaines pour améliorer la délivrabilité.",
+            },
+        ],
+    },
+    domains: {
+        topicSlug: 'domains',
+        title: "Domaines",
+        purpose:
+            "La page Domaines affiche vos domaines d'envoi et l'état de leurs enregistrements DNS : DKIM, SPF et DMARC. Un domaine authentifié protège votre réputation d'expéditeur.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Ajouter un domaine",
+                description: "Saisissez le domaine ; l'application génère les enregistrements à publier.",
+            },
+            {
+                step: 2,
+                title: "Publier les enregistrements",
+                description: "Copiez les valeurs DKIM, SPF et DMARC dans la zone DNS de votre hébergeur.",
+            },
+            {
+                step: 3,
+                title: "Vérifier",
+                description: "« Vérifier » lance le contrôle DNS ; chaque enregistrement affiche son statut.",
+            },
+            {
+                step: 4,
+                title: "Associer les expéditeurs",
+                description: "Une fois authentifié, les expéditeurs du domaine sont validés automatiquement.",
+            },
+        ],
+    },
+    'unsubscribe-pages': {
+        topicSlug: 'unsubscribe-pages',
+        title: "Pages de désinscription",
+        purpose:
+            "Cette page personnalise ce que voit un contact qui se désinscrit : textes, logo et couleurs issus de l'identité visuelle, message de confirmation, et page de préférences (/preferences/…) permettant de se retirer liste par liste.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Modifier les textes",
+                description: "Adaptez le titre, le message et le bouton de confirmation.",
+            },
+            {
+                step: 2,
+                title: "Activer les préférences",
+                description: "Proposez aux contacts de choisir les listes dont ils se désabonnent.",
+            },
+            {
+                step: 3,
+                title: "Prévisualiser",
+                description: "Ouvrez l'aperçu avant d'enregistrer.",
+            },
+            {
+                step: 4,
+                title: "Utiliser dans une campagne",
+                description: "Choisissez la page voulue dans les paramètres supplémentaires d'une campagne.",
+            },
+        ],
+    },
+    'update-profile-forms': {
+        topicSlug: 'update-profile-forms',
+        title: "Formulaires de mise à jour",
+        purpose:
+            "Les formulaires de mise à jour du profil permettent à un contact de corriger lui-même ses attributs via un lien dans l'e-mail.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer un formulaire",
+                description: "Nommez le formulaire et choisissez les attributs modifiables.",
+            },
+            {
+                step: 2,
+                title: "Personnaliser",
+                description: "Réglez textes, bouton et message de remerciement.",
+            },
+            {
+                step: 3,
+                title: "Prévisualiser",
+                description: "Contrôlez l'affichage avant publication.",
+            },
+            {
+                step: 4,
+                title: "Associer à une campagne",
+                description: "Sélectionnez-le dans les paramètres supplémentaires de la campagne.",
+            },
+        ],
+    },
+    automations: {
+        topicSlug: 'automations',
+        title: "Automatisations",
+        purpose:
+            "Une automatisation envoie automatiquement des e-mails à vos contacts lorsqu'un déclencheur se produit (inscription à une liste, entrée dans un segment, date…). La page liste vos scénarios avec leur statut et leurs résultats.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer une automatisation",
+                description: "Cliquez sur « Créer une automatisation », nommez-la et choisissez le scénario de départ.",
+            },
+            {
+                step: 2,
+                title: "Définir le déclencheur",
+                description: "Indiquez ce qui fait entrer un contact dans le scénario : ajout à une liste, segment, date ou événement.",
+            },
+            {
+                step: 3,
+                title: "Composer les étapes",
+                description: "Enchaînez e-mails et délais d'attente ; chaque e-mail utilise un expéditeur vérifié et un modèle.",
+            },
+            {
+                step: 4,
+                title: "Activer et suivre",
+                description: "Activez l'automatisation puis suivez les contacts entrés, les envois et les résultats depuis la liste.",
             },
         ],
     },

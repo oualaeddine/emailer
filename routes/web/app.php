@@ -35,17 +35,12 @@ Route::get('settings/branding', fn () => Inertia::render('Settings/Branding'))
     ->middleware('can:settings.branding.access')
     ->name('settings.branding');
 
-Route::get('recipients/import/pagejaunes', fn () => Inertia::render('Recipients/PageJaunesSearch'))
+Route::get('contacts/pagejaunes', fn () => Inertia::render('Recipients/PageJaunesSearch'))
     ->middleware('can:recipients.import')
     ->name('recipients.import.pagejaunes');
 
-Route::get('recipients', fn () => Inertia::render('Recipients/Index'))
-    ->middleware('can:recipients.view')
-    ->name('recipients.index');
-
-Route::get('recipients/import', fn () => Inertia::render('Recipients/Import'))
-    ->middleware('can:recipients.import')
-    ->name('recipients.import');
+// docs/47 — `/contacts` and `/contacts/imports/new` are served by routes/web/contacts.php
+// and routes/web/imports.php since Wave 2 (Contacts/Index, Contacts/ImportWizard).
 
 Route::get('compose', fn () => Inertia::render('Composer/Index'))
     ->middleware('can:composer.compose')
@@ -59,9 +54,31 @@ Route::get('smtp', fn () => Inertia::render('Smtp/Index'))
     ->middleware('can:smtp.view')
     ->name('smtp.index');
 
+/*
+ | docs/43-brevo-parity-plan.md §43.3 — legacy URLs keep working as permanent
+ | redirects for one release. Same `auth` group, so guests still hit login first.
+ */
+Route::redirect('recipients/import/pagejaunes', '/contacts/pagejaunes', 301);
+Route::redirect('recipients/import', '/contacts/imports/new', 301);
+Route::redirect('recipients', '/contacts', 301);
+
 require __DIR__.'/suppression.php';
 require __DIR__.'/mailbox.php';
 require __DIR__.'/campaigns.php';
 require __DIR__.'/audit.php';
 require __DIR__.'/reporting.php';
 require __DIR__.'/help.php';
+require __DIR__.'/senders.php';
+require __DIR__.'/lists.php';
+require __DIR__.'/imports.php';
+require __DIR__.'/blocklist.php';
+require __DIR__.'/contact-detail.php';
+require __DIR__.'/segments.php';
+require __DIR__.'/contacts.php';
+require __DIR__.'/attributes.php';
+require __DIR__.'/statistics.php';
+require __DIR__.'/editor.php';
+require __DIR__.'/transactional.php';
+require __DIR__.'/transactional-logs.php';
+require __DIR__.'/forms-pages.php';
+require __DIR__.'/automations.php';

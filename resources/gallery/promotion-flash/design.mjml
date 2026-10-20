@@ -1,0 +1,19 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#C4314B" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #C4314B; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#C4314B">Votre marque</mj-text></mj-column></mj-section>
+    <mj-section background-color="#FDF3F4" padding="32px 24px"><mj-column><mj-text color="#C4314B" font-size="12px" font-weight="700" text-transform="uppercase" letter-spacing="1px">Offre limitée</mj-text><mj-text font-size="28px" font-weight="700" line-height="1.25">-20 % sur toute la boutique</mj-text><mj-text font-size="16px">Jusqu’à dimanche minuit seulement. Profitez-en avant la fin de l’offre.</mj-text><mj-button href="#">J’en profite</mj-button></mj-column></mj-section>
+    <mj-section padding="8px 24px"><mj-column><mj-text align="center" color="#616161">Votre code promo</mj-text><mj-text align="center" font-size="26px" font-weight="700" letter-spacing="4px" color="#C4314B" container-background-color="#F5F5F5">PROMO20</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 12px"><mj-column><mj-text font-weight="700">Livraison offerte</mj-text><mj-text>Dès 5 000 DA d’achat.</mj-text></mj-column><mj-column><mj-text font-weight="700">Retours faciles</mj-text><mj-text>Sous 14 jours.</mj-text></mj-column><mj-column><mj-text font-weight="700">Paiement sécurisé</mj-text><mj-text>Plusieurs moyens au choix.</mj-text></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Conditions</mj-text><mj-text>Offre non cumulable, valable une fois par client. Voir les conditions complètes sur notre site.</mj-text></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

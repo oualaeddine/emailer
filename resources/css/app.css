@@ -24,3 +24,47 @@
     box-sizing: border-box !important;
 }
 
+
+/* Phones: native Fluent tables scroll sideways instead of squeezing columns
+   until long values (e-mails, dates) overlap the next column. */
+@media (max-width: 719px) {
+    table.fui-Table {
+        display: block !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Long unbroken values (e-mail addresses, URLs) wrap inside their cell instead
+   of spilling over the next column; truncated cells keep their ellipsis. */
+td.fui-TableCell,
+th.fui-TableHeaderCell {
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 719px) {
+    .fui-DataGrid {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .fui-DataGrid .fui-DataGridRow {
+        min-width: 600px;
+    }
+    /* DataGrid cells are flex items with no minimum width: on phones only
+       `anywhere` lets long e-mails wrap instead of spilling over. */
+    .fui-DataGridCell,
+    div.fui-TableCell {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* docs/07-ui-design.md §7.11 — canvas behind the FluentProvider (overscroll,
+   first paint before React mounts). data-theme is set by the inline script in
+   app.blade.php, then kept in sync by resources/js/Theme/ThemeContext.tsx.
+   The value mirrors colorNeutralBackground3 of pageJaunesDarkTheme; light keeps
+   the browser's white canvas. */
+html[data-theme='dark'],
+html[data-theme='dark'] body {
+    background-color: #181611;
+    color: #ffffff;
+}

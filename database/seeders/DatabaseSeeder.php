@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolePermissionSeeder::class);
         $this->call(SettingsSeeder::class);
+        $this->call(DefaultSenderSeeder::class);
+        $this->call(ContactAttributeSeeder::class);
+        $this->call(TemplateGallerySeeder::class);
 
         $this->call(SuperAdminSeeder::class);
       //  $this->call(AlgeriaB2bDemoSeeder::class);

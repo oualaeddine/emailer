@@ -41,6 +41,7 @@ class FakeSmtpManager implements SmtpManagerContract
             // email string accessor.
             'to' => $email->getTo()[0]->getAddress(),
             'subject' => (string) $email->getSubject(),
+            'email' => $email,
         ];
     }
 

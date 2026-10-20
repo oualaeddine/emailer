@@ -1,0 +1,180 @@
+/*
+ * WP-60 (from the WP-60S spike) — GrapesJS restyled with Fluent tokens (docs/46-editor-spike.md §5).
+ *
+ * FluentProvider exposes every token as a CSS custom property on its root
+ * element (e.g. tokens.colorNeutralBackground1 === "var(--colorNeutralBackground1)"),
+ * so the --gjs-* theme variables are simply re-pointed at Fluent variables
+ * inside `.pj-gjs` (the element wrapping canvas + managers). Light/dark
+ * follows the FluentProvider theme automatically.
+ */
+.pj-gjs {
+    --gjs-main-font: var(--fontFamilyBase);
+    --gjs-font-size: var(--fontSizeBase200);
+    --gjs-primary-color: var(--colorNeutralBackground1);
+    --gjs-secondary-color: var(--colorNeutralForeground1);
+    --gjs-tertiary-color: var(--colorBrandBackground);
+    --gjs-quaternary-color: var(--colorBrandForeground1);
+    --gjs-main-color: var(--colorNeutralBackground1);
+    --gjs-main-dark-color: var(--colorNeutralBackground3);
+    --gjs-main-light-color: var(--colorNeutralBackground2);
+    --gjs-secondary-dark-color: var(--colorNeutralStroke2);
+    --gjs-secondary-light-color: var(--colorNeutralForeground2);
+    --gjs-soft-light-color: var(--colorNeutralBackground1Hover);
+    --gjs-light-border: var(--colorNeutralStroke2);
+    --gjs-font-color: var(--colorNeutralForeground1);
+    --gjs-font-color-active: var(--colorNeutralForeground1);
+    --gjs-arrow-color: var(--colorNeutralForeground3);
+    --gjs-dark-text-shadow: transparent;
+    --gjs-color-blue: var(--colorBrandBackground);
+    --gjs-color-highlight: var(--colorBrandStroke1);
+    --gjs-color-green: var(--colorPaletteGreenBorderActive);
+    --gjs-color-red: var(--colorPaletteRedForeground1);
+    --gjs-color-yellow: var(--colorPaletteYellowBorderActive);
+    --gjs-color-warn: var(--colorPaletteMarigoldBorderActive);
+    --gjs-placeholder-background-color: var(--colorBrandStroke1);
+    --gjs-canvas-top: 0px;
+    --gjs-left-width: 0px;
+
+    font-family: var(--fontFamilyBase);
+    color: var(--colorNeutralForeground1);
+}
+
+/* Canvas fills its host: no GrapesJS panels are rendered. */
+.pj-gjs .gjs-editor {
+    background-color: var(--colorNeutralBackground3);
+}
+.pj-gjs .gjs-cv-canvas {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    background-color: var(--colorNeutralBackground3);
+}
+.pj-gjs .gjs-pn-panels,
+.pj-gjs .gjs-pn-panel {
+    display: none;
+}
+
+/* Toolbar + badge on the selected component: brand yellow, dark text. */
+.pj-gjs .gjs-toolbar,
+.pj-gjs .gjs-badge {
+    background-color: var(--colorBrandBackground);
+    color: var(--colorNeutralForegroundOnBrand);
+    border-radius: var(--borderRadiusSmall);
+    font-family: var(--fontFamilyBase);
+}
+.pj-gjs .gjs-toolbar-item {
+    color: var(--colorNeutralForegroundOnBrand);
+}
+.pj-gjs .gjs-resizer-h {
+    border-color: var(--colorBrandStroke1);
+}
+
+/* Style manager: sector headers and fields as Fluent inputs. */
+.pj-gjs .gjs-sm-sector {
+    border-bottom: 1px solid var(--colorNeutralStroke2);
+}
+.pj-gjs .gjs-sm-sector-title,
+.pj-gjs .gjs-layer-title {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    font-weight: var(--fontWeightSemibold);
+    font-size: var(--fontSizeBase300);
+    letter-spacing: normal;
+    border-bottom: none;
+    padding: var(--spacingVerticalS) var(--spacingHorizontalM);
+}
+.pj-gjs .gjs-sm-sector-title:hover {
+    background-color: var(--colorNeutralBackground1Hover);
+}
+.pj-gjs .gjs-sm-label,
+.pj-gjs .gjs-label {
+    color: var(--colorNeutralForeground2);
+    font-size: var(--fontSizeBase200);
+}
+.pj-gjs .gjs-field {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    border: 1px solid var(--colorNeutralStroke1);
+    border-bottom-color: var(--colorNeutralStrokeAccessible);
+    border-radius: var(--borderRadiusMedium);
+}
+.pj-gjs .gjs-field:focus-within {
+    border-bottom: 2px solid var(--colorCompoundBrandStroke);
+}
+.pj-gjs .gjs-field input,
+.pj-gjs .gjs-field select,
+.pj-gjs .gjs-field textarea {
+    color: var(--colorNeutralForeground1);
+    font-family: var(--fontFamilyBase);
+}
+.pj-gjs .gjs-radio-item {
+    border-color: var(--colorNeutralStroke1);
+}
+.pj-gjs .gjs-radio-item input:checked + .gjs-radio-item-label {
+    background-color: var(--colorNeutralBackground1Selected);
+}
+.pj-gjs .gjs-sm-btn,
+.pj-gjs .gjs-btn-prim {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    border: 1px solid var(--colorNeutralStroke1);
+    border-radius: var(--borderRadiusMedium);
+    box-shadow: none;
+    text-shadow: none;
+}
+.pj-gjs .gjs-sm-btn:hover,
+.pj-gjs .gjs-btn-prim:hover {
+    background-color: var(--colorNeutralBackground1Hover);
+}
+
+/* Layer manager rows. */
+.pj-gjs .gjs-layer {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    font-size: var(--fontSizeBase200);
+}
+.pj-gjs .gjs-layer.gjs-selected .gjs-layer-item {
+    background-color: var(--colorBrandBackground2);
+}
+.pj-gjs .gjs-layer-item:hover {
+    background-color: var(--colorNeutralBackground1Hover);
+}
+
+/* Rich text editor toolbar (rendered in the parent document). */
+.pj-gjs .gjs-rte-toolbar {
+    background-color: var(--colorNeutralBackground1);
+    border: 1px solid var(--colorNeutralStroke1);
+    border-radius: var(--borderRadiusMedium);
+    box-shadow: var(--shadow8);
+}
+.pj-gjs .gjs-rte-action {
+    color: var(--colorNeutralForeground1);
+    border-right-color: var(--colorNeutralStroke2);
+}
+.pj-gjs .gjs-rte-active {
+    background-color: var(--colorNeutralBackground1Selected);
+}
+
+/* Modals (asset manager, code viewer) inherit the same palette. */
+.pj-gjs .gjs-mdl-dialog {
+    background-color: var(--colorNeutralBackground1);
+    color: var(--colorNeutralForeground1);
+    border-radius: var(--borderRadiusXLarge);
+    box-shadow: var(--shadow64);
+}
+.pj-gjs .gjs-mdl-header {
+    border-bottom: 1px solid var(--colorNeutralStroke2);
+}
+
+/* Personalisation <select> inside the RTE toolbar. */
+.pj-gjs .gjs-rte-action select.gjs-field {
+    width: auto;
+    max-width: 160px;
+    padding: 0 var(--spacingHorizontalXS);
+    font-size: var(--fontSizeBase200);
+}
+
+/* The RTE toolbar and modals are appended to the editor container, which sits inside .pj-gjs. */
+.pj-gjs .gjs-rte-toolbar .pj-merge-select {
+    height: 24px;
+}

@@ -8,6 +8,7 @@ use App\Domain\Enums\RoleName;
 use App\Domain\Enums\SuppressionReason;
 use App\Modules\Campaigns\Enums\CampaignStatus;
 use App\Modules\Campaigns\Jobs\DispatchCampaignJob;
+use App\Modules\Campaigns\Models\CampaignAudience;
 use App\Modules\Campaigns\Services\CampaignService;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
 use App\Modules\Identity\Models\User;
@@ -16,6 +17,7 @@ use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Recipients\Models\Segment;
 use App\Modules\Suppression\Services\SuppressionManager;
 use App\Modules\Templates\Models\Template;
+use App\Modules\Senders\Models\Sender;
 use App\Modules\Tracking\Models\Message;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -100,7 +102,8 @@ class CampaignLifecycleTest extends TestCase
             'name' => 'Campagne Test',
             'template_id' => $template->id,
             'subject' => 'Objet de test',
-            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p>',
+            'html_body' => '<p>Bonjour {{recipient.first_name|there}}</p><a href="{{ unsubscribe }}">Se désinscrire</a>',
+            'sender_id' => Sender::factory()->verified()->create()->id,
             'recipient_list_id' => $list->id,
         ];
     }
@@ -134,26 +137,36 @@ class CampaignLifecycleTest extends TestCase
         $this->assertDatabaseHas('campaigns', ['name' => 'Campagne Test', 'status' => 'draft']);
     }
 
-    public function test_creating_a_campaign_requires_exactly_one_of_recipient_list_or_segment(): void
+    /**
+     * docs/45 §45.4.2 / §45.10 — the one-list-or-one-segment rule is gone:
+     * Brevo asks only for the internal name, and the legacy
+     * `recipient_list_id` / `segment_id` keys are converted to `include`
+     * audience rows (both at once is now a valid two-target audience).
+     */
+    public function test_creating_a_campaign_converts_legacy_targets_into_audience_rows(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
         $template = $this->createTemplate();
         $list = $this->createStaticList();
         $segment = $this->createSegment();
 
-        // Neither set.
+        // Neither set: only the internal name is required.
         $this->actingAs($operator)->postJson('/api/v1/campaigns', [
             'name' => 'Sans cible',
             'template_id' => $template->uuid,
-        ])->assertStatus(422);
+        ])->assertCreated()->assertJsonPath('data.audience.lists', []);
 
-        // Both set.
-        $this->actingAs($operator)->postJson('/api/v1/campaigns', [
+        // Both set: two include rows.
+        $response = $this->actingAs($operator)->postJson('/api/v1/campaigns', [
             'name' => 'Deux cibles',
             'template_id' => $template->uuid,
             'recipient_list_id' => $list->uuid,
             'segment_id' => $segment->uuid,
-        ])->assertStatus(422);
+        ])->assertCreated();
+
+        $response->assertJsonPath('data.audience.lists.0.id', $list->uuid);
+        $response->assertJsonPath('data.audience.segments.0.id', $segment->uuid);
+        $this->assertSame(2, CampaignAudience::query()->where('mode', 'include')->count());
     }
 
     public function test_full_lifecycle_draft_to_scheduled_to_running_to_completed(): void
@@ -270,12 +283,12 @@ class CampaignLifecycleTest extends TestCase
         Bus::assertDispatched(SendEmailJob::class, 2);
     }
 
-    public function test_cancel_is_allowed_from_draft_scheduled_and_paused(): void
+    public function test_cancel_is_allowed_from_scheduled_and_paused(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
         $template = $this->createTemplate();
 
-        foreach ([CampaignStatus::Draft, CampaignStatus::Scheduled, CampaignStatus::Paused] as $fromStatus) {
+        foreach ([CampaignStatus::Scheduled, CampaignStatus::Paused] as $fromStatus) {
             $list = $this->createStaticList(1);
             $campaign = app(CampaignService::class)->create($this->draftData($template, $list), $operator);
             $campaign->update(['status' => $fromStatus->value]);
@@ -285,6 +298,15 @@ class CampaignLifecycleTest extends TestCase
             $response->assertOk();
             $response->assertJsonPath('data.status', CampaignStatus::Cancelled->value);
         }
+    }
+
+    public function test_cancel_is_rejected_from_draft_with_409(): void
+    {
+        $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
+        $campaign = app(CampaignService::class)->create($this->draftData($this->createTemplate(), $this->createStaticList(1)), $operator);
+
+        $this->actingAs($operator)->postJson("/api/v1/campaigns/{$campaign->uuid}/cancel")->assertStatus(409);
+        $this->assertSame(CampaignStatus::Draft->value, $campaign->fresh()->status);
     }
 
     public function test_cancel_is_rejected_from_completed(): void
@@ -416,6 +438,10 @@ class CampaignLifecycleTest extends TestCase
         $this->assertSame(2, $targeted->count());
     }
 
+    /**
+     * docs/45 §45.4.2 — PATCH is allowed in draft/scheduled/suspended and
+     * answers 409 (state conflict) otherwise.
+     */
     public function test_update_is_rejected_once_campaign_is_no_longer_draft(): void
     {
         $operator = User::factory()->withRole(RoleName::MarketingOperator)->create();
@@ -426,6 +452,6 @@ class CampaignLifecycleTest extends TestCase
         $campaign->update(['status' => CampaignStatus::Running->value]);
 
         $this->actingAs($operator)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['name' => 'Nouveau nom'])
-            ->assertStatus(422);
+            ->assertStatus(409);
     }
 }
