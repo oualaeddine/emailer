@@ -23,6 +23,7 @@ Scope: full HTTP request → controller → service → DB round trip using Lara
 - **SMTP testing**: a fake SMTP transport (Laravel's `Mail::fake()` equivalent extended with a custom fake transport that can simulate provider accept/reject/bounce responses) validates the full Delivery Engine flow (rotation, quota decrement, retry, failover) without hitting real providers. A smaller, manually-triggered suite validates against a real sandbox SMTP provider (e.g. Mailtrap-style test inbox) before releases.
 - **External PageJaunes DB integration**: tested against a disposable Postgres instance seeded with a representative fixture schema/data mirroring the expected external shape (see [06-pagejaunes-integration.md](06-pagejaunes-integration.md)), verifying the repository's read-only boundary (a test asserts no write-capable SQL is ever issued on that connection) and circuit-breaker behavior (simulated connection failure).
 - **Webhook integration**: signature verification tests per configured provider, including intentionally-invalid-signature rejection tests (28.8).
+- **End-to-end smoke suite**: a real Chromium drives the built app (every page at desktop and phone width, the campaign golden path, a double-opt-in form + automation, restricted API keys) against `php -S`, a fresh database and a local SMTP sink — run with `npm run test:e2e` (CI job `e2e`); see [tests/e2e/README.md](../tests/e2e/README.md).
 
 ## 32.5 Performance Testing
 
