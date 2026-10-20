@@ -24,3 +24,6 @@ Schedule::command('exports:prune')->daily();
 // docs/45 §45.9 — WP-70 campaign stats rollup (fans out per active campaign) and monthly GeoLite2 refresh.
 Schedule::job(new \App\Modules\Reporting\Jobs\RollupCampaignStatsJob)->hourly();
 Schedule::command('geoip:update')->monthly();
+
+// docs/45 §45.9 — WP-91 automation tick: date-anniversary scan + advance due runs.
+Schedule::job(new \App\Modules\Automations\Jobs\AdvanceAutomationRunsJob)->everyMinute()->withoutOverlapping();
