@@ -1,10 +1,10 @@
 {
-  "_DocContent-B_2jKg4X.js": {
-    "file": "assets/DocContent-B_2jKg4X.js",
+  "_DocContent-Cw560r8a.js": {
+    "file": "assets/DocContent-Cw560r8a.js",
     "name": "DocContent",
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_fluentui-mKPwQTMF.js"
+      "_fluentui-DsiGiFE8.js"
     ],
     "dynamicImports": [
       "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
@@ -19,20 +19,39 @@
       "resources/docs/ar/flows/flow-import-recipients-csv.md?raw",
       "resources/docs/ar/flows/flow-source-pagejaunes.md?raw",
       "resources/docs/ar/pages/admin-users.md?raw",
+      "resources/docs/ar/pages/attributes.md?raw",
       "resources/docs/ar/pages/audit-log.md?raw",
+      "resources/docs/ar/pages/automations.md?raw",
+      "resources/docs/ar/pages/campaign-design.md?raw",
+      "resources/docs/ar/pages/campaign-report.md?raw",
+      "resources/docs/ar/pages/campaign-setup.md?raw",
       "resources/docs/ar/pages/campaigns.md?raw",
       "resources/docs/ar/pages/composer.md?raw",
+      "resources/docs/ar/pages/contact-detail.md?raw",
       "resources/docs/ar/pages/dashboard.md?raw",
+      "resources/docs/ar/pages/domains.md?raw",
+      "resources/docs/ar/pages/forms.md?raw",
+      "resources/docs/ar/pages/imports.md?raw",
+      "resources/docs/ar/pages/list-detail.md?raw",
+      "resources/docs/ar/pages/lists.md?raw",
       "resources/docs/ar/pages/login.md?raw",
       "resources/docs/ar/pages/mailbox.md?raw",
       "resources/docs/ar/pages/pagejaunes-search.md?raw",
       "resources/docs/ar/pages/recipients-import.md?raw",
       "resources/docs/ar/pages/recipients.md?raw",
       "resources/docs/ar/pages/reporting.md?raw",
+      "resources/docs/ar/pages/segment-edit.md?raw",
+      "resources/docs/ar/pages/segments.md?raw",
+      "resources/docs/ar/pages/senders.md?raw",
       "resources/docs/ar/pages/settings-branding.md?raw",
       "resources/docs/ar/pages/smtp.md?raw",
       "resources/docs/ar/pages/suppression.md?raw",
+      "resources/docs/ar/pages/template-edit.md?raw",
       "resources/docs/ar/pages/templates.md?raw",
+      "resources/docs/ar/pages/transactional-logs.md?raw",
+      "resources/docs/ar/pages/transactional-settings.md?raw",
+      "resources/docs/ar/pages/unsubscribe-pages.md?raw",
+      "resources/docs/ar/pages/update-profile-forms.md?raw",
       "resources/docs/fr/dialogs/dialog-campaign-wizard.md?raw",
       "resources/docs/fr/dialogs/dialog-recipient-form.md?raw",
       "resources/docs/fr/dialogs/dialog-smtp-account-form.md?raw",
@@ -45,24 +64,43 @@
       "resources/docs/fr/flows/flow-import-recipients-csv.md?raw",
       "resources/docs/fr/flows/flow-source-pagejaunes.md?raw",
       "resources/docs/fr/pages/admin-users.md?raw",
+      "resources/docs/fr/pages/attributes.md?raw",
       "resources/docs/fr/pages/audit-log.md?raw",
+      "resources/docs/fr/pages/automations.md?raw",
+      "resources/docs/fr/pages/campaign-design.md?raw",
+      "resources/docs/fr/pages/campaign-report.md?raw",
+      "resources/docs/fr/pages/campaign-setup.md?raw",
       "resources/docs/fr/pages/campaigns.md?raw",
       "resources/docs/fr/pages/composer.md?raw",
+      "resources/docs/fr/pages/contact-detail.md?raw",
       "resources/docs/fr/pages/dashboard.md?raw",
+      "resources/docs/fr/pages/domains.md?raw",
+      "resources/docs/fr/pages/forms.md?raw",
+      "resources/docs/fr/pages/imports.md?raw",
+      "resources/docs/fr/pages/list-detail.md?raw",
+      "resources/docs/fr/pages/lists.md?raw",
       "resources/docs/fr/pages/login.md?raw",
       "resources/docs/fr/pages/mailbox.md?raw",
       "resources/docs/fr/pages/pagejaunes-search.md?raw",
       "resources/docs/fr/pages/recipients-import.md?raw",
       "resources/docs/fr/pages/recipients.md?raw",
       "resources/docs/fr/pages/reporting.md?raw",
+      "resources/docs/fr/pages/segment-edit.md?raw",
+      "resources/docs/fr/pages/segments.md?raw",
+      "resources/docs/fr/pages/senders.md?raw",
       "resources/docs/fr/pages/settings-branding.md?raw",
       "resources/docs/fr/pages/smtp.md?raw",
       "resources/docs/fr/pages/suppression.md?raw",
-      "resources/docs/fr/pages/templates.md?raw"
+      "resources/docs/fr/pages/template-edit.md?raw",
+      "resources/docs/fr/pages/templates.md?raw",
+      "resources/docs/fr/pages/transactional-logs.md?raw",
+      "resources/docs/fr/pages/transactional-settings.md?raw",
+      "resources/docs/fr/pages/unsubscribe-pages.md?raw",
+      "resources/docs/fr/pages/update-profile-forms.md?raw"
     ]
   },
-  "_fluentui-mKPwQTMF.js": {
-    "file": "assets/fluentui-mKPwQTMF.js",
+  "_fluentui-DsiGiFE8.js": {
+    "file": "assets/fluentui-DsiGiFE8.js",
     "name": "fluentui",
     "imports": [
       "_vendor-nfStYNJH.js"
@@ -167,10 +205,40 @@
     "src": "resources/docs/ar/pages/admin-users.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/ar/pages/attributes.md?raw": {
+    "file": "assets/attributes-BdLAyFPe.js",
+    "name": "attributes",
+    "src": "resources/docs/ar/pages/attributes.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/ar/pages/audit-log.md?raw": {
     "file": "assets/audit-log-CC0qb3b_.js",
     "name": "audit-log",
     "src": "resources/docs/ar/pages/audit-log.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/automations.md?raw": {
+    "file": "assets/automations-Y9Im5fvX.js",
+    "name": "automations",
+    "src": "resources/docs/ar/pages/automations.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/campaign-design.md?raw": {
+    "file": "assets/campaign-design-CN3CYiiZ.js",
+    "name": "campaign-design",
+    "src": "resources/docs/ar/pages/campaign-design.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/campaign-report.md?raw": {
+    "file": "assets/campaign-report-C2VLqoml.js",
+    "name": "campaign-report",
+    "src": "resources/docs/ar/pages/campaign-report.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/campaign-setup.md?raw": {
+    "file": "assets/campaign-setup-JYQB6zEL.js",
+    "name": "campaign-setup",
+    "src": "resources/docs/ar/pages/campaign-setup.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/campaigns.md?raw": {
@@ -185,10 +253,46 @@
     "src": "resources/docs/ar/pages/composer.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/ar/pages/contact-detail.md?raw": {
+    "file": "assets/contact-detail-BKHvedh1.js",
+    "name": "contact-detail",
+    "src": "resources/docs/ar/pages/contact-detail.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/ar/pages/dashboard.md?raw": {
     "file": "assets/dashboard-BwG9np9o.js",
     "name": "dashboard",
     "src": "resources/docs/ar/pages/dashboard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/domains.md?raw": {
+    "file": "assets/domains-CRo2px0v.js",
+    "name": "domains",
+    "src": "resources/docs/ar/pages/domains.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/forms.md?raw": {
+    "file": "assets/forms-8U3XWC-t.js",
+    "name": "forms",
+    "src": "resources/docs/ar/pages/forms.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/imports.md?raw": {
+    "file": "assets/imports-BA494HSr.js",
+    "name": "imports",
+    "src": "resources/docs/ar/pages/imports.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/list-detail.md?raw": {
+    "file": "assets/list-detail-COGcz1K4.js",
+    "name": "list-detail",
+    "src": "resources/docs/ar/pages/list-detail.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/lists.md?raw": {
+    "file": "assets/lists-CNAKVT2c.js",
+    "name": "lists",
+    "src": "resources/docs/ar/pages/lists.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/ar/pages/login.md?raw": {
@@ -227,6 +331,24 @@
     "src": "resources/docs/ar/pages/reporting.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/ar/pages/segment-edit.md?raw": {
+    "file": "assets/segment-edit-DjQV3I-O.js",
+    "name": "segment-edit",
+    "src": "resources/docs/ar/pages/segment-edit.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/segments.md?raw": {
+    "file": "assets/segments-BqLxWP_p.js",
+    "name": "segments",
+    "src": "resources/docs/ar/pages/segments.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/senders.md?raw": {
+    "file": "assets/senders-HqDhub0G.js",
+    "name": "senders",
+    "src": "resources/docs/ar/pages/senders.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/ar/pages/settings-branding.md?raw": {
     "file": "assets/settings-branding-DSVQ8uHy.js",
     "name": "settings-branding",
@@ -245,10 +367,40 @@
     "src": "resources/docs/ar/pages/suppression.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/ar/pages/template-edit.md?raw": {
+    "file": "assets/template-edit-5UKIhR0U.js",
+    "name": "template-edit",
+    "src": "resources/docs/ar/pages/template-edit.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/ar/pages/templates.md?raw": {
     "file": "assets/templates-byR5b1EX.js",
     "name": "templates",
     "src": "resources/docs/ar/pages/templates.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/transactional-logs.md?raw": {
+    "file": "assets/transactional-logs-YJHncwjA.js",
+    "name": "transactional-logs",
+    "src": "resources/docs/ar/pages/transactional-logs.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/transactional-settings.md?raw": {
+    "file": "assets/transactional-settings-BI0rLfzx.js",
+    "name": "transactional-settings",
+    "src": "resources/docs/ar/pages/transactional-settings.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/unsubscribe-pages.md?raw": {
+    "file": "assets/unsubscribe-pages-BMQSX0CT.js",
+    "name": "unsubscribe-pages",
+    "src": "resources/docs/ar/pages/unsubscribe-pages.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/ar/pages/update-profile-forms.md?raw": {
+    "file": "assets/update-profile-forms-B8DcFu5y.js",
+    "name": "update-profile-forms",
+    "src": "resources/docs/ar/pages/update-profile-forms.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/fr/dialogs/dialog-campaign-wizard.md?raw": {
@@ -323,10 +475,40 @@
     "src": "resources/docs/fr/pages/admin-users.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/fr/pages/attributes.md?raw": {
+    "file": "assets/attributes-VvksZ0M3.js",
+    "name": "attributes",
+    "src": "resources/docs/fr/pages/attributes.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/fr/pages/audit-log.md?raw": {
     "file": "assets/audit-log-DiG8k7hl.js",
     "name": "audit-log",
     "src": "resources/docs/fr/pages/audit-log.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/automations.md?raw": {
+    "file": "assets/automations-enutgiDt.js",
+    "name": "automations",
+    "src": "resources/docs/fr/pages/automations.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/campaign-design.md?raw": {
+    "file": "assets/campaign-design-B10jgNfm.js",
+    "name": "campaign-design",
+    "src": "resources/docs/fr/pages/campaign-design.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/campaign-report.md?raw": {
+    "file": "assets/campaign-report-BdoG0_Ml.js",
+    "name": "campaign-report",
+    "src": "resources/docs/fr/pages/campaign-report.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/campaign-setup.md?raw": {
+    "file": "assets/campaign-setup-DIl5s0tn.js",
+    "name": "campaign-setup",
+    "src": "resources/docs/fr/pages/campaign-setup.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/campaigns.md?raw": {
@@ -341,10 +523,46 @@
     "src": "resources/docs/fr/pages/composer.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/fr/pages/contact-detail.md?raw": {
+    "file": "assets/contact-detail-BGlBE1q1.js",
+    "name": "contact-detail",
+    "src": "resources/docs/fr/pages/contact-detail.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/fr/pages/dashboard.md?raw": {
     "file": "assets/dashboard-BbQNozky.js",
     "name": "dashboard",
     "src": "resources/docs/fr/pages/dashboard.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/domains.md?raw": {
+    "file": "assets/domains-BQ0V760m.js",
+    "name": "domains",
+    "src": "resources/docs/fr/pages/domains.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/forms.md?raw": {
+    "file": "assets/forms-O2ntC1XR.js",
+    "name": "forms",
+    "src": "resources/docs/fr/pages/forms.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/imports.md?raw": {
+    "file": "assets/imports-CtZLX9yH.js",
+    "name": "imports",
+    "src": "resources/docs/fr/pages/imports.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/list-detail.md?raw": {
+    "file": "assets/list-detail-BODugygl.js",
+    "name": "list-detail",
+    "src": "resources/docs/fr/pages/list-detail.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/lists.md?raw": {
+    "file": "assets/lists-C0bMvvcQ.js",
+    "name": "lists",
+    "src": "resources/docs/fr/pages/lists.md?raw",
     "isDynamicEntry": true
   },
   "resources/docs/fr/pages/login.md?raw": {
@@ -383,6 +601,24 @@
     "src": "resources/docs/fr/pages/reporting.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/fr/pages/segment-edit.md?raw": {
+    "file": "assets/segment-edit-DnEfTYn4.js",
+    "name": "segment-edit",
+    "src": "resources/docs/fr/pages/segment-edit.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/segments.md?raw": {
+    "file": "assets/segments-FnwXvWtj.js",
+    "name": "segments",
+    "src": "resources/docs/fr/pages/segments.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/senders.md?raw": {
+    "file": "assets/senders-DZ3xQJjF.js",
+    "name": "senders",
+    "src": "resources/docs/fr/pages/senders.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/fr/pages/settings-branding.md?raw": {
     "file": "assets/settings-branding-DiOnRvDD.js",
     "name": "settings-branding",
@@ -401,21 +637,51 @@
     "src": "resources/docs/fr/pages/suppression.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/fr/pages/template-edit.md?raw": {
+    "file": "assets/template-edit-CUALCIHI.js",
+    "name": "template-edit",
+    "src": "resources/docs/fr/pages/template-edit.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/docs/fr/pages/templates.md?raw": {
     "file": "assets/templates-Dlvm_zXi.js",
     "name": "templates",
     "src": "resources/docs/fr/pages/templates.md?raw",
     "isDynamicEntry": true
   },
+  "resources/docs/fr/pages/transactional-logs.md?raw": {
+    "file": "assets/transactional-logs-DbTWt-4w.js",
+    "name": "transactional-logs",
+    "src": "resources/docs/fr/pages/transactional-logs.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/transactional-settings.md?raw": {
+    "file": "assets/transactional-settings-CgDoFx3a.js",
+    "name": "transactional-settings",
+    "src": "resources/docs/fr/pages/transactional-settings.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/unsubscribe-pages.md?raw": {
+    "file": "assets/unsubscribe-pages-uUYjRkbW.js",
+    "name": "unsubscribe-pages",
+    "src": "resources/docs/fr/pages/unsubscribe-pages.md?raw",
+    "isDynamicEntry": true
+  },
+  "resources/docs/fr/pages/update-profile-forms.md?raw": {
+    "file": "assets/update-profile-forms-BQXyjy_1.js",
+    "name": "update-profile-forms",
+    "src": "resources/docs/fr/pages/update-profile-forms.md?raw",
+    "isDynamicEntry": true
+  },
   "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx": {
-    "file": "assets/EmailBuilder-CVaJ3cgf.js",
+    "file": "assets/EmailBuilder-B5ue3rYr.js",
     "name": "EmailBuilder",
     "src": "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
       "resources/js/app.tsx",
-      "_fluentui-mKPwQTMF.js",
+      "_fluentui-DsiGiFE8.js",
       "_grapesjs-D88KzZFl.js"
     ],
     "css": [
@@ -424,43 +690,43 @@
     ]
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-C2XAwCTM.js",
+    "file": "assets/HelpCenter-BgDc35eG.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_DocContent-B_2jKg4X.js",
+      "_DocContent-Cw560r8a.js",
       "resources/js/app.tsx",
-      "_fluentui-mKPwQTMF.js"
+      "_fluentui-DsiGiFE8.js"
     ],
     "css": [
       "assets/app-QVbyhFDB.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody--fpEbkD3.js",
+    "file": "assets/HelpDialogBody-FWXeGNt_.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
       "resources/js/app.tsx",
-      "_DocContent-B_2jKg4X.js",
-      "_fluentui-mKPwQTMF.js"
+      "_DocContent-Cw560r8a.js",
+      "_fluentui-DsiGiFE8.js"
     ],
     "css": [
       "assets/app-QVbyhFDB.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-COJDySoK.js",
+    "file": "assets/app-DyuBjZRv.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
       "_vendor-nfStYNJH.js",
-      "_fluentui-mKPwQTMF.js"
+      "_fluentui-DsiGiFE8.js"
     ],
     "dynamicImports": [
       "resources/js/Components/Help/HelpDialogBody.tsx",
