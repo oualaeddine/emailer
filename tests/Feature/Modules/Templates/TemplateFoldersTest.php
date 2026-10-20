@@ -72,7 +72,7 @@ class TemplateFoldersTest extends TestCase
 
         $this->actingAs($this->manager)->getJson("/api/v1/templates?folder_id={$folder->uuid}")
             ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $inside->uuid);
-        $this->actingAs($this->manager)->getJson('/api/v1/templates?folder_id=none')
+        $this->actingAs($this->manager)->getJson('/api/v1/templates?folder_id=none&scope=marketing')
             ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $outside->uuid);
 
         $this->actingAs($this->manager)->getJson('/api/v1/template-folders')->assertJsonPath('data.0.items_count', 1);

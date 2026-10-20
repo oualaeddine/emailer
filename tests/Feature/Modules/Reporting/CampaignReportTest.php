@@ -10,7 +10,6 @@ use App\Modules\Recipients\Models\Segment;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Tests\Feature\Modules\Reporting\Support\RollupTables;
 use Tests\Feature\Modules\Reporting\Support\SeedsReportData;
 use Tests\TestCase;
 
@@ -26,7 +25,6 @@ class CampaignReportTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        RollupTables::ensure();
         $this->seed(RolePermissionSeeder::class);
         $this->manager = User::factory()->withRole(RoleName::MarketingManager)->create();
     }
