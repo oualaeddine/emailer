@@ -8,6 +8,7 @@ use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
 use App\Domain\Events\UserLoggedIn;
 use App\Domain\Events\UserLoginFailed;
+use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
 use App\Modules\Audit\Services\AuditLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -68,6 +69,15 @@ class AuditListener implements ShouldQueue
             $event->deactivatedBy,
             oldValues: ['is_active' => true],
             newValues: ['is_active' => false],
+        );
+    }
+
+    public function handleUserPasswordChanged(UserPasswordChanged $event): void
+    {
+        $this->auditLogger->record(
+            $event->isReset ? 'user.password_reset' : 'user.password_changed',
+            $event->user,
+            $event->changedBy,
         );
     }
 

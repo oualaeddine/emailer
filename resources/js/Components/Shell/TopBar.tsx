@@ -16,13 +16,15 @@ import {
     mergeClasses,
     tokens,
 } from '@fluentui/react-components';
-import { NavigationRegular, SignOutRegular, ArrowDownloadRegular, AddRegular, DarkThemeRegular } from '@fluentui/react-icons';
+import { NavigationRegular, SignOutRegular, KeyRegular, ArrowDownloadRegular, AddRegular, DarkThemeRegular } from '@fluentui/react-icons';
+import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import type { AuthenticatedUser } from '@/Lib/types/identity';
 import { useText } from '@/Hooks/useText';
 import { usePwaInstall } from '@/Hooks/usePwaInstall';
 import { NotificationBell } from '@/Components/Shell/NotificationBell';
 import { HelpMenuButton } from '@/Components/Help/HelpMenuButton';
+import { ChangePasswordDialog } from '@/Components/Shell/ChangePasswordDialog';
 import { BrandMark } from '@/Components/Shell/BrandMark';
 import { hasAnyPermission } from '@/Lib/permissions';
 import { navItems } from '@/Components/Shell/navItems';
@@ -89,6 +91,7 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
     const styles = useStyles();
     const t = useText();
     const { isInstallable, install } = usePwaInstall();
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
     const { props } = usePage<{ auth: { permissions: string[] } }>();
     const permissions = props.auth.permissions;
 
@@ -204,6 +207,9 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                                 </MenuPopover>
                             </Menu>
                             <MenuDivider />
+                            <MenuItem icon={<KeyRegular />} onClick={() => setPasswordDialogOpen(true)}>
+                                {t.users.changePassword.menu}
+                            </MenuItem>
                             <MenuItem icon={<SignOutRegular />} onClick={handleLogout}>
                                 {t.nav.logout}
                             </MenuItem>
@@ -211,6 +217,7 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                     </MenuPopover>
                 </Menu>
             </Toolbar>
+            <ChangePasswordDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
         </header>
     );
 }

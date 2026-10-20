@@ -4,6 +4,7 @@ namespace App\Modules\Identity\Services;
 
 use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
+use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
 use App\Modules\Identity\DataTransferObjects\CreateUserData;
 use App\Modules\Identity\DataTransferObjects\UpdateUserData;
@@ -62,7 +63,19 @@ class UserService
                 'is_active' => $data->isActive,
             ], fn ($value) => $value !== null));
 
+            if ($data->password !== null) {
+                // 'hashed' cast on the model hashes it.
+                $user->password = $data->password;
+            }
+
             $user->save();
+
+            if ($data->password !== null) {
+                UserPasswordChanged::dispatch($user, $updatedBy, true);
+                // An administrator reset must cut off whoever knew the old one.
+                $user->tokens()->delete();
+                $this->forgetOtherSessions($user);
+            }
 
             if ($data->roleId !== null && $oldRole !== null && $oldRole->id !== $data->roleId) {
                 $newRole = Role::query()->findOrFail($data->roleId);
@@ -77,5 +90,40 @@ class UserService
 
             return $user->fresh('role');
         });
+    }
+
+    /**
+     * Self-service change. The caller has already proven the current password.
+     * Other sessions and API tokens are dropped; the current session survives.
+     */
+    public function changePassword(User $user, string $newPassword, ?string $keepSessionId = null): void
+    {
+        $user->forceFill(['password' => $newPassword])->save();
+
+        UserPasswordChanged::dispatch($user, $user, false);
+
+        $user->tokens()->delete();
+        $this->forgetOtherSessions($user, $keepSessionId);
+    }
+
+    /**
+     * Cheap session invalidation: only possible with the `database` session
+     * driver (rows carry user_id). Other drivers keep their sessions alive.
+     */
+    private function forgetOtherSessions(User $user, ?string $keepSessionId = null): void
+    {
+        if (config('session.driver') !== 'database') {
+            return;
+        }
+
+        $query = DB::connection(config('session.connection'))
+            ->table(config('session.table', 'sessions'))
+            ->where('user_id', $user->getKey());
+
+        if ($keepSessionId !== null) {
+            $query->where('id', '!=', $keepSessionId);
+        }
+
+        $query->delete();
     }
 }

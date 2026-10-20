@@ -34,6 +34,18 @@ export interface UpdateUserPayload {
     name?: string;
     role_id?: number;
     is_active?: boolean;
+    password?: string;
+    password_confirmation?: string;
+}
+
+export interface ChangePasswordPayload {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<void> {
+    await axios.put('/api/v1/me/password', payload);
 }
 
 export async function updateUser(id: string, payload: UpdateUserPayload): Promise<User> {
