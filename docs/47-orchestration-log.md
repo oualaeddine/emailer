@@ -154,3 +154,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 4 | gate | — | Final full suite: **1012 passed, 1 skipped, 0 failed** (5794 assertions); migrate:fresh --seed green; tsc + build green; grep/route gates clean. Opening PR brevo/wave-4 → brevo/main | green |
 | 2026-10-20 | 4 | PR | — | PR #18 brevo/wave-4 → brevo/main opened, ready, merged (954101a; local gate, CI billing-locked). Wave 4 complete; Wave 4 worktrees to be removed | merged |
 | 2026-10-20 | — | PR | — | Programme PR **#19** brevo/main → main opened ready for review, subscribed (not merged by the orchestrator) | open |
+| 2026-10-20 | — | PR #19 | — | Safety-net check-in 1: no reviews, no threads, mergeable; CI red = Actions billing lock (commented on the PR). Check-ins stopped per rule; the subscription stays active | waiting on reviewers |
