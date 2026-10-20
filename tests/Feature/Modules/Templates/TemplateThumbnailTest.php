@@ -8,7 +8,14 @@ use App\Modules\Identity\Models\User;
 use App\Modules\Templates\Events\TemplateSaved;
 use App\Modules\Templates\Jobs\RenderThumbnailJob;
 use App\Modules\Templates\Models\Template;
+use App\Modules\Templates\Sections\Http\Resources\SavedSectionResource;
+use App\Modules\Templates\Sections\Models\SavedSection;
+use App\Modules\Templates\Sections\Services\SavedSectionService;
+use App\Modules\Templates\Services\MjmlCompiler;
+use App\Modules\Templates\Services\CompiledMjml;
 use App\Modules\Templates\Services\TemplateThumbnailService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -108,12 +115,56 @@ class TemplateThumbnailTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
+    public function test_creating_a_saved_section_dispatches_the_thumbnail_job_but_renaming_does_not(): void
+    {
+        config(['templates.thumbnails' => true]);
+        Bus::fake();
+
+        $service = app(SavedSectionService::class);
+        $section = $service->create('S', '<mj-section><mj-column><mj-text>Hi</mj-text></mj-column></mj-section>', [], $this->manager);
+
+        Bus::assertDispatched(RenderThumbnailJob::class, fn (RenderThumbnailJob $job) => $job->modelType === 'saved_section' && $job->modelId === $section->id);
+
+        Bus::fake();
+        $service->rename($section, 'Renamed');
+        Bus::assertNotDispatched(RenderThumbnailJob::class);
+    }
+
+    public function test_job_renders_a_saved_section_and_the_resource_exposes_the_url(): void
+    {
+        Storage::fake('public');
+        $section = SavedSection::factory()->create();
+        $this->assertNull((new SavedSectionResource($section))->toArray(new Request)['thumbnail_url']);
+
+        $this->app->instance(MjmlCompiler::class, new class(app(\App\Modules\Templates\Services\HtmlSanitizer::class)) extends MjmlCompiler
+        {
+            public function compile(string $mjml): CompiledMjml
+            {
+                return new CompiledMjml('<html><body>ok</body></html>', []);
+            }
+        });
+        $this->app->instance(TemplateThumbnailService::class, new class extends TemplateThumbnailService
+        {
+            public function renderHtml(string $html): ?string
+            {
+                return "\x89PNG-fake";
+            }
+        });
+
+        (new RenderThumbnailJob('saved_section', $section->id))->handle(app(TemplateThumbnailService::class));
+
+        $path = "thumbnails/saved_sections/{$section->uuid}.png";
+        $this->assertSame($path, $section->fresh()->thumbnail_path);
+        Storage::disk('public')->assertExists($path);
+        $this->assertSame(Storage::disk('public')->url($path), (new SavedSectionResource($section->fresh()))->toArray(new Request)['thumbnail_url']);
+    }
+
     public function test_unknown_models_and_saved_sections_are_ignored(): void
     {
         $service = app(TemplateThumbnailService::class);
 
         $this->assertNull($service->renderFor('template', 999999));
-        $this->assertNull($service->renderFor('saved_section', 1));
+        $this->assertNull($service->renderFor('saved_section', 999999));
     }
 
     public function test_html_goes_to_the_renderer_on_stdin_not_as_an_argument(): void
