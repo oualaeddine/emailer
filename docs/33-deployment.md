@@ -48,6 +48,7 @@ Web tier is stateless (sessions in Redis/DB, not local files) so it scales horiz
 | Mail/Tracking | `MAILER_TRACKING_DOMAIN` |
 | Verification Provider | `EMAIL_VERIFICATION_PROVIDER`, `EMAIL_VERIFICATION_API_KEY` |
 | Thumbnails | `THUMBNAIL_CHROMIUM_PATH` (optional system Chromium for `scripts/thumbnail.mjs`) |
+| Transactional | `TRANSACTIONAL_ATTACHMENT_RETENTION_DAYS` (default `30`: days before `transactional:prune-attachments`, scheduled daily, deletes stored attachments of finished messages) |
 
 All secrets sourced from a secrets manager (cloud provider's native secrets store or Vault) in staging/production, injected as environment variables at container start — never baked into images, never committed.
 

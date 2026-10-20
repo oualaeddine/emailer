@@ -58,6 +58,8 @@ class TransactionalSendService implements TransactionalSender
         $params = is_array($input['params'] ?? null) ? $input['params'] : [];
         $subject = $this->mergeParams($subject, $params, false);
         $html = $this->mergeParams($html, $params, true);
+        // `text_content` wins over the plain text generated from the HTML; params are merged without HTML escaping.
+        $text = filled($input['text_content'] ?? null) ? $this->mergeParams((string) $input['text_content'], $params, false) : null;
         $scheduledAt = ! empty($input['scheduled_at']) ? Carbon::parse($input['scheduled_at']) : null;
         $replyTo = $input['reply_to']['email'] ?? $sender?->reply_to;
         $headers = $this->headers($input['headers'] ?? null);
@@ -89,6 +91,7 @@ class TransactionalSendService implements TransactionalSender
             'cc' => $this->addresses($input['cc'] ?? []),
             'bcc' => $this->addresses($input['bcc'] ?? []),
             'headers' => $headers,
+            'text' => $text,
             'attachments' => $this->attachments->store($files, $firstUuid),
         ], fn ($v) => $v !== null && $v !== []);
 
