@@ -555,13 +555,18 @@ class CampaignService
      * @param  list<string>  $emails
      * @return array{queued: int, message_ids: list<string>, test_sent_at: string}
      */
-    public function testSend(Campaign $campaign, array $emails, ?Recipient $contact, ?User $actor): array
+    public function testSend(Campaign $campaign, array $emails, ?Recipient $contact, ?User $actor, ?\App\Modules\Campaigns\Models\AbTestVariant $variant = null): array
     {
         if (blank($campaign->subject) || blank($campaign->html_body)) {
             throw new CampaignNotReadyException("La campagne doit avoir un objet et un contenu avant l'envoi d'un test.");
         }
 
         $messageIds = [];
+
+        // A/B version asked for: its subject, preheader and content (message.variant_id stays null — no A/B stats).
+        $abTests = app(\App\Modules\Campaigns\AbTesting\Services\AbTestService::class);
+        $subject = $variant !== null ? $abTests->subjectFor($campaign, $variant) : (string) $campaign->subject;
+        $html = $variant !== null ? $abTests->htmlWithPreviewFor($campaign, $variant) : $this->htmlWithPreheader($campaign);
 
         foreach (array_values(array_unique(array_map('strtolower', $emails))) as $email) {
             $recipient = Recipient::withTrashed()->firstOrCreate(
@@ -576,7 +581,7 @@ class CampaignService
                 'status' => MessageStatus::Queued->value,
                 'queued_at' => now(),
                 'is_test' => true,
-            ], (string) $campaign->subject, $this->htmlWithPreheader($campaign), $recipient, $campaign, $mergeWith);
+            ], $subject, $html, $recipient, $campaign, $mergeWith);
 
             SendEmailJob::dispatch($message->id);
             $messageIds[] = $message->uuid;

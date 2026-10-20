@@ -233,6 +233,33 @@ class AbTestService
         return $campaign->abTestVariants()->get()->keyBy('label');
     }
 
+    /**
+     * The version a preview / test send was asked for (`variant` = "A"/"B"),
+     * `null` when none was asked. 422 `errors.variant` for an unknown label,
+     * a campaign without an active A/B test or a missing version.
+     */
+    public function variantForPreview(Campaign $campaign, mixed $label): ?AbTestVariant
+    {
+        if ($label === null || $label === '') {
+            return null;
+        }
+
+        if (! is_string($label) || ! in_array($label, ['A', 'B'], true)) {
+            throw ValidationException::withMessages(['variant' => ['Version inconnue : choisissez A ou B.']]);
+        }
+
+        if (! $campaign->ab_test_enabled) {
+            throw ValidationException::withMessages(['variant' => ["Cette campagne n'a pas de test A/B actif."]]);
+        }
+
+        $variant = $this->variants($campaign)->get($label);
+        if ($variant === null) {
+            throw ValidationException::withMessages(['variant' => ["La version {$label} n'existe pas pour cette campagne."]]);
+        }
+
+        return $variant;
+    }
+
     /** Subject sent for a version (falls back to the campaign subject). */
     public function subjectFor(Campaign $campaign, ?AbTestVariant $variant): string
     {

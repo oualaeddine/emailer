@@ -1133,6 +1133,9 @@ export const fr = {
             testSentAt: 'Dernier test envoyé le %s',
             tooManyEmails: 'Vous pouvez saisir au maximum 5 adresses.',
             variant: 'Version',
+            // gap-abvariant
+            abVersion: 'Version du test A/B',
+            abVersionLabel: 'Version %s',
         },
         checklist: {
             title: 'Liste de vérification',

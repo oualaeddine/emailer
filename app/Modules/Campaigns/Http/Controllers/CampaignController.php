@@ -140,6 +140,9 @@ class CampaignController extends Controller
     {
         $this->authorize('view', $campaign);
 
+        $abTests = app(\App\Modules\Campaigns\AbTesting\Services\AbTestService::class);
+        $variant = $abTests->variantForPreview($campaign, $request->query('variant'));
+
         $contact = $request->filled('contact_id')
             ? Recipient::query()->where('uuid', $request->query('contact_id'))->firstOrFail()
             : null;
@@ -154,11 +157,11 @@ class CampaignController extends Controller
             : ($contact !== null ? trim($contact->first_name.' '.$contact->last_name) : null);
 
         return response()->json(['data' => [
-            'subject' => $render($campaign->subject),
-            'preview_text' => $render($campaign->preview_text),
+            'subject' => $render($variant !== null ? $abTests->subjectFor($campaign, $variant) : $campaign->subject),
+            'preview_text' => $render($variant !== null ? $variant->preview_text : $campaign->preview_text),
             'from' => ['name' => $sender['name'] ?? null, 'email' => $sender['email'] ?? null],
             'to' => $contact === null ? null : ($toName !== '' && $toName !== null ? "{$toName} <{$contact->email}>" : $contact->email),
-            'html' => $render($campaign->html_body),
+            'html' => $render($variant !== null ? $abTests->htmlFor($campaign, $variant) : $campaign->html_body),
             'contact_id' => $contact?->uuid,
         ]]);
     }
@@ -182,6 +185,9 @@ class CampaignController extends Controller
     {
         $this->authorize('prepare', $campaign);
 
+        $variant = app(\App\Modules\Campaigns\AbTesting\Services\AbTestService::class)
+            ->variantForPreview($campaign, $request->validated('variant'));
+
         $key = "campaign-test-send:{$campaign->id}";
         if (RateLimiter::tooManyAttempts($key, self::TEST_SENDS_PER_HOUR)) {
             throw new ThrottleRequestsException('Limite de 10 envois de test par heure atteinte pour cette campagne.');
@@ -192,7 +198,7 @@ class CampaignController extends Controller
             ? Recipient::query()->where('uuid', $request->validated('contact_id'))->first()
             : null;
 
-        $result = $this->campaigns->testSend($campaign, $request->validated('emails'), $contact, $request->user());
+        $result = $this->campaigns->testSend($campaign, $request->validated('emails'), $contact, $request->user(), $variant);
 
         return response()->json(['data' => $result], 202);
     }
