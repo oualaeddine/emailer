@@ -50,10 +50,15 @@ const captureEnv = {
     QUEUE_CONNECTION: 'sync',
 };
 
+type ShotUrl = string | ((page: Page) => Promise<string | null>);
+
 interface Shot {
     /** Output path, relative to public/docs/screenshots (without .png). */
     name: string;
-    url?: string;
+    /** A path, or a resolver returning the path (null = nothing to capture, shot skipped). */
+    url?: ShotUrl;
+    /** Skip silently when the page answers with an HTTP error (page not shipped yet). */
+    optional?: boolean;
     /** Opens dialogs/drawers, advances wizards, … before the capture. */
     actions?: (page: Page) => Promise<void>;
     /** Extra wait beyond the default (network idle + no spinner). */
@@ -155,8 +160,50 @@ const shots: Shot[] = [
 
     { name: 'settings-branding/01-branding', url: '/settings/branding' },
 
+    // ---- Brevo IA (docs/43 §43.4) ------------------------------------------
+    { name: 'recipients/03-views', url: '/contacts' },
+    { name: 'contact-detail/01-detail', url: (page) => detailUrl(page, 'recipients', '/contacts') },
+    { name: 'lists/01-lists', url: '/contacts/lists' },
+    { name: 'list-detail/01-detail', url: (page) => detailUrl(page, 'recipient-lists', '/contacts/lists') },
+    { name: 'segments/01-segments', url: '/contacts/segments' },
+    { name: 'segment-edit/01-builder', url: '/contacts/segments/new' },
+    { name: 'attributes/01-attributes', url: '/contacts/attributes' },
+    { name: 'imports/01-history', url: '/contacts/imports' },
+
+    { name: 'campaign-setup/01-setup', url: (page) => detailUrl(page, 'campaigns', '/campaigns', '/setup') },
+    { name: 'campaign-design/01-editor', url: (page) => detailUrl(page, 'campaigns', '/campaigns', '/design') },
+    { name: 'campaign-report/01-overview', url: (page) => detailUrl(page, 'campaigns', '/campaigns', '/report') },
+    { name: 'forms/01-forms', url: '/marketing/forms', optional: true },
+    { name: 'template-edit/01-editor', url: (page) => detailUrl(page, 'templates', '/templates', '/edit') },
+
+    { name: 'transactional-logs/01-logs', url: '/transactional/logs', optional: true },
+    { name: 'transactional-settings/01-settings', url: '/transactional/settings', optional: true },
+
+    { name: 'senders/01-senders', url: '/settings/senders' },
+    { name: 'domains/01-domains', url: '/settings/domains' },
+    { name: 'unsubscribe-pages/01-pages', url: '/settings/unsubscribe-pages' },
+    { name: 'update-profile-forms/01-forms', url: '/settings/update-profile-forms' },
+
     { name: 'help/01-help-center', url: '/help' },
 ];
+
+/**
+ * Resolves a parameterised page URL (/campaigns/{id}/setup, …) by asking the
+ * JSON API, through the signed-in session, for the first record of the
+ * collection. Returns null when the demo data has none, so the shot is skipped.
+ */
+async function detailUrl(page: Page, apiCollection: string, base: string, suffix = ''): Promise<string | null> {
+    await page.goto(`${BASE}${base}`);
+    await settle(page);
+    const id = await page.evaluate(async (path) => {
+        const response = await fetch(`/api/v1/${path}?per_page=1`, { headers: { Accept: 'application/json' } });
+        if (!response.ok) return null;
+        const body = await response.json();
+        const first = (Array.isArray(body) ? body : body.data)?.[0];
+        return first ? String(first.uuid ?? first.id) : null;
+    }, apiCollection);
+    return id ? `${base}/${id}${suffix}` : null;
+}
 
 async function settle(page: Page, extra = 400) {
     await page.waitForLoadState('networkidle').catch(() => undefined);
@@ -258,7 +305,16 @@ async function main() {
 
         for (const shot of shots) {
             if (shot.url) {
-                await page.goto(`${BASE}${shot.url}`);
+                const url = typeof shot.url === 'function' ? await shot.url(page) : shot.url;
+                if (url === null) {
+                    console.log(`  - ${shot.name} ignorée (aucune donnée de démonstration)`);
+                    continue;
+                }
+                const response = await page.goto(`${BASE}${url}`);
+                if (shot.optional && (response?.status() ?? 200) >= 400) {
+                    console.log(`  - ${shot.name} ignorée (page indisponible)`);
+                    continue;
+                }
                 await settle(page);
             }
             if (shot.actions) await shot.actions(page);

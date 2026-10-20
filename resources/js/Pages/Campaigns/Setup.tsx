@@ -17,10 +17,12 @@ import {
     useToastController,
 } from '@fluentui/react-components';
 import { ArrowLeftRegular, CalendarLtrRegular, CheckmarkRegular, DismissRegular, EditRegular, EyeRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaignV2, updateCampaignV2 } from '@/Lib/api/campaigns';
 import type { CampaignChecklist, CampaignSendMode, CampaignV2Detail } from '@/Lib/types/campaigns';
+import { AbTestCard, isAbTestReady } from '@/Components/Campaigns/AbTestCard';
 import { ChecklistPanel } from '@/Components/Campaigns/ChecklistPanel';
 import { ConfirmSendDialog, allowedSendModes } from '@/Components/Campaigns/ConfirmSendDialog';
 import { DesignCard, isDesignComplete } from '@/Components/Campaigns/DesignCard';
@@ -35,7 +37,7 @@ interface SetupPageProps {
     campaignId: string;
 }
 
-type CardKey = 'sender' | 'subject' | 'recipients' | 'settings';
+type CardKey = 'sender' | 'subject' | 'recipients' | 'settings' | 'abTest';
 
 const useStyles = makeStyles({
     header: {
@@ -208,7 +210,8 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
 
     const editable = campaign.available_actions.includes('edit');
     const requiredComplete =
-        isSenderComplete(campaign) && isSubjectComplete(campaign) && isRecipientsComplete(campaign) && isDesignComplete(campaign);
+        isSenderComplete(campaign) && isSubjectComplete(campaign) && isRecipientsComplete(campaign) && isDesignComplete(campaign) &&
+        isAbTestReady(campaign);
     const canProgram =
         editable && requiredComplete && allowedSendModes(campaign).length > 0 && (checklist ? checklist.can_schedule : true);
 
@@ -307,6 +310,7 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
                     )}
                 </div>
             </header>
+            <PageHelp topic="campaign-setup" hideHeaderRow />
 
             {campaign.status === 'suspended' && campaign.suspended_reason && (
                 <MessageBar intent="warning" style={{ marginBottom: tokens.spacingVerticalM }}>
@@ -320,6 +324,7 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
                     <SubjectCard {...cardProps('subject')} />
                     <RecipientsCard {...cardProps('recipients')} />
                     <DesignCard campaign={campaign} editable={editable} onSaved={handleSaved} onPreview={() => setPreviewOpen(true)} />
+                    <AbTestCard {...cardProps('abTest')} />
                     <SettingsCard {...cardProps('settings')} />
                 </div>
                 <aside className={styles.aside}>

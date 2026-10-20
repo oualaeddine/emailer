@@ -60,6 +60,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $sent_at
  * @property Carbon|null $completed_at
  * @property Carbon|null $test_sent_at
+ * @property bool $ab_test_enabled
+ * @property array<string, mixed>|null $ab_test_config
+ * @property int|null $winner_variant_id
  */
 class Campaign extends Model
 {
@@ -241,6 +244,24 @@ class Campaign extends Model
     public function campaignRecipients(): HasMany
     {
         return $this->hasMany(CampaignRecipient::class);
+    }
+
+    /**
+     * docs/45 §45.7.2 — A/B test versions (A, B), WP-80.
+     *
+     * @return HasMany<AbTestVariant, $this>
+     */
+    public function abTestVariants(): HasMany
+    {
+        return $this->hasMany(AbTestVariant::class)->orderBy('label');
+    }
+
+    /**
+     * @return BelongsTo<AbTestVariant, $this>
+     */
+    public function winnerVariant(): BelongsTo
+    {
+        return $this->belongsTo(AbTestVariant::class, 'winner_variant_id');
     }
 
     /**

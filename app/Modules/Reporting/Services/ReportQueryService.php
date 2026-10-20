@@ -3,6 +3,7 @@
 namespace App\Modules\Reporting\Services;
 
 use App\Modules\Audit\Models\AuditLog;
+use App\Modules\Campaigns\AbTesting\Services\AbTestService;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Support\ExternalReferences;
 use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
@@ -441,7 +442,7 @@ class ReportQueryService
             'timeline' => $this->timeline($campaign),
             'links' => $this->links($campaign, 10),
             'statsByDevice' => $engagement['device'],
-            'ab_test' => null,
+            'ab_test' => app(AbTestService::class)->report($campaign),
             'apple_mpp_note' => (int) $stats['appleMppOpens'] > 0,
         ];
     }

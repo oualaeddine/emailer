@@ -118,20 +118,20 @@ export const navItems: NavItem[] = [
 
     // Marketing
     { href: '/campaigns', icon: MegaphoneLoudIcon, label: (t) => t.nav.emailCampaigns, match: 'prefix', group: 'marketing', permissions: ['campaigns.view'] },
-    { href: '/marketing/forms', icon: DocumentIcon, label: (t) => t.nav.forms, match: 'prefix', group: 'marketing', permissions: ['forms.manage'], hidden: true },
+    { href: '/marketing/forms', icon: DocumentIcon, label: (t) => t.nav.forms, match: 'prefix', group: 'marketing', permissions: ['forms.manage'] },
     { href: '/templates', icon: DocumentIcon, label: (t) => t.nav.templates, match: 'exact', group: 'marketing', permissions: ['templates.view'] },
     { href: '/statistics', icon: DocumentIcon, label: (t) => t.nav.statistics, match: 'exact', group: 'marketing', permissions: ['reporting.view'] },
 
     // Automatisations (phase F)
-    { href: '/automations', icon: SettingsIcon, label: (t) => t.nav.automations, match: 'prefix', group: 'automations', permissions: ['automations.manage'], hidden: true },
+    { href: '/automations', icon: SettingsIcon, label: (t) => t.nav.automations, match: 'prefix', group: 'automations', permissions: ['automations.manage'] },
 
     // Transactionnel
     { href: '/compose', icon: MailIcon, label: (t) => t.nav.compose, match: 'exact', group: 'transactional', permissions: ['composer.compose'] },
     // Reuses MailIcon: no npm/tsc-verified inbox icon export is available.
     { href: '/mailbox', icon: MailIcon, label: (t) => t.nav.messaging, match: 'exact', group: 'transactional', permissions: ['mailbox.view_own', 'mailbox.view_all'] },
-    { href: '/transactional/logs', icon: DocumentIcon, label: (t) => t.nav.transactionalLogs, match: 'prefix', group: 'transactional', permissions: ['transactional.view'], hidden: true },
+    { href: '/transactional/logs', icon: DocumentIcon, label: (t) => t.nav.transactionalLogs, match: 'prefix', group: 'transactional', permissions: ['transactional.view'] },
     { href: '/templates?scope=transactional', icon: DocumentIcon, label: (t) => t.nav.transactionalTemplates, match: 'exact', group: 'transactional', permissions: ['templates.view'], hidden: true },
-    { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['transactional.view'], hidden: true },
+    { href: '/transactional/settings', icon: ServerIcon, label: (t) => t.nav.transactionalSettings, match: 'prefix', group: 'transactional', permissions: ['transactional.view'] },
 
     // Paramètres (account menu, top-right)
     { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['senders.manage'] },
@@ -141,7 +141,7 @@ export const navItems: NavItem[] = [
     { href: '/settings/tracking', icon: SettingsIcon, label: (t) => t.nav.tracking, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/branding', icon: SettingsIcon, label: (t) => t.nav.branding, match: 'prefix', group: 'settings', permissions: ['settings.branding_only', 'settings.manage'] },
     { href: '/admin/users', icon: PeopleIcon, label: (t) => t.nav.usersRoles, match: 'prefix', group: 'settings', permissions: ['users.manage'] },
-    { href: '/settings/api', icon: SettingsIcon, label: (t) => t.nav.apiKeys, match: 'prefix', group: 'settings', permissions: ['api_keys.manage', 'webhooks.manage'], hidden: true },
+    { href: '/settings/api', icon: SettingsIcon, label: (t) => t.nav.apiKeys, match: 'prefix', group: 'settings', permissions: ['api_keys.manage', 'webhooks.manage'] },
     { href: '/admin/audit-log', icon: DocumentIcon, label: (t) => t.nav.audit, match: 'exact', group: 'settings', permissions: ['audit.view'] },
     { href: '/horizon', icon: ServerIcon, label: (t) => t.nav.horizon, match: 'prefix', group: 'settings', permissions: ['queues.view'], external: true },
 

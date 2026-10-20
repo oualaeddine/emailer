@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This documentation set defines the complete enterprise architecture for **PageJaunes Mailer**, an Outlook-inspired email management platform combining transactional email, newsletter campaigns, recipient management, SMTP infrastructure management, and delivery analytics.
+This documentation set defines the complete enterprise architecture for **PageJaunes Mailer**, a Brevo-style email management platform (information architecture: Accueil, Contacts, Marketing, Automatisations, Transactionnel, Paramètres) combining transactional email, email campaigns, contact management, SMTP infrastructure management, and delivery analytics.
 
 This documentation is written so that **another AI or engineering team can implement the entire Laravel + React application without making architectural assumptions**. It intentionally contains **no application code** — only architecture, data design, workflows, UI/UX specification, and API contracts.
 
@@ -25,7 +25,7 @@ This documentation is written so that **another AI or engineering team can imple
 | 05 | [ERD](05-erd.md) | Entity-relationship diagrams (Mermaid) |
 | 06 | [PageJaunes Integration](06-pagejaunes-integration.md) | External DB connection, sync, import |
 | 07 | [UI Design System](07-ui-design.md) | Fluent UI tokens, components, theming |
-| 08 | [Navigation](08-navigation.md) | IA, shell layout, routing map |
+| 08 | [Navigation](08-navigation.md) | Brevo-style IA (Contacts / Marketing / Automatisations / Transactionnel / Paramètres), shell layout, route map |
 | 09 | [Dashboard](09-dashboard.md) | Dashboard widgets and data sources |
 | 10 | [Mailbox (Inbox/Sent/Drafts)](10-mailbox.md) | Outlook-style mail views |
 | 11 | [Email Composer](11-email-composer.md) | Composer architecture and editor |
@@ -62,6 +62,9 @@ This documentation is written so that **another AI or engineering team can imple
 | 42 | [Parallel Execution Plan](42-parallel-execution-plan.md) | Agent-orchestrated work packages, waves, file ownership, token-economy protocol |
 | 43 | [Brevo Parity Plan](43-brevo-parity-plan.md) | Gap analysis vs. Brevo, target IA, page-by-page specs, schema addendum, phased work packages to reach Brevo-equivalent email marketing |
 | 44 | [Brevo Parallel Execution Plan](44-brevo-parallel-execution-plan.md) | Agent-orchestrated delivery of doc 43: Opus/Sonnet assignment per work package, contracts-first Wave 0, five waves, gates, migration slots, prompt template, runbook |
+| 45 | [Brevo API Contracts](45-brevo-api-contracts.md) | Frozen API contracts of the Brevo parity work (WP-40): endpoints, payloads, permissions |
+| 46 | [Editor Spike](46-editor-spike.md) | Decision memo for the drag & drop email builder (GrapesJS + grapesjs-mjml in the Fluent shell) |
+| 47 | [Orchestration Log](47-orchestration-log.md) | Running log of the autonomous orchestrator session: launches, merges, gates |
 
 ## How to Use This Documentation
 

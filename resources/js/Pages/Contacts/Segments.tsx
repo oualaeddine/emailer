@@ -28,7 +28,6 @@ import {
     Option,
     Spinner,
     Text,
-    Title2,
     Tooltip,
     createTableColumn,
     makeStyles,
@@ -45,6 +44,7 @@ import {
     MoreHorizontalRegular,
     SearchRegular,
 } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { format } from '@/Components/Contacts/ConditionBuilder/editors/shared';
@@ -335,10 +335,15 @@ export default function Segments() {
     return (
         <AppShell>
             <Head title={t.segments.title} />
-            <div className={styles.header}>
-                <Title2 as="h1">{t.segments.title}</Title2>
-                {createButton}
-            </div>
+            <PageHelp
+                topic="segments"
+                title={t.segments.title}
+                actions={
+                    <>
+                        {createButton}
+                    </>
+                }
+            />
 
             {notice && (
                 <MessageBar intent={notice.intent} className={styles.message}>

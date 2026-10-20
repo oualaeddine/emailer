@@ -3,6 +3,7 @@
 namespace App\Modules\Campaigns\Services;
 
 use App\Domain\Enums\RecipientStatus;
+use App\Modules\Campaigns\AbTesting\Services\VariantAssigner;
 use App\Modules\Campaigns\Contracts\AudienceResolver as AudienceResolverContract;
 use App\Modules\Campaigns\Data\AudienceEstimate;
 use App\Modules\Campaigns\Enums\AudienceMode;
@@ -87,6 +88,7 @@ class AudienceResolver implements AudienceResolverContract
             }
 
             $this->linkAlreadyDispatchedMessages($campaign);
+            app(VariantAssigner::class)->assign($campaign);
 
             $count = CampaignRecipient::query()->where('campaign_id', $campaign->id)->count();
             $campaign->forceFill(['recipients_count' => $count])->save();

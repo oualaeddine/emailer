@@ -61,6 +61,7 @@ const fontWeight: PropertyFieldDef = {
 
 export const FIELDS_BY_TYPE: Record<string, PropertyFieldDef[]> = {
     'mj-body': [color('background-color', text.style.backgroundColor), field('width', text.style.contentWidth, '600px')],
+    'mj-wrapper': [color('background-color', text.style.backgroundColor), url('background-url', f.backgroundImage), padding],
     'mj-section': [
         color('background-color', text.style.backgroundColor),
         url('background-url', f.backgroundImage),

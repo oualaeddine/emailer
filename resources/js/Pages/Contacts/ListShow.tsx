@@ -25,6 +25,7 @@ import {
     type TableColumnDefinition,
 } from '@fluentui/react-components';
 import { ArrowDownloadRegular, ArrowLeftRegular, ArrowUploadRegular, DeleteRegular, PeopleListRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
@@ -210,6 +211,7 @@ export default function ListShow({ uuid }: { uuid: string }) {
                             </Button>
                         </div>
                     </div>
+                    <PageHelp topic="list-detail" hideHeaderRow />
                     <div className={styles.stats}>
                         <div className={styles.stat}>
                             <Text size={200}>{t.lists.contacts}</Text>

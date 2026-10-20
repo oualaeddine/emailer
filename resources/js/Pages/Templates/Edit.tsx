@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import { MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmailBuilderLazy, type EmailBuilderSaveResult, type EmailBuilderSource } from '@/Components/Editor/EmailBuilder';
 import { useText } from '@/Hooks/useText';
@@ -75,6 +76,7 @@ export default function TemplateEdit({ templateId }: Props) {
     return (
         <AppShell>
             <Head title={template ? `${t.templates.editTitle} — ${template.name}` : t.templates.editTitle} />
+            <PageHelp topic="template-edit" hideHeaderRow />
             {error && (
                 <MessageBar intent="error">
                     <MessageBarBody>{error}</MessageBarBody>
@@ -90,6 +92,7 @@ export default function TemplateEdit({ templateId }: Props) {
                     onExit={() => router.visit('/templates')}
                     onSendTest={sendTest}
                     restore={lastVersion !== null ? { versionNumber: lastVersion } : null}
+                    templateId={template.id}
                 />
             )}
         </AppShell>

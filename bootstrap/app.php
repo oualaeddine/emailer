@@ -39,6 +39,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             EnsureTwoFactorEnrolled::class,
         ]);
+
+        // docs/45 §45.7.6 — reject API keys on untagged routes right after
+        // authentication, before route-model binding touches the database.
+        $middleware->appendToPriorityList(
+            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            \App\Http\Middleware\RestrictApiKeysToTaggedRoutes::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {

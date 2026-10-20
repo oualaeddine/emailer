@@ -10,11 +10,11 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
-    Title2,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { ArrowDownloadRegular, ArrowUploadRegular, DocumentTableRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
@@ -47,12 +47,17 @@ export default function Imports() {
     return (
         <AppShell>
             <Head title={t.imports.history.title} />
-            <div className={styles.header}>
-                <Title2>{t.imports.history.title}</Title2>
-                <Button appearance="primary" icon={<ArrowUploadRegular />} onClick={() => router.visit('/contacts/imports/new')}>
-                    {t.imports.history.newImport}
-                </Button>
-            </div>
+            <PageHelp
+                topic="imports"
+                title={t.imports.history.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<ArrowUploadRegular />} onClick={() => router.visit('/contacts/imports/new')}>
+                            {t.imports.history.newImport}
+                        </Button>
+                    </>
+                }
+            />
 
             {jobs === null && <Spinner label={t.common.loading} />}
             {jobs !== null && jobs.length === 0 && <EmptyState icon={DocumentTableRegular} title={t.imports.history.empty} />}

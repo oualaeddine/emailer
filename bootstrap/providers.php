@@ -16,4 +16,6 @@ return [
     SuppressionListenerServiceProvider::class,
     ListsServiceProvider::class,
     TemplatesServiceProvider::class,
+    App\Modules\Automations\AutomationsServiceProvider::class,
+    \App\Modules\Webhooks\WebhooksServiceProvider::class,
 ];

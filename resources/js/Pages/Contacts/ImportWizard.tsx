@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import { MessageBar, MessageBarBody, Title2, makeStyles, tokens } from '@fluentui/react-components';
+import { MessageBar, MessageBarBody, makeStyles, tokens } from '@fluentui/react-components';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { FileStep } from '@/Components/Imports/FileStep';
 import { MappingStep } from '@/Components/Imports/MappingStep';
@@ -68,7 +69,7 @@ export default function ImportWizard() {
     return (
         <AppShell>
             <Head title={t.imports.wizard.title} />
-            <Title2>{t.imports.wizard.title}</Title2>
+            <PageHelp topic="recipients-import" title={t.imports.wizard.title} />
             <ol className={styles.steps} style={{ listStyle: 'none', padding: 0 }}>
                 {STEPS.map((s, i) => (
                     <li key={s} className={i === index ? styles.current : styles.step} aria-current={i === index ? 'step' : undefined}>

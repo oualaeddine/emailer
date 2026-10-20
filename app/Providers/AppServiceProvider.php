@@ -61,6 +61,10 @@ class AppServiceProvider extends ServiceProvider
         // docs/45 §45.9 — WP-70 campaign statistics contract + local GeoLite2 resolver (tests bind a fake).
         $this->app->bind(\App\Modules\Reporting\Contracts\CampaignStats::class, \App\Modules\Reporting\Services\CampaignStatsService::class);
         $this->app->singleton(\App\Modules\Tracking\Contracts\GeoIpResolver::class, \App\Modules\Tracking\Support\MaxMindGeoIpResolver::class);
+        // docs/45 §45.9 (WP-100) — the single transactional send path (also called by WP-91 / WP-90).
+        $this->app->bind(\App\Modules\Transactional\Contracts\TransactionalSender::class, \App\Modules\Transactional\Services\TransactionalSendService::class);
+        // docs/45 §45.9 — WP-81 send at best time (CampaignService::BEST_SEND_TIME_SERVICE dispatcher hook).
+        $this->app->bind(\App\Modules\DeliveryEngine\Scheduling\Contracts\BestSendTimeService::class, \App\Modules\DeliveryEngine\Scheduling\Services\BestSendTimeService::class);
     }
 
     /**
@@ -72,5 +76,14 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Route::pattern('campaign', '[0-9a-fA-F-]{36}');
         // docs/45 §45.9 — WP-70: final rollup when a campaign completes.
         \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
+        // docs/45 §45.7.4 — WP-90: the double opt-in confirmation confirms the contact's pending form submissions.
+        \Illuminate\Support\Facades\Event::listen(\App\Modules\Suppression\Preferences\Events\DoubleOptInConfirmed::class, \App\Modules\Forms\Listeners\ConfirmFormSubmissionsOnOptIn::class);
+        // docs/45 §45.1 (WP-100) — API keys accepted as `Authorization: Bearer` or Brevo-style `api-key` header.
+        \Laravel\Sanctum\Sanctum::getAccessTokenFromRequestUsing(fn (\Illuminate\Http\Request $request): ?string => \App\Modules\Transactional\Services\ApiKeyService::tokenFromRequest($request));
+        // docs/45 §45.7.6 — a token stops authenticating once its owner is deactivated or (soft-)deleted.
+        \Laravel\Sanctum\Sanctum::authenticateAccessTokensUsing(fn ($token, bool $isValid): bool => $isValid
+            && $token->tokenable instanceof \App\Modules\Identity\Models\User
+            && ! $token->tokenable->trashed()
+            && (bool) $token->tokenable->is_active);
     }
 }

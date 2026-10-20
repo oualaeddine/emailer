@@ -56,13 +56,20 @@ const useStyles = makeStyles({
     },
 });
 
+/**
+ * Delivery options offered for the campaign. An A/B test campaign only
+ * offers `now` / `scheduled`: the server rejects `best_time` and `batches`
+ * for it (docs/45 §45.7.2 — the sample split and the winner pick need the
+ * whole sample released at once).
+ */
 export function allowedSendModes(campaign: CampaignV2Detail): CampaignSendMode[] {
     const modes: CampaignSendMode[] = [];
     if (campaign.available_actions.includes('send_now')) {
         modes.push('now');
     }
     if (campaign.available_actions.includes('schedule')) {
-        modes.push('scheduled', 'best_time', 'batches');
+        const abTest = Boolean(campaign.ab_test_enabled || campaign.ab_test);
+        modes.push(...(abTest ? (['scheduled'] as const) : (['scheduled', 'best_time', 'batches'] as const)));
     }
 
     return modes;
@@ -198,6 +205,7 @@ export function ConfirmSendDialog({ open, campaign, onClose, onDone }: ConfirmSe
                         <Divider />
                         <Text weight="semibold">{c.deliveryOptions}</Text>
                         <SendModeOptions
+                            campaignId={campaign.id}
                             value={value}
                             onChange={(next) => {
                                 setValue(next);

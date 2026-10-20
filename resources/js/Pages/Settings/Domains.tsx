@@ -24,6 +24,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, GlobeRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { DomainRecordsPanel } from '@/Components/Senders/DomainRecordsPanel';
@@ -167,14 +168,17 @@ export default function Domains() {
     return (
         <AppShell>
             <Head title={t.domains.title} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.domains.title}
-                </Text>
-                <Button appearance="primary" icon={<AddRegular />} onClick={() => setAddOpen(true)}>
-                    {t.domains.addDomain}
-                </Button>
-            </div>
+            <PageHelp
+                topic="domains"
+                title={t.domains.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<AddRegular />} onClick={() => setAddOpen(true)}>
+                            {t.domains.addDomain}
+                        </Button>
+                    </>
+                }
+            />
 
             {error && (
                 <div className={styles.messages}>

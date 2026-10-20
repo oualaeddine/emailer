@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 | Literal sub-paths are registered before the `{campaign}` routes (§45.1).
 */
 
-Route::get('campaigns', [CampaignController::class, 'index']);
+Route::get('campaigns', [CampaignController::class, 'index'])
+    ->middleware(\App\Modules\Transactional\Http\Middleware\RequireApiScope::class.':campaigns:read');
 Route::post('campaigns', [CampaignController::class, 'store']);
 Route::post('campaigns/bulk', [CampaignController::class, 'bulk']);
 
@@ -46,3 +47,7 @@ Route::post('campaigns/{campaign}/archive', [CampaignController::class, 'archive
 Route::post('campaigns/{campaign}/unarchive', [CampaignController::class, 'unarchive']);
 Route::get('campaigns/{campaign}/recipients', [CampaignController::class, 'recipients']);
 Route::get('campaigns/{campaign}/analytics', [CampaignController::class, 'analytics']);
+
+// docs/45-brevo-api-contracts.md §45.7.2 — WP-80 A/B testing.
+Route::put('campaigns/{campaign}/ab-test', [\App\Modules\Campaigns\AbTesting\Http\Controllers\AbTestController::class, 'update']);
+Route::post('campaigns/{campaign}/ab-test/winner', [\App\Modules\Campaigns\AbTesting\Http\Controllers\AbTestController::class, 'pickWinner']);
