@@ -27,3 +27,5 @@ Schedule::command('geoip:update')->monthly();
 
 // docs/45 §45.9 — WP-91 automation tick: date-anniversary scan + advance due runs.
 Schedule::job(new \App\Modules\Automations\Jobs\AdvanceAutomationRunsJob)->everyMinute()->withoutOverlapping();
+// docs/45 §45.7.7 — WP-101 webhook retry safety net + 30-day delivery log pruning.
+Schedule::job(new \App\Modules\Webhooks\Jobs\SweepWebhookDeliveriesJob)->everyFiveMinutes();
