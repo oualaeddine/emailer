@@ -142,7 +142,7 @@ class ContactReviewFixesTest extends TestCase
             ->assertJsonPath('data.custom_fields.AGE', 42);
 
         $fresh = $recipient->fresh();
-        $this->assertSame(['VILLE' => 'alger', 'AGE' => 42], $fresh->custom_fields);
+        $this->assertSameJson(['VILLE' => 'alger', 'AGE' => 42], $fresh->custom_fields);
         $this->assertSame('CRM-7', $fresh->getAttribute('ext_id'));
         Event::assertDispatched(ContactAttributesUpdated::class, fn ($e) => $e->recipientId === $recipient->id
             && $e->source === 'manual' && isset($e->changes['AGE'], $e->changes['EXT_ID']));

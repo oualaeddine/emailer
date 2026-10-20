@@ -284,6 +284,11 @@ class SendEmailJob implements ShouldQueue
             }
         }
 
+        // Explicit transactional `text_content` replaces the plain-text part generated from the HTML.
+        if (is_string($options['text'] ?? null) && trim($options['text']) !== '') {
+            $email->text($options['text']);
+        }
+
         foreach ((array) ($options['attachments'] ?? []) as $file) {
             $disk = Storage::disk((string) ($file['disk'] ?? 'local'));
             $path = (string) ($file['path'] ?? '');

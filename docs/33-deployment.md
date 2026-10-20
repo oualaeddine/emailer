@@ -1,5 +1,7 @@
 # 33 — Deployment
 
+> Step-by-step first deployment: [48-deploy-runbook.md](48-deploy-runbook.md). The app database is **MySQL 8**.
+
 ## 33.1 Environments
 
 | Environment | Purpose | Notes |
@@ -14,11 +16,11 @@
 graph TB
     LB[Load Balancer / TLS termination] --> Web1[App Server 1 - Octane/PHP-FPM]
     LB --> Web2[App Server 2]
-    Web1 --> AppDB[(PostgreSQL - App, primary + replica)]
+    Web1 --> AppDB[(MySQL 8 - App, primary + replica)]
     Web2 --> AppDB
     Web1 --> Redis[(Redis - cache/queues/Horizon, clustered or managed)]
     Web2 --> Redis
-    Web1 -.read-only.-> PJDB[(PageJaunes PostgreSQL)]
+    Web1 -.read-only.-> PJDB[(PageJaunes MariaDB/MySQL)]
     Web2 -.read-only.-> PJDB
     Worker1[Horizon Worker Node 1] --> Redis
     Worker2[Horizon Worker Node 2] --> Redis
@@ -32,7 +34,7 @@ Web tier is stateless (sessions in Redis/DB, not local files) so it scales horiz
 
 ## 33.3 Docker
 
-- `docker-compose.yml` for development: `app` (PHP-FPM + Nginx or Octane), `postgres` (app DB), `postgres-pagejaunes-fixture` (local stand-in for the external DB), `redis`, `mailhog`-style fake SMTP catcher, `node` (Vite dev server for HMR).
+- `docker-compose.yml` for development: `app` (PHP-FPM + Nginx or Octane), `mysql` (app DB, MySQL 8), `mariadb-pagejaunes-fixture` (local stand-in for the external DB), `redis`, `mailhog`-style fake SMTP catcher, `node` (Vite dev server for HMR).
 - Production images built via multi-stage Dockerfile (composer install → npm build → slim runtime image), no dev dependencies/tools in the runtime image, non-root container user.
 - Template and campaign thumbnails (WP-62) are rendered by `scripts/thumbnail.mjs` with Playwright. The worker image needs Node and a Chromium: run `npx playwright install --with-deps chromium` at build time, or point `THUMBNAIL_CHROMIUM_PATH` at a system Chromium. Without one, thumbnails are skipped (logged at info level) and cards show the « Miniature en cours de génération » placeholder.
 
@@ -41,20 +43,21 @@ Web tier is stateless (sessions in Redis/DB, not local files) so it scales horiz
 | Group | Variables |
 |---|---|
 | App | `APP_KEY`, `APP_URL`, `APP_ENV`, `APP_DEBUG` (always `false` outside development) |
-| App DB | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` |
+| App DB | `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` |
 | PageJaunes DB | `PAGEJAUNES_DB_HOST`, `PAGEJAUNES_DB_PORT`, `PAGEJAUNES_DB_DATABASE`, `PAGEJAUNES_DB_USERNAME` (read-only role), `PAGEJAUNES_DB_PASSWORD`, `PAGEJAUNES_DB_SSLMODE` |
 | Redis | `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, separate logical DB indices for cache vs. queue vs. Horizon |
 | Storage | `FILESYSTEM_DISK`, `AWS_*` (or equivalent S3-compatible credentials) |
 | Mail/Tracking | `MAILER_TRACKING_DOMAIN` |
 | Verification Provider | `EMAIL_VERIFICATION_PROVIDER`, `EMAIL_VERIFICATION_API_KEY` |
 | Thumbnails | `THUMBNAIL_CHROMIUM_PATH` (optional system Chromium for `scripts/thumbnail.mjs`) |
+| Transactional | `TRANSACTIONAL_ATTACHMENT_RETENTION_DAYS` (default `30`: days before `transactional:prune-attachments`, scheduled daily, deletes stored attachments of finished messages) |
 
 All secrets sourced from a secrets manager (cloud provider's native secrets store or Vault) in staging/production, injected as environment variables at container start — never baked into images, never committed.
 
 ## 33.5 Backups
 
-- App PostgreSQL: automated daily full backup + continuous WAL archiving for point-in-time recovery (retention: 30 days rolling, configurable per organizational policy).
-- Redis: primarily cache/queue (transient) — persistence (AOF/RDB) enabled for Horizon/queue durability but not treated as a backup source of truth; durable state always has a Postgres counterpart (`quota_ledger` reconciles Redis counters, per [19-throttling.md §19.2](19-throttling.md#192-enforcement-architecture)).
+- App MySQL: automated daily full backup (`mysqldump --single-transaction` or a physical backup) + binary-log retention for point-in-time recovery (retention: 30 days rolling, configurable per organizational policy).
+- Redis: primarily cache/queue (transient) — persistence (AOF/RDB) enabled for Horizon/queue durability but not treated as a backup source of truth; durable state always has a database counterpart (`quota_ledger` reconciles Redis counters, per [19-throttling.md §19.2](19-throttling.md#192-enforcement-architecture)).
 - Object storage (attachments, exports): versioning enabled on the bucket; lifecycle policy matches the app-level retention documented in [02-system-architecture.md §2.8](02-system-architecture.md#28-storage-strategy).
 - **No backup/write access is ever taken of the external PageJaunes database** — it is entirely out of this application's operational responsibility.
 

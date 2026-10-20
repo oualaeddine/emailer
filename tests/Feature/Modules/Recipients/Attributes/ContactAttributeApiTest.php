@@ -272,7 +272,7 @@ class ContactAttributeApiTest extends TestCase
         $recipient = Recipient::factory()->create();
 
         $this->actingAs($this->operator())->patchJson("/api/v1/recipients/{$recipient->uuid}", ['custom_fields' => ['N' => '7', 'B' => 'false']])->assertOk();
-        $this->assertSame(['N' => 7, 'B' => false], $recipient->fresh()->custom_fields);
+        $this->assertSameJson(['N' => 7, 'B' => false], $recipient->fresh()->custom_fields);
 
         $this->actingAs($this->operator())->patchJson("/api/v1/recipients/{$recipient->uuid}", ['custom_fields' => ['N' => 'x']])
             ->assertStatus(422)->assertJsonValidationErrors('attributes.N');

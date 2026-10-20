@@ -19,7 +19,7 @@ import {
 import { SendRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
 import { sendCampaignTest } from '@/Lib/api/campaigns';
-import type { TestSendResult } from '@/Lib/types/campaigns';
+import type { AbVariantLabel, TestSendResult } from '@/Lib/types/campaigns';
 import { apiErrorMessage, apiValidationErrors, formatDateTime, formatText, isEmailLike } from '@/Components/Campaigns/campaignUi';
 
 const MAX_TEST_EMAILS = 5;
@@ -51,13 +51,15 @@ export function parseTestEmails(raw: string): string[] {
 
 export interface TestSendFormProps {
     campaignId: string;
+    /** A/B version driving the test send (gap-abvariant). */
+    variant?: AbVariantLabel | null;
     lastTestSentAt?: string | null;
     disabled?: boolean;
     onSent?: (result: TestSendResult) => void;
 }
 
 /** "Envoyer un test" — up to 5 addresses (`POST /campaigns/{id}/test-send`, docs/45 §45.4.2). */
-export function TestSendForm({ campaignId, lastTestSentAt, disabled, onSent }: TestSendFormProps) {
+export function TestSendForm({ campaignId, variant, lastTestSentAt, disabled, onSent }: TestSendFormProps) {
     const styles = useStyles();
     const t = useText();
     const [raw, setRaw] = useState('');
@@ -79,7 +81,7 @@ export function TestSendForm({ campaignId, lastTestSentAt, disabled, onSent }: T
         setBusy(true);
         setFeedback(null);
         try {
-            const result = await sendCampaignTest(campaignId, { emails });
+            const result = await sendCampaignTest(campaignId, variant ? { emails, variant } : { emails });
             setSentAt(result.test_sent_at);
             setFeedback({ intent: 'success', text: t.campaignSetup.previewPanel.testSent });
             onSent?.(result);

@@ -12,10 +12,11 @@ final readonly class UpdateUserData
         public ?string $name = null,
         public ?int $roleId = null,
         public ?bool $isActive = null,
+        public ?string $password = null,
     ) {}
 
     /**
-     * @param  array{name?: string, role_id?: int, is_active?: bool}  $validated
+     * @param  array{name?: string, role_id?: int, is_active?: bool, password?: string|null}  $validated
      */
     public static function fromArray(array $validated): self
     {
@@ -23,6 +24,7 @@ final readonly class UpdateUserData
             name: $validated['name'] ?? null,
             roleId: $validated['role_id'] ?? null,
             isActive: $validated['is_active'] ?? null,
+            password: ($validated['password'] ?? '') !== '' ? $validated['password'] : null,
         );
     }
 }

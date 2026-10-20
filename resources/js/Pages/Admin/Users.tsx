@@ -100,6 +100,9 @@ export default function Users() {
                     name: values.name,
                     role_id: values.role_id ?? undefined,
                     is_active: values.is_active,
+                    ...(values.password !== ''
+                        ? { password: values.password, password_confirmation: values.password_confirmation }
+                        : {}),
                 });
             } else {
                 await createUser(values as CreateUserPayload);

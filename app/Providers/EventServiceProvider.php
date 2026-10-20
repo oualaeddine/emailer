@@ -9,6 +9,7 @@ use App\Domain\Events\UserCreated;
 use App\Domain\Events\UserDeactivated;
 use App\Domain\Events\UserLoggedIn;
 use App\Domain\Events\UserLoginFailed;
+use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
 use App\Modules\Identity\Listeners\AuditListener as IdentityAuditListener;
 use App\Modules\Identity\Listeners\NotifyUserOfRoleChange;
@@ -43,6 +44,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserDeactivated::class => [
             [IdentityAuditListener::class, 'handleUserDeactivated'],
+        ],
+        UserPasswordChanged::class => [
+            [IdentityAuditListener::class, 'handleUserPasswordChanged'],
         ],
         TwoFactorEnabled::class => [
             [IdentityAuditListener::class, 'handleTwoFactorEnabled'],

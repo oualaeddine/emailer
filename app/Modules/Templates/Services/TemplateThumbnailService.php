@@ -4,6 +4,7 @@ namespace App\Modules\Templates\Services;
 
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Templates\Models\Template;
+use App\Modules\Templates\Sections\Models\SavedSection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Process\Process;
@@ -23,6 +24,9 @@ class TemplateThumbnailService
 
     public const MODEL_SAVED_SECTION = 'saved_section';
 
+    /** Crop to the content height instead of the fixed 600x800 frame (saved sections). */
+    private bool $fit = false;
+
     /** Whether the listener should queue thumbnails on save (off under tests unless enabled). */
     public static function enabled(): bool
     {
@@ -34,10 +38,14 @@ class TemplateThumbnailService
      */
     public function renderFor(string $modelType, int $modelId): ?string
     {
+        if ($modelType === self::MODEL_SAVED_SECTION) {
+            return $this->renderSavedSection($modelId);
+        }
+
         $model = match ($modelType) {
             self::MODEL_TEMPLATE => Template::query()->find($modelId),
             self::MODEL_CAMPAIGN => Campaign::query()->find($modelId),
-            default => null, // saved_section arrives with WP-61
+            default => null,
         };
         if ($model === null) {
             return null;
@@ -61,6 +69,39 @@ class TemplateThumbnailService
     }
 
     /**
+     * A saved section is MJML: wrapped in a minimal document, compiled, then
+     * rendered cropped to its own height (a section is much shorter than 800px).
+     */
+    private function renderSavedSection(int $id): ?string
+    {
+        $section = SavedSection::query()->find($id);
+        if ($section === null || trim((string) $section->mjml) === '') {
+            return null;
+        }
+
+        $compiled = app(MjmlCompiler::class)->compile('<mjml><mj-body>'.$section->mjml.'</mj-body></mjml>');
+        if (trim($compiled->html) === '') {
+            return null;
+        }
+
+        $this->fit = true;
+        try {
+            $png = $this->renderHtml($compiled->html);
+        } finally {
+            $this->fit = false;
+        }
+        if ($png === null) {
+            return null;
+        }
+
+        $path = 'thumbnails/saved_sections/'.$section->uuid.'.png';
+        Storage::disk('public')->put($path, $png);
+        $section->forceFill(['thumbnail_path' => $path])->saveQuietly();
+
+        return $path;
+    }
+
+    /**
      * @return string|null PNG bytes
      */
     public function renderHtml(string $html): ?string
@@ -77,7 +118,12 @@ class TemplateThumbnailService
 
         try {
             // The HTML is untrusted: it goes to the renderer on stdin ("-"), never as an argument.
-            if (! $this->execute([$node, $script, '-', $output], $html) || ! is_file($output)) {
+            $command = [$node, $script, '-', $output];
+            if ($this->fit) {
+                $command[] = '2000';
+                $command[] = '--fit';
+            }
+            if (! $this->execute($command, $html) || ! is_file($output)) {
                 return null;
             }
 

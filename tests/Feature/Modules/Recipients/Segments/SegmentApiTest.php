@@ -203,9 +203,9 @@ class SegmentApiTest extends TestCase
     {
         $segment = $this->makeSegment(['name' => 'Source', 'description' => 'd']);
 
-        $this->actingAs($this->admin)->postJson("/api/v1/segments/{$segment->uuid}/duplicate")
-            ->assertCreated()->assertJsonPath('data.name', 'Source (copie)')->assertJsonPath('data.description', 'd')
-            ->assertJsonPath('data.rules', $this->algerTree());
+        $copy = $this->actingAs($this->admin)->postJson("/api/v1/segments/{$segment->uuid}/duplicate")
+            ->assertCreated()->assertJsonPath('data.name', 'Source (copie)')->assertJsonPath('data.description', 'd');
+        $this->assertSameJson($this->algerTree(), $copy->json('data.rules'));
 
         $this->actingAs($this->admin)->postJson("/api/v1/segments/{$segment->uuid}/duplicate", ['name' => 'Copie 2'])
             ->assertCreated()->assertJsonPath('data.name', 'Copie 2');

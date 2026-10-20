@@ -1,8 +1,10 @@
 # 04 — Database Design
 
+> **Implementation note (release):** the application database is **MySQL 8** in production (MariaDB 10.11 also works and is used for local development). This design was first written for PostgreSQL; the migrations use Laravel's portable schema builder (`json` instead of `jsonb`, string columns with application-level enum validation, no Postgres-only features), and the full test suite runs on MySQL 8 and MariaDB. Read “PostgreSQL” below as “the app database”. Deployment steps: [48-deploy-runbook.md](48-deploy-runbook.md).
+
 ## 4.1 Conventions
 
-- Database: PostgreSQL 16+.
+- Database: MySQL 8 in production (originally specified as PostgreSQL 16+; see the note above).
 - Primary keys: `id BIGSERIAL PRIMARY KEY` unless noted.
 - All FKs indexed. Naming: `{singular_referenced_table}_id`.
 - Timestamps: `created_at`, `updated_at` as `timestamptz NOT NULL DEFAULT now()`; `deleted_at timestamptz NULL` where soft delete applies.
