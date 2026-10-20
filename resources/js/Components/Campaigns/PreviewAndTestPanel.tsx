@@ -17,7 +17,7 @@ import {
 import { DesktopRegular, DismissRegular, PhoneRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaignPreview } from '@/Lib/api/campaigns';
-import type { CampaignV2Detail, TestSendResult } from '@/Lib/types/campaigns';
+import type { AbVariantLabel, CampaignV2Detail, TestSendResult } from '@/Lib/types/campaigns';
 import { EmailFrame } from '@/Components/Campaigns/EmailFrame';
 import { InboxPreview } from '@/Components/Campaigns/SubjectCard';
 import { TestSendForm } from '@/Components/Campaigns/TestSendDialog';
@@ -73,19 +73,24 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
     const [device, setDevice] = useState<Device>('desktop');
     const [html, setHtml] = useState<string | null>(campaign.html_body);
     const [loading, setLoading] = useState(false);
+    const abVariants = campaign.ab_test_enabled ? (campaign.ab_test?.variants ?? []) : [];
+    const [variant, setVariant] = useState<AbVariantLabel>('A');
+    const activeVariant = abVariants.length > 0 ? (abVariants.find((v) => v.label === variant) ?? abVariants[0]) : null;
+    const variantLabel = activeVariant?.label ?? null;
+    const baseHtml = activeVariant?.html_body || campaign.html_body;
 
     useEffect(() => {
         if (!open) {
             return;
         }
         let cancelled = false;
-        setHtml(campaign.html_body);
-        if (!campaign.html_body) {
+        setHtml(baseHtml);
+        if (!baseHtml) {
             return;
         }
         // Rendered preview (merge tags resolved); falls back to the raw html_body.
         setLoading(true);
-        fetchCampaignPreview(campaign.id)
+        fetchCampaignPreview(campaign.id, variantLabel ? { variant: variantLabel } : {})
             .then((preview) => {
                 if (!cancelled && preview.html) {
                     setHtml(preview.html);
@@ -101,7 +106,7 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
         return () => {
             cancelled = true;
         };
-    }, [open, campaign.id, campaign.html_body]);
+    }, [open, campaign.id, baseHtml, variantLabel]);
 
     const panel = t.campaignSetup.previewPanel;
     const width = device === 'desktop' ? 680 : 375;
@@ -125,9 +130,23 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
             <DrawerBody className={styles.body}>
                 <InboxPreview
                     senderName={campaign.sender?.name ?? t.campaigns.noSender}
-                    subject={campaign.subject ?? ''}
-                    previewText={campaign.preview_text ?? ''}
+                    subject={(activeVariant ? activeVariant.subject : campaign.subject) ?? ''}
+                    previewText={(activeVariant ? activeVariant.preview_text : campaign.preview_text) ?? ''}
                 />
+                {abVariants.length > 0 && (
+                    <TabList
+                        size="small"
+                        aria-label={panel.abVersion}
+                        selectedValue={variantLabel ?? 'A'}
+                        onTabSelect={(_, data) => setVariant(data.value as AbVariantLabel)}
+                    >
+                        {abVariants.map((v) => (
+                            <Tab key={v.label} value={v.label}>
+                                {panel.abVersionLabel.replace('%s', v.label)}
+                            </Tab>
+                        ))}
+                    </TabList>
+                )}
                 <TabList selectedValue={device} onTabSelect={(_, data) => setDevice(data.value as Device)}>
                     <Tab value="desktop" icon={<DesktopRegular />}>
                         {panel.desktop}
@@ -151,6 +170,7 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
                 <Text weight="semibold">{panel.sendTest}</Text>
                 <TestSendForm
                     campaignId={campaign.id}
+                    variant={variantLabel}
                     lastTestSentAt={campaign.test_sent_at}
                     disabled={!campaign.html_body}
                     onSent={onTestSent}
