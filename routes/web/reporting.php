@@ -11,9 +11,8 @@ use Inertia\Inertia;
 | Required from routes/web/app.php inside the `auth` middleware group.
 */
 
-Route::get('statistics', fn () => Inertia::render('Reporting/Index'))
-    ->middleware('can:reporting.view')
-    ->name('reporting.index');
+// docs/47 — `/statistics` is served by routes/web/statistics.php since Wave 3.
+// (Route::get('statistics', …) → Reporting/Index removed; Reporting/Index.tsx is deleted.)
 
 // docs/43 §43.3 — legacy URL, permanent redirect for one release.
 Route::redirect('reporting', '/statistics', 301);

@@ -4,7 +4,6 @@ use App\Modules\Reporting\Http\Controllers\ReportController;
 use App\Modules\Reporting\Http\Controllers\ReportExportController;
 use App\Modules\Reporting\Http\Controllers\ReportingController;
 use App\Modules\Reporting\Http\Controllers\StatisticsController;
-use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,18 +37,8 @@ Route::get('campaigns/{campaign}/report/export', [ReportExportController::class,
 // routes/api/campaigns.php (WP-42, required first) registers `{campaign}` before this file runs: it is moved to the
 // front of the route collection so route matching (first match wins) reaches it.
 $compare = Route::get('campaigns/compare', [ReportController::class, 'compare']);
-$router = app('router');
-$routes = $router->getRoutes();
-if ($routes instanceof RouteCollection) {
-    $ordered = new RouteCollection;
-    $ordered->add($compare);
-    foreach ($routes->getRoutes() as $route) {
-        if ($route !== $compare) {
-            $ordered->add($route);
-        }
-    }
-    $router->setRoutes($ordered);
-}
+// `campaigns/compare` is kept out of `campaigns/{campaign}` by the global UUID
+// pattern registered in AppServiceProvider::boot (Wave 3 gate).
 
 // Global statistics (`reporting.view`).
 Route::get('statistics/summary', [StatisticsController::class, 'summary']);

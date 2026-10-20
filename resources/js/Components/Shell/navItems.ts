@@ -136,8 +136,8 @@ export const navItems: NavItem[] = [
     // Paramètres (account menu, top-right)
     { href: '/settings/senders', icon: MailIcon, label: (t) => t.nav.senders, match: 'prefix', group: 'settings', permissions: ['senders.manage'] },
     { href: '/smtp', icon: ServerIcon, label: (t) => t.nav.smtp, match: 'exact', group: 'settings', permissions: ['smtp.view'] },
-    { href: '/settings/unsubscribe-pages', icon: ShieldProhibitedIcon, label: (t) => t.nav.unsubscribePages, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
-    { href: '/settings/update-profile-forms', icon: DocumentIcon, label: (t) => t.nav.updateProfileForms, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
+    { href: '/settings/unsubscribe-pages', icon: ShieldProhibitedIcon, label: (t) => t.nav.unsubscribePages, match: 'prefix', group: 'settings', permissions: ['settings.manage'] },
+    { href: '/settings/update-profile-forms', icon: DocumentIcon, label: (t) => t.nav.updateProfileForms, match: 'prefix', group: 'settings', permissions: ['settings.manage'] },
     { href: '/settings/tracking', icon: SettingsIcon, label: (t) => t.nav.tracking, match: 'prefix', group: 'settings', permissions: ['settings.manage'], hidden: true },
     { href: '/settings/branding', icon: SettingsIcon, label: (t) => t.nav.branding, match: 'prefix', group: 'settings', permissions: ['settings.branding_only', 'settings.manage'] },
     { href: '/admin/users', icon: PeopleIcon, label: (t) => t.nav.usersRoles, match: 'prefix', group: 'settings', permissions: ['users.manage'] },

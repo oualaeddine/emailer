@@ -9,25 +9,7 @@ import type { DeviceType, RateSet, ReportCampaignHeader } from '@/Lib/types/repo
  * `campaignReport` namespace does not have yet; they are reported in WP-71's
  * return so the orchestrator can move them to fr.ts between waves.
  */
-export const reportMissingText = {
-    showTable: 'Afficher le tableau',
-    showChart: 'Afficher le graphique',
-    noData: 'Aucune donnée pour le moment.',
-    domain: 'Domaine',
-    country: 'Pays',
-    client: 'Client de messagerie',
-    device: 'Appareil',
-    hour: 'Heure',
-    shareOfOpens: 'Part des ouvertures',
-    email: 'E-mail',
-    metric: 'Indicateur',
-    clickMapFallback: 'L’aperçu de l’e-mail ne peut pas être annoté : liens classés par part des clics.',
-    emailUnavailable: 'Le contenu de l’e-mail n’est pas disponible.',
-    linkClicks: '%s clics uniques · %s clics totaux',
-    compareMax: 'Vous pouvez comparer au maximum 4 autres campagnes.',
-    compareRun: 'Lancer la comparaison',
-    compareCurrent: 'Campagne actuelle',
-} as const;
+export const reportMissingText = fr.campaignReport;
 
 export const DEVICE_ORDER: DeviceType[] = ['desktop', 'mobile', 'tablet', 'unknown'];
 

@@ -68,7 +68,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Wave 3 gate: literal `campaigns/compare` must not be captured by `campaigns/{campaign}`.
+        \Illuminate\Support\Facades\Route::pattern('campaign', '[0-9a-fA-F-]{36}');
         // docs/45 §45.9 — WP-70: final rollup when a campaign completes.
         \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
     }

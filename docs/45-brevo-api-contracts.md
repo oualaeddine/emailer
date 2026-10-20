@@ -908,6 +908,9 @@ Other deviations recorded: `POST /segments/count` is always synchronous (no 202 
 
 ## 45.6 Wave 3 — Design & reports
 
+> Gate note (orchestrator): `data-link-id` / `campaign_links.link_id` is the first **16** hex chars of
+> sha1(absolute URL) (WP-63 injects, WP-70 reads; an optional signed `lid` query overrides).
+
 ### 45.6.1 WP-60 EmailBuilder core (`Lib/types/editor.ts`)
 
 | Method | Path | Permission | Request | Response |
