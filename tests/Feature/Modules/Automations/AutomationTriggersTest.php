@@ -4,6 +4,7 @@ namespace Tests\Feature\Modules\Automations;
 
 use App\Modules\Automations\Events\AutomationRunStarted;
 use App\Modules\Automations\Jobs\AdvanceAutomationRunsJob;
+use App\Modules\Automations\Listeners\StartRunsOnCampaignEngagement;
 use App\Modules\Automations\Models\Automation;
 use App\Modules\Automations\Models\AutomationRun;
 use App\Modules\Campaigns\Models\Campaign;
@@ -15,6 +16,7 @@ use App\Modules\Recipients\Attributes\Events\ContactAttributesUpdated;
 use App\Modules\Recipients\Lists\Contracts\ListMembershipService;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
+use App\Modules\Tracking\Events\MessageEventRecorded;
 use App\Modules\Tracking\Models\Message;
 use App\Modules\Tracking\Services\TrackingEventRecorder;
 use Database\Factories\ContactAttributeFactory;
@@ -151,6 +153,22 @@ class AutomationTriggersTest extends TestCase
 
         $recorder->recordOpen($this->campaignMessage($campaign, $contact));
         $this->assertSame(1, AutomationRun::query()->where('automation_id', $specific->id)->count());
+    }
+
+    public function test_apple_mpp_proxy_open_starts_no_campaign_opened_run(): void
+    {
+        $campaign = Campaign::factory()->create();
+        $automation = $this->activeAutomation('campaign_opened', ['campaign_ids' => null], [$this->step('end')]);
+        $contact = $this->contact();
+        $message = $this->campaignMessage($campaign, $contact);
+        $listener = app(StartRunsOnCampaignEngagement::class);
+
+        $listener->handle(new MessageEventRecorded(1, $message->id, 'opened', $campaign->id, $contact->id, isProxyOpen: true));
+        $this->assertSame(0, AutomationRun::query()->where('automation_id', $automation->id)->count());
+
+        // The same open from a real client starts the run.
+        $listener->handle(new MessageEventRecorded(2, $message->id, 'opened', $campaign->id, $contact->id));
+        $this->assertSame(1, AutomationRun::query()->where('automation_id', $automation->id)->count());
     }
 
     public function test_campaign_click_matches_link_url_and_ignores_test_sends(): void

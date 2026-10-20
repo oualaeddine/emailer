@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
  * Triggers `campaign_opened` — { campaign_ids: uuid[]|null } and
  * `campaign_clicked` — { campaign_ids, link_url: exact URL or prefix
  * ending with "*" | null }. `campaign_ids = null` = any campaign. Test
- * sends and non-campaign messages never trigger.
+ * sends, non-campaign messages and machine opens (Apple MPP proxy opens,
+ * `isProxyOpen`, docs/45 §45.7.8) never trigger.
  */
 class StartRunsOnCampaignEngagement
 {
@@ -25,7 +26,7 @@ class StartRunsOnCampaignEngagement
             default => null,
         };
 
-        if ($type === null || $event->campaignId === null || $event->recipientId === null) {
+        if ($type === null || $event->isProxyOpen || $event->campaignId === null || $event->recipientId === null) {
             return;
         }
 
