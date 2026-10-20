@@ -119,3 +119,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 3 | fix-A | opus | Returned; B3, S1–S4, S7–S11, N1, N4, N5, N7, N8 fixed; 236 tests green; 2 migrations (messages.to_name, stats_hourly.variant_id NOT NULL) | 386cb8a |
 | 2026-10-20 | 3 | merge | — | Merged fix-A (75634ce), fix-B (5031509) without conflicts; tsc + build green; final gate running | running |
 | 2026-10-20 | 3 | PR | — | Draft PR #17 brevo/wave-3 → brevo/main opened, subscribed; final suite running | pending |
+| 2026-10-20 | 3 | gate | — | Final full suite: **832 passed, 1 skipped, 0 failed**; migrate/tsc/build green; PR #17 marked ready | green |
