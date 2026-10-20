@@ -1551,6 +1551,26 @@ plus the webhook's custom headers. 2xx = success; otherwise retry at +1 min, +5 
 +2 h, +12 h (6 attempts total), then `failed`; 50 consecutive failures auto-disable the webhook
 (`is_active = false`, notification `delivery_infrastructure`).
 
+### 45.7.8 Additions and deviations recorded at the Wave 4 gate (orchestrator)
+
+| Method | Path | Permission | Notes |
+|---|---|---|---|
+| POST | `/automations` | `automations.manage` | Also accepts an optional `steps` array on create (WP-91); `PATCH` still rejects `steps`. |
+| POST | `/transactional/send` | API key / `transactional.send` | Responds `201` with the message object (WP-100). API keys are Sanctum personal access tokens, there is no separate `api_keys` table. |
+| GET | `web:/settings/api` | auth | 302 redirect to `/transactional/settings` (API keys tab); doc 43 §43.3 lists the page at `/settings/api`. |
+| PUT | `/campaigns/{id}/ab-test` | `campaigns.create` (policy `prepare`) | 409 unless draft; `sample_percent` 5–50 (§45.7.2); disabling keeps stored variants (WP-80). |
+| POST | `/campaigns/{id}/ab-test/winner` | `campaigns.send` / `campaigns.send_any` | 409 unless the test phase is running or a winner exists; 422 `errors.variant_id` for a foreign variant (WP-80). |
+
+Deviations and contract notes:
+
+- **WP-80** — the `variant` query on `GET /campaigns/{id}/preview` and `POST /campaigns/{id}/test-send` (§45.4.2) is **not implemented** (CampaignController out of WP-80 scope; deferred to a follow-up). Remainder messages keep `variant_id = null`, so per-variant stats cover the test sample only. `picked_at`/`picked_by` come from the `campaign.ab_winner_picked` audit entry. The event is `AbTestWinnerPicked` (§45.9). An A/B campaign is rejected at schedule time when combined with best-time sending.
+- **WP-81** — `BestSendTimeService::plan()` writes `campaign_recipients.scheduled_for`; the dispatcher honours it. `ConfirmSendDialog` passes `campaignId` to `SendModeOptions` for the preview. Default timezone `Africa/Algiers` (constant, not per-user).
+- **WP-90** — DOI confirmation for form submissions is handled by the shared opt-in flow; the per-form DOI template/redirect columns are stored but unused by the confirm step. Captcha verification is skipped (fail-open) when no provider is configured.
+- **WP-100** — `reply_to`, `cc`, `bcc` and `attachments` are validated and stored on the transactional log entry but **not delivered** by the current pipeline (follow-up). Recipients created through the API get `RecipientSource::Api` and status `active`.
+- **WP-101** — signature headers are `X-Mailer-Signature`, `X-Mailer-Timestamp`, `X-Mailer-Event`, `X-Mailer-Delivery` (HMAC-SHA256 over `timestamp.body`). HTTPS required in production only; private/loopback hosts always 422. `failure_count` counts deliveries that exhaust 6 attempts; `template_id` only present for campaign messages. `sent` is stored as `request`.
+- **WP-91** — `send_email` steps use the `TransactionalSender` contract when bound, otherwise `RenderingPipeline::createMessage(campaign: null)` + `SendEmailJob`. A contact never has two concurrent runs in the same automation. Run `exited` includes `failed`.
+- **WP-102** — registry groups now use the `NavGroup` values; `topicForUrl` supports `{param}` segments. Help-centre `groupOrder` extended to the Brevo groups at the gate.
+
 ## 45.8 Schema addendum (frozen column lists per migration slot)
 
 Slots and timestamp prefixes are doc 44 §44.11. A column listed here is created **only** by the
