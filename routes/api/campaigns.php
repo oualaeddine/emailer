@@ -46,3 +46,7 @@ Route::post('campaigns/{campaign}/archive', [CampaignController::class, 'archive
 Route::post('campaigns/{campaign}/unarchive', [CampaignController::class, 'unarchive']);
 Route::get('campaigns/{campaign}/recipients', [CampaignController::class, 'recipients']);
 Route::get('campaigns/{campaign}/analytics', [CampaignController::class, 'analytics']);
+
+// docs/45-brevo-api-contracts.md §45.7.2 — WP-80 A/B testing.
+Route::put('campaigns/{campaign}/ab-test', [\App\Modules\Campaigns\AbTesting\Http\Controllers\AbTestController::class, 'update']);
+Route::post('campaigns/{campaign}/ab-test/winner', [\App\Modules\Campaigns\AbTesting\Http\Controllers\AbTestController::class, 'pickWinner']);

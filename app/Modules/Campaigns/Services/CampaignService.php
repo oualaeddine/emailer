@@ -5,6 +5,7 @@ namespace App\Modules\Campaigns\Services;
 use App\Domain\Enums\MessageStatus;
 use App\Domain\Enums\RecipientSource;
 use App\Domain\Enums\RecipientStatus;
+use App\Modules\Campaigns\AbTesting\Services\AbTestService;
 use App\Modules\Campaigns\Contracts\AudienceResolver as AudienceResolverContract;
 use App\Modules\Campaigns\Enums\AudienceMode;
 use App\Modules\Campaigns\Enums\AudienceTargetType;
@@ -471,6 +472,7 @@ class CampaignService
             ]);
 
             $this->copyAudienceRows($campaign, $copy);
+            app(AbTestService::class)->copyVariants($campaign, $copy);
 
             return $copy->fresh();
         });
@@ -506,6 +508,7 @@ class CampaignService
             ]);
 
             $this->copyAudienceRows($campaign, $child);
+            app(AbTestService::class)->copyVariants($campaign, $child);
 
             return $child->fresh();
         });
@@ -846,6 +849,8 @@ class CampaignService
                 throw new CampaignChecklistBlockedException($failures);
             }
         }
+
+        app(AbTestService::class)->assertSchedulable($campaign);
     }
 
     private function transition(Campaign $campaign, CampaignStatus $to, ?string $reason = null): void

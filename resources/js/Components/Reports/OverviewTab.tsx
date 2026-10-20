@@ -1,56 +1,15 @@
-import { Badge } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
-import { formatCount, formatDateTime, formatRate } from '@/Components/Campaigns/campaignUi';
+import { AbTestReportCard } from '@/Components/Campaigns/AbTestReportCard';
+import { formatCount, formatRate } from '@/Components/Campaigns/campaignUi';
 import { AppleMppNote } from '@/Components/Reports/AppleMppNote';
 import { AudienceSection } from '@/Components/Reports/AudienceSection';
-import { ChartDataTable } from '@/Components/Reports/ChartChrome';
 import { DeviceSplit } from '@/Components/Reports/DeviceSplit';
 import { KpiRow, KpiTile } from '@/Components/Reports/KpiTile';
 import { TopLinksTable } from '@/Components/Reports/LinksTable';
 import { ReportSection, SectionGrid, TabStack } from '@/Components/Reports/ReportSection';
 import { TimeSeriesChart } from '@/Components/Reports/TimeSeriesChart';
 import { TimelineList } from '@/Components/Reports/TimelineList';
-import type { AbTestReport } from '@/Lib/types/campaigns';
 import type { ReportOverview } from '@/Lib/types/reports';
-
-function AbTestCard({ report }: { report: AbTestReport }) {
-    const t = useText();
-    const s = t.campaignSetup;
-    const picked = report.picked_by === 'auto' ? t.campaignReport.pickedAuto : report.picked_by === 'manual' ? t.campaignReport.pickedManual : null;
-
-    return (
-        <ReportSection
-            title={t.campaignReport.abTestCard}
-            subtitle={[s.abPhases[report.phase], picked, report.picked_at ? formatDateTime(report.picked_at) : null].filter(Boolean).join(' · ')}
-        >
-            <ChartDataTable
-                caption={t.campaignReport.abTestCard}
-                columns={[
-                    { label: s.previewPanel.variant },
-                    { label: t.campaignReport.subject },
-                    { label: t.campaignReport.kpis.sent, numeric: true },
-                    { label: t.campaignReport.rates.open_rate, numeric: true },
-                    { label: t.campaignReport.rates.click_rate, numeric: true },
-                    { label: s.abTest.winner },
-                ]}
-                rows={report.variants.map((variant) => [
-                    variant.label === 'A' ? s.abTest.variantA : s.abTest.variantB,
-                    variant.subject,
-                    formatCount(variant.globalStats.sent),
-                    formatRate(variant.rates.open_rate),
-                    formatRate(variant.rates.click_rate),
-                    variant.variant_id === report.winner_variant_id ? (
-                        <Badge appearance="tint" color="success">
-                            {s.abTest.winner}
-                        </Badge>
-                    ) : (
-                        t.common.emptyValue
-                    ),
-                ])}
-            />
-        </ReportSection>
-    );
-}
 
 /**
  * **Vue d'ensemble** — KPI tiles (Envoyés, Délivrés, Ouvertures uniques, Clics
@@ -128,7 +87,7 @@ export function OverviewTab({ data }: { data: ReportOverview }) {
                 <AppleMppNote appleMppOpens={s.appleMppOpens} uniqueViews={s.uniqueViews} trackableViews={s.trackableViews} />
             )}
 
-            {data.ab_test && <AbTestCard report={data.ab_test} />}
+            {data.ab_test && <AbTestReportCard report={data.ab_test} campaignId={data.campaign.id} />}
 
             <ReportSection title={t.campaignReport.performanceOverTime}>
                 <TimeSeriesChart

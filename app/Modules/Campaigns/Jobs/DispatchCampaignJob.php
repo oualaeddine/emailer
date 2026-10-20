@@ -2,6 +2,7 @@
 
 namespace App\Modules\Campaigns\Jobs;
 
+use App\Modules\Campaigns\AbTesting\Services\AbTestDispatcher;
 use App\Modules\Campaigns\Enums\CampaignStatus;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Services\CampaignService;
@@ -21,6 +22,11 @@ use Illuminate\Support\Facades\Cache;
  * v2 (docs/43 §43.6.1, docs/45 §45.4.2): iterates the materialised
  * `campaign_recipients` rows; batches mode re-enqueues itself with a delay
  * until the next batch is due.
+ *
+ * A/B test campaigns (`ab_test_enabled`, docs/43 §43.6.2, WP-80) run the
+ * split cycle of {@see AbTestDispatcher}: the sample gets versions A/B
+ * evenly, the remainder waits for `PickAbWinnerJob` and is then sent with
+ * the winner's subject / html.
  *
  * `$scheduledFor` is set on the delayed job created by a schedule: if the
  * campaign was unscheduled / rescheduled / sent now since, the stale job
@@ -43,7 +49,7 @@ class DispatchCampaignJob implements ShouldQueue
         $this->scheduledFor = $scheduledFor;
     }
 
-    public function handle(CampaignService $campaigns): void
+    public function handle(CampaignService $campaigns, ?AbTestDispatcher $abTests = null): void
     {
         $campaign = Campaign::find($this->campaignId);
 
@@ -61,7 +67,11 @@ class DispatchCampaignJob implements ShouldQueue
         }
 
         try {
-            $campaigns->runDispatchCycle($campaign);
+            if ($campaign->ab_test_enabled) {
+                ($abTests ?? app(AbTestDispatcher::class))->runDispatchCycle($campaign);
+            } else {
+                $campaigns->runDispatchCycle($campaign);
+            }
         } finally {
             $lock->release();
         }

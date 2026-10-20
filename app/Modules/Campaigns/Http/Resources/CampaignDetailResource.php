@@ -2,6 +2,7 @@
 
 namespace App\Modules\Campaigns\Http\Resources;
 
+use App\Modules\Campaigns\AbTesting\Services\AbTestService;
 use App\Modules\Campaigns\Enums\AudienceMode;
 use App\Modules\Campaigns\Enums\AudienceTargetType;
 use App\Modules\Campaigns\Models\Campaign;
@@ -60,7 +61,7 @@ class CampaignDetailResource extends CampaignResource
             'batch' => $this->batch_size !== null
                 ? ['size' => (int) $this->batch_size, 'interval_minutes' => (int) $this->batch_interval_minutes]
                 : null,
-            'ab_test' => null,
+            'ab_test' => app(AbTestService::class)->detailPayload($this->resource),
             'test_sent_at' => self::iso($this->test_sent_at),
             // docs/45 §45.6.3 — anonymous public mirror (`/m/c/{campaign}`) once the campaign was sent.
             'share_link' => $this->sent_at !== null ? app(SystemUrls::class)->campaignMirror($this->resource) : null,
