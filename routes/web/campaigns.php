@@ -23,3 +23,12 @@ Route::get('campaigns/{campaign}/setup', fn (string $campaign) => Inertia::rende
 ]))
     ->middleware('can:campaigns.view')
     ->name('campaigns.setup');
+
+// docs/43-brevo-parity-plan.md §43.4.15 / docs/45 §45.6.5 (WP-71) — Brevo
+// campaign report: Vue d'ensemble, Délivrabilité, Ouvertures, Clics,
+// Désinscriptions, export per tab and compare (data from WP-72 endpoints).
+Route::get('campaigns/{campaign}/report', fn (string $campaign) => Inertia::render('Campaigns/Report', [
+    'campaignId' => $campaign,
+]))
+    ->middleware('can:campaigns.view')
+    ->name('campaigns.report');
