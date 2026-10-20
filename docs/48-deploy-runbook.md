@@ -62,6 +62,15 @@ CACHE_STORE=redis
 SESSION_DRIVER=database            # needed so a password change signs out other sessions
 REDIS_HOST=… / REDIS_PASSWORD=…
 
+# System e-mails (double opt-in confirmations, form sign-up notifications)
+# go through Laravel's mailer, NOT the SMTP accounts configured in the app.
+# With MAIL_MAILER=log they are silently written to the log instead of sent.
+MAIL_MAILER=smtp
+MAIL_HOST=…
+MAIL_PORT=587
+MAIL_USERNAME=…
+MAIL_PASSWORD=…
+MAIL_SCHEME=null                           # "smtps" for port 465
 MAIL_FROM_ADDRESS=no-reply@pagejaunes.dz   # becomes the default sender
 MAIL_FROM_NAME="PageJaunes"
 
@@ -192,6 +201,19 @@ terminal output: don't run the command through a shared or logged session.
 - Database backups per [33-deployment.md §33.5](33-deployment.md#335-backups), starting on day one.
 
 ## 10. Later deployments and rollback
+
+The repository ships `scripts/deploy.sh` (production: `emailer.pagesjaunes-dz.com`). It pulls
+`main` (fast-forward only), runs `composer install --no-dev`, `migrate --force`, rebuilds the
+caches and terminates Horizon so systemd (`horizon-emailer.service`) restarts it on the new code.
+It does not rebuild the front end: `public/build` is committed with every release.
+
+```bash
+mysqldump --single-transaction pagejaunes_mailer > backup-$(date +%F-%H%M).sql   # always first
+sudo -u pagesjaunes-emailer bash scripts/deploy.sh
+php artisan horizon:status
+```
+
+Equivalent manual sequence (with maintenance mode):
 
 ```bash
 php artisan down --render="errors::503"
