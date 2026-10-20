@@ -153,4 +153,4 @@ gate run, retry and decision. Newest entries at the bottom. Timestamps are UTC.
 | 2026-10-20 | 4 | gate | — | Final gate: tsc clean, build green; migrate:fresh --seed + full suite running; §44.15 Wave 4 row + doc 34 note written | running |
 | 2026-10-20 | 4 | gate | — | Final full suite: **1012 passed, 1 skipped, 0 failed** (5794 assertions); migrate:fresh --seed green; tsc + build green; grep/route gates clean. Opening PR brevo/wave-4 → brevo/main | green |
 | 2026-10-20 | 4 | PR | — | PR #18 brevo/wave-4 → brevo/main opened, ready, merged (954101a; local gate, CI billing-locked). Wave 4 complete; Wave 4 worktrees to be removed | merged |
-| 2026-10-20 | — | PR | — | Programme PR brevo/main → main opened ready for review (not merged by the orchestrator) | open |
+| 2026-10-20 | — | PR | — | Programme PR **#19** brevo/main → main opened ready for review, subscribed (not merged by the orchestrator) | open |
