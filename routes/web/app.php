@@ -80,3 +80,4 @@ require __DIR__.'/statistics.php';
 require __DIR__.'/editor.php';
 require __DIR__.'/transactional.php';
 require __DIR__.'/transactional-logs.php';
+require __DIR__.'/forms-pages.php';
