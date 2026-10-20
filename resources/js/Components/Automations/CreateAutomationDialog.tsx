@@ -24,7 +24,6 @@ import type { AutomationTrigger } from '@/Lib/types/automations';
 import { isTriggerConfigured } from './graph';
 import { AutomationLookupsProvider } from './lookups';
 import { TriggerConfigEditor } from './TriggerCard';
-import { automationMissingText as mt } from './text';
 
 const useStyles = makeStyles({
     content: {
@@ -92,7 +91,7 @@ function CreateForm({ onClose }: { onClose: () => void }) {
         }
     }
 
-    const nameError = errors.name ?? (attempted && nameMissing ? mt.editor.nameRequired : undefined);
+    const nameError = errors.name ?? (attempted && nameMissing ? t.automations.editor.editor.nameRequired : undefined);
 
     return (
         <form onSubmit={submit}>
@@ -107,7 +106,7 @@ function CreateForm({ onClose }: { onClose: () => void }) {
                     <Field label={t.automations.name} required validationMessage={nameError} validationState={nameError ? 'error' : 'none'}>
                         <Input value={name} maxLength={255} autoFocus onChange={(_, data) => setName(data.value)} />
                     </Field>
-                    <Text className={styles.muted}>{mt.create.chooseTrigger}</Text>
+                    <Text className={styles.muted}>{t.automations.editor.create.chooseTrigger}</Text>
                     <TriggerConfigEditor trigger={trigger} onChange={setTrigger} errors={errors} showRequired={attempted} hideFilter disabled={saving} />
                 </DialogContent>
                 <DialogActions>
@@ -115,7 +114,7 @@ function CreateForm({ onClose }: { onClose: () => void }) {
                         {t.common.cancel}
                     </Button>
                     <Button appearance="primary" type="submit" disabled={saving} icon={saving ? <Spinner size="tiny" /> : undefined}>
-                        {mt.create.submit}
+                        {t.automations.editor.create.submit}
                     </Button>
                 </DialogActions>
             </DialogBody>

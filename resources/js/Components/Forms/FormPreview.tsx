@@ -4,7 +4,6 @@ import { DesktopRegular, PhoneRegular } from '@fluentui/react-icons';
 import { EmailFrame } from '@/Components/Campaigns/EmailFrame';
 import type { FormDraft } from '@/Components/Forms/model';
 import { renderFormHtml } from '@/Components/Forms/renderFormHtml';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 
 const useStyles = makeStyles({
@@ -44,7 +43,7 @@ export function FormPreview({ draft, height = 640 }: Props) {
     const t = useText();
     const [device, setDevice] = useState<Device>('desktop');
     const html = useMemo(
-        () => renderFormHtml(draft, { captcha: formText.preview.captcha, selectPlaceholder: formText.preview.selectPlaceholder }),
+        () => renderFormHtml(draft, { captcha: t.forms.editor.preview.captcha, selectPlaceholder: t.forms.editor.preview.selectPlaceholder }),
         [draft],
     );
 

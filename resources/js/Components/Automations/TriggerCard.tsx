@@ -33,7 +33,6 @@ import type { AutomationTrigger, AutomationTriggerType } from '@/Lib/types/autom
 import { AttributeValueEditor, formatAttributeValue } from './AttributeValueEditor';
 import { TRIGGER_TYPES, defaultTrigger, triggerFilterErrors } from './graph';
 import { EntityPicker, useAutomationLookups } from './lookups';
-import { automationMissingText as mt } from './text';
 
 export const TRIGGER_ICONS: Record<AutomationTriggerType, ComponentType> = {
     list_added: PeopleAddRegular,
@@ -137,50 +136,50 @@ export function useTriggerSummary(): (trigger: AutomationTrigger | null) => stri
     const { attributes, label } = useAutomationLookups();
 
     return (trigger) => {
-        if (!trigger) return mt.trigger.notConfigured;
+        if (!trigger) return t.automations.editor.trigger.notConfigured;
         switch (trigger.type) {
             case 'list_added': {
                 const ids = trigger.config.list_ids;
-                if (ids.length === 0) return mt.trigger.notConfigured;
+                if (ids.length === 0) return t.automations.editor.trigger.notConfigured;
 
-                return ids.length === 1 ? (label('lists', ids[0]) ?? formatText(mt.trigger.summaryLists, 1)) : formatText(mt.trigger.summaryLists, ids.length);
+                return ids.length === 1 ? (label('lists', ids[0]) ?? formatText(t.automations.editor.trigger.summaryLists, 1)) : formatText(t.automations.editor.trigger.summaryLists, ids.length);
             }
             case 'form_submitted': {
                 const ids = trigger.config.form_ids;
-                if (ids.length === 0) return mt.trigger.notConfigured;
+                if (ids.length === 0) return t.automations.editor.trigger.notConfigured;
 
-                return ids.length === 1 ? (label('forms', ids[0]) ?? formatText(mt.trigger.summaryForms, 1)) : formatText(mt.trigger.summaryForms, ids.length);
+                return ids.length === 1 ? (label('forms', ids[0]) ?? formatText(t.automations.editor.trigger.summaryForms, 1)) : formatText(t.automations.editor.trigger.summaryForms, ids.length);
             }
             case 'campaign_opened':
             case 'campaign_clicked': {
                 const ids = trigger.config.campaign_ids;
                 let text: string;
-                if (ids === null) text = mt.trigger.summaryAnyCampaign;
-                else if (ids.length === 0) return mt.trigger.notConfigured;
-                else text = ids.length === 1 ? (label('campaigns', ids[0]) ?? formatText(mt.trigger.summaryCampaigns, 1)) : formatText(mt.trigger.summaryCampaigns, ids.length);
+                if (ids === null) text = t.automations.editor.trigger.summaryAnyCampaign;
+                else if (ids.length === 0) return t.automations.editor.trigger.notConfigured;
+                else text = ids.length === 1 ? (label('campaigns', ids[0]) ?? formatText(t.automations.editor.trigger.summaryCampaigns, 1)) : formatText(t.automations.editor.trigger.summaryCampaigns, ids.length);
                 if (trigger.type === 'campaign_clicked' && trigger.config.link_url) text += ` · ${trigger.config.link_url}`;
 
                 return text;
             }
             case 'attribute_changed': {
                 const { attribute, to_value: toValue } = trigger.config;
-                if (!attribute) return mt.trigger.notConfigured;
+                if (!attribute) return t.automations.editor.trigger.notConfigured;
                 const name = attributeLabel(attributes, attribute);
-                if (toValue === null) return formatText(mt.trigger.summaryAttributeAny, name);
+                if (toValue === null) return formatText(t.automations.editor.trigger.summaryAttributeAny, name);
                 const definition = attributes.find((a) => a.name === attribute);
 
                 return formatText(
-                    mt.trigger.summaryAttributeTo,
+                    t.automations.editor.trigger.summaryAttributeTo,
                     name,
                     formatAttributeValue(definition, toValue, t.conditionBuilder.booleanValues.true, t.conditionBuilder.booleanValues.false),
                 );
             }
             case 'date_anniversary': {
                 const { attribute, offset_days: offset, time } = trigger.config;
-                if (!attribute) return mt.trigger.notConfigured;
+                if (!attribute) return t.automations.editor.trigger.notConfigured;
                 const signed = offset === 0 ? '' : offset > 0 ? `+${offset}` : String(offset);
 
-                return formatText(mt.trigger.summaryAnniversary, attributeLabel(attributes, attribute), signed, time);
+                return formatText(t.automations.editor.trigger.summaryAnniversary, attributeLabel(attributes, attribute), signed, time);
             }
         }
     };
@@ -205,7 +204,7 @@ export function TriggerCard({ trigger, selected, invalid, onOpen }: TriggerCardP
         <Card
             className={mergeClasses(styles.card, selected && styles.selected, invalid && styles.invalid)}
             onClick={onOpen}
-            aria-label={`${t.automations.trigger} : ${trigger ? t.automations.triggers[trigger.type] : mt.trigger.chooseTrigger}`}
+            aria-label={`${t.automations.trigger} : ${trigger ? t.automations.triggers[trigger.type] : t.automations.editor.trigger.chooseTrigger}`}
         >
             <div className={styles.header}>
                 <span className={styles.icon} aria-hidden="true">
@@ -215,7 +214,7 @@ export function TriggerCard({ trigger, selected, invalid, onOpen }: TriggerCardP
                     <Text size={200} className={styles.eyebrow}>
                         {t.automations.trigger}
                     </Text>
-                    <Text weight="semibold">{trigger ? t.automations.triggers[trigger.type] : mt.trigger.chooseTrigger}</Text>
+                    <Text weight="semibold">{trigger ? t.automations.triggers[trigger.type] : t.automations.editor.trigger.chooseTrigger}</Text>
                 </div>
             </div>
             <Text size={300} className={styles.summary}>
@@ -223,12 +222,12 @@ export function TriggerCard({ trigger, selected, invalid, onOpen }: TriggerCardP
             </Text>
             {hasFilter && (
                 <Text size={200} className={styles.filterNote}>
-                    <FilterRegular aria-hidden="true" /> {mt.trigger.filterActive}
+                    <FilterRegular aria-hidden="true" /> {t.automations.editor.trigger.filterActive}
                 </Text>
             )}
             {invalid && (
                 <Badge appearance="tint" color="danger" size="small">
-                    {mt.step.incomplete}
+                    {t.automations.editor.step.incomplete}
                 </Badge>
             )}
         </Card>
@@ -286,10 +285,10 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
         switch (trigger.type) {
             case 'list_added':
                 config = (
-                    <Field label={mt.trigger.lists} required {...fieldState('list_ids', trigger.config.list_ids.length === 0)}>
+                    <Field label={t.automations.editor.trigger.lists} required {...fieldState('list_ids', trigger.config.list_ids.length === 0)}>
                         <EntityPicker
                             kind="lists"
-                            ariaLabel={mt.trigger.lists}
+                            ariaLabel={t.automations.editor.trigger.lists}
                             disabled={disabled}
                             values={trigger.config.list_ids}
                             onChange={(list_ids) => setConfig(trigger, { list_ids })}
@@ -299,10 +298,10 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                 break;
             case 'form_submitted':
                 config = (
-                    <Field label={mt.trigger.forms} required {...fieldState('form_ids', trigger.config.form_ids.length === 0)}>
+                    <Field label={t.automations.editor.trigger.forms} required {...fieldState('form_ids', trigger.config.form_ids.length === 0)}>
                         <EntityPicker
                             kind="forms"
-                            ariaLabel={mt.trigger.forms}
+                            ariaLabel={t.automations.editor.trigger.forms}
                             disabled={disabled}
                             values={trigger.config.form_ids}
                             onChange={(form_ids) => setConfig(trigger, { form_ids })}
@@ -315,20 +314,20 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                 const ids = trigger.config.campaign_ids;
                 config = (
                     <>
-                        <Field label={mt.trigger.campaigns} {...fieldState('campaign_ids', ids !== null && ids.length === 0)}>
+                        <Field label={t.automations.editor.trigger.campaigns} {...fieldState('campaign_ids', ids !== null && ids.length === 0)}>
                             <RadioGroup
                                 disabled={disabled}
                                 value={ids === null ? 'any' : 'specific'}
                                 onChange={(_, data) => setConfig(trigger, { campaign_ids: data.value === 'any' ? null : [] })}
                             >
-                                <Radio value="any" label={mt.trigger.anyCampaign} />
-                                <Radio value="specific" label={mt.trigger.specificCampaigns} />
+                                <Radio value="any" label={t.automations.editor.trigger.anyCampaign} />
+                                <Radio value="specific" label={t.automations.editor.trigger.specificCampaigns} />
                             </RadioGroup>
                         </Field>
                         {ids !== null && (
                             <EntityPicker
                                 kind="campaigns"
-                                ariaLabel={mt.trigger.specificCampaigns}
+                                ariaLabel={t.automations.editor.trigger.specificCampaigns}
                                 disabled={disabled}
                                 invalid={Boolean(error('campaign_ids'))}
                                 values={ids}
@@ -336,7 +335,7 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                             />
                         )}
                         {trigger.type === 'campaign_clicked' && (
-                            <Field label={mt.trigger.linkUrl} {...fieldState('link_url', false)}>
+                            <Field label={t.automations.editor.trigger.linkUrl} {...fieldState('link_url', false)}>
                                 <Input
                                     disabled={disabled}
                                     type="url"
@@ -354,12 +353,12 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                 const definition = attributes.find((a) => a.name === trigger.config.attribute);
                 config = (
                     <>
-                        <Field label={mt.trigger.attribute} required {...fieldState('attribute', trigger.config.attribute === '')}>
+                        <Field label={t.automations.editor.trigger.attribute} required {...fieldState('attribute', trigger.config.attribute === '')}>
                             {attributeDropdown(
                                 trigger.config.attribute,
                                 attributes,
                                 (attribute) => setConfig(trigger, { attribute, to_value: null }),
-                                mt.trigger.attribute,
+                                t.automations.editor.trigger.attribute,
                             )}
                         </Field>
                         <RadioGroup
@@ -371,14 +370,14 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                                 })
                             }
                         >
-                            <Radio value="any" label={mt.trigger.anyValue} />
-                            <Radio value="specific" label={mt.trigger.specificValue} />
+                            <Radio value="any" label={t.automations.editor.trigger.anyValue} />
+                            <Radio value="specific" label={t.automations.editor.trigger.specificValue} />
                         </RadioGroup>
                         {trigger.config.to_value !== null && (
-                            <Field label={mt.step.value} {...fieldState('to_value', false)}>
+                            <Field label={t.automations.editor.step.value} {...fieldState('to_value', false)}>
                                 <AttributeValueEditor
                                     attribute={definition}
-                                    ariaLabel={mt.step.value}
+                                    ariaLabel={t.automations.editor.step.value}
                                     disabled={disabled}
                                     value={trigger.config.to_value}
                                     onChange={(to_value) => setConfig(trigger, { to_value: to_value ?? '' })}
@@ -393,20 +392,20 @@ export function TriggerConfigEditor({ trigger, onChange, errors = {}, showRequir
                 config = (
                     <>
                         <Field
-                            label={mt.trigger.dateAttribute}
+                            label={t.automations.editor.trigger.dateAttribute}
                             required
-                            hint={dateAttributes.length === 0 ? mt.trigger.noDateAttribute : undefined}
+                            hint={dateAttributes.length === 0 ? t.automations.editor.trigger.noDateAttribute : undefined}
                             {...fieldState('attribute', trigger.config.attribute === '')}
                         >
                             {attributeDropdown(
                                 trigger.config.attribute,
                                 dateAttributes,
                                 (attribute) => setConfig(trigger, { attribute }),
-                                mt.trigger.dateAttribute,
+                                t.automations.editor.trigger.dateAttribute,
                             )}
                         </Field>
                         <div className={styles.row}>
-                            <Field label={t.automations.offsetDays} hint={mt.trigger.offsetHint} {...fieldState('offset_days', false)}>
+                            <Field label={t.automations.offsetDays} hint={t.automations.editor.trigger.offsetHint} {...fieldState('offset_days', false)}>
                                 <SpinButton
                                     disabled={disabled}
                                     min={-365}

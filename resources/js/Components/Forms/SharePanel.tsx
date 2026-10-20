@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Field, Input, MessageBar, MessageBarBody, Textarea, makeStyles, tokens } from '@fluentui/react-components';
 import { CheckmarkRegular, CopyRegular, OpenRegular } from '@fluentui/react-icons';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 import type { FormShare, SubscriptionFormStatus } from '@/Lib/types/forms';
 
@@ -84,7 +83,7 @@ export function SharePanel({ share, status }: Props) {
         <div className={styles.root}>
             {status !== 'active' && (
                 <MessageBar intent="warning">
-                    <MessageBarBody>{formText.share.inactive}</MessageBarBody>
+                    <MessageBarBody>{t.forms.editor.share.inactive}</MessageBarBody>
                 </MessageBar>
             )}
 
@@ -100,7 +99,7 @@ export function SharePanel({ share, status }: Props) {
                         target="_blank"
                         rel="noreferrer"
                     >
-                        {formText.share.open}
+                        {t.forms.editor.share.open}
                     </Button>
                 </div>
             </Field>

@@ -47,7 +47,6 @@ import {
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { CreateFormDialog } from '@/Components/Forms/CreateFormDialog';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 import { apiErrorMessage, apiErrorStatus, deleteForm, duplicateForm, fetchForms, publishForm, unpublishForm } from '@/Lib/api/forms';
 import { hasPermission } from '@/Lib/permissions';
@@ -320,7 +319,7 @@ export default function Forms() {
                                                                     <MenuItem
                                                                         icon={<DocumentCopyRegular />}
                                                                         onClick={() =>
-                                                                            void run(form, () => duplicateForm(form.id), formText.list.duplicated)
+                                                                            void run(form, () => duplicateForm(form.id), t.forms.editor.list.duplicated)
                                                                         }
                                                                     >
                                                                         {t.common.duplicate}
@@ -329,7 +328,7 @@ export default function Forms() {
                                                                         <MenuItem
                                                                             icon={<PauseRegular />}
                                                                             onClick={() =>
-                                                                                void run(form, () => unpublishForm(form.id), formText.list.unpublished)
+                                                                                void run(form, () => unpublishForm(form.id), t.forms.editor.list.unpublished)
                                                                             }
                                                                         >
                                                                             {t.forms.unpublish}
@@ -386,7 +385,7 @@ export default function Forms() {
                                 onClick={() => {
                                     const target = deleting;
                                     setDeleting(null);
-                                    if (target) void run(target, () => deleteForm(target.id), formText.list.deleted);
+                                    if (target) void run(target, () => deleteForm(target.id), t.forms.editor.list.deleted);
                                 }}
                             >
                                 {t.common.delete}

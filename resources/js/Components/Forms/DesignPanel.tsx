@@ -1,7 +1,6 @@
 import { Dropdown, Field, Input, Option, Radio, RadioGroup, SpinButton, Text, Textarea, makeStyles, tokens } from '@fluentui/react-components';
 import { DesignFields } from '@/Components/Preferences/DesignFields';
 import { FONT_FAMILIES } from '@/Components/Forms/model';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 import type { FormDesign, FormLayout } from '@/Lib/types/forms';
 
@@ -37,7 +36,7 @@ export function DesignPanel({ design, onChange, errors = {} }: Props) {
 
     return (
         <div className={styles.root}>
-            <Text weight="semibold">{formText.design.content}</Text>
+            <Text weight="semibold">{t.forms.editor.design.content}</Text>
             <Field label={t.forms.design.title} {...errorFor('title')}>
                 <Input value={design.title} maxLength={255} onChange={(_, d) => set('title', d.value)} />
             </Field>
@@ -49,11 +48,11 @@ export function DesignPanel({ design, onChange, errors = {} }: Props) {
             </Field>
 
             <Text weight="semibold" className={styles.heading}>
-                {formText.design.appearance}
+                {t.forms.editor.design.appearance}
             </Text>
             <DesignFields design={design} onChange={(page) => onChange({ ...design, ...page })} />
             <div className={styles.grid}>
-                <Field label={formText.design.buttonTextColor} {...errorFor('button_text_color')}>
+                <Field label={t.forms.editor.design.buttonTextColor} {...errorFor('button_text_color')}>
                     <Input
                         maxLength={7}
                         placeholder="#FFFFFF"
@@ -61,7 +60,7 @@ export function DesignPanel({ design, onChange, errors = {} }: Props) {
                         onChange={(_, d) => set('button_text_color', d.value)}
                     />
                 </Field>
-                <Field label={formText.design.borderRadius} {...errorFor('border_radius')}>
+                <Field label={t.forms.editor.design.borderRadius} {...errorFor('border_radius')}>
                     <SpinButton
                         min={0}
                         max={40}

@@ -15,7 +15,6 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
-import { formText } from '@/Components/Forms/strings';
 import { areValidEmails, isHttpUrl } from '@/Components/Forms/model';
 import { useText } from '@/Hooks/useText';
 import type { Uuid } from '@/Lib/types/common';
@@ -84,7 +83,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                     <Combobox
                         multiselect
                         freeform
-                        placeholder={formText.settings.listsPlaceholder}
+                        placeholder={t.forms.editor.settings.listsPlaceholder}
                         value={query}
                         selectedOptions={listIds}
                         onChange={(event) => setQuery(event.target.value)}
@@ -151,7 +150,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                             label={`${t.forms.settings.doiRedirect} (${t.common.optional})`}
                             {...errorFor(
                                 'settings.doi_redirect_url',
-                                !isHttpUrl(settings.doi_redirect_url) && formText.settings.invalidUrl,
+                                !isHttpUrl(settings.doi_redirect_url) && t.forms.editor.settings.invalidUrl,
                             )}
                         >
                             <Input
@@ -166,7 +165,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
             </div>
 
             <div className={styles.section}>
-                <Field label={formText.settings.afterSubmit}>
+                <Field label={t.forms.editor.settings.afterSubmit}>
                     <RadioGroup
                         value={afterSubmit}
                         onChange={(_, d) => {
@@ -175,8 +174,8 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                             set('redirect_url', mode === 'redirect' ? (settings.redirect_url ?? '') : null);
                         }}
                     >
-                        <Radio value="message" label={formText.settings.showMessage} />
-                        <Radio value="redirect" label={formText.settings.redirect} />
+                        <Radio value="message" label={t.forms.editor.settings.showMessage} />
+                        <Radio value="redirect" label={t.forms.editor.settings.redirect} />
                     </RadioGroup>
                 </Field>
                 <div className={styles.nested}>
@@ -193,7 +192,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                         <Field
                             label={t.forms.settings.redirectUrl}
                             required
-                            {...errorFor('settings.redirect_url', !isHttpUrl(settings.redirect_url) && formText.settings.invalidUrl)}
+                            {...errorFor('settings.redirect_url', !isHttpUrl(settings.redirect_url) && t.forms.editor.settings.invalidUrl)}
                         >
                             <Input
                                 type="url"
@@ -221,8 +220,8 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
 
             <Field
                 label={`${t.forms.settings.notifyEmails} (${t.common.optional})`}
-                hint={formText.settings.notifyEmailsHelp}
-                {...errorFor('settings.notify_emails', !areValidEmails(settings.notify_emails) && formText.settings.invalidEmails)}
+                hint={t.forms.editor.settings.notifyEmailsHelp}
+                {...errorFor('settings.notify_emails', !areValidEmails(settings.notify_emails) && t.forms.editor.settings.invalidEmails)}
             >
                 <Textarea
                     value={notifyText}

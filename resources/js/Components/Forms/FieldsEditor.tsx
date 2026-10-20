@@ -15,7 +15,6 @@ import {
 } from '@fluentui/react-components';
 import { ArrowDownRegular, ArrowUpRegular, DeleteRegular } from '@fluentui/react-icons';
 import { EMAIL_ATTRIBUTE, PICKABLE, fieldFromAttribute } from '@/Components/Forms/model';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 import type { ContactAttribute } from '@/Lib/types/attributes';
 import type { FormField, FormGdpr } from '@/Lib/types/forms';
@@ -89,7 +88,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
 
     return (
         <div className={styles.root}>
-            <Caption1 className={styles.muted}>{formText.fields.emailLocked}</Caption1>
+            <Caption1 className={styles.muted}>{t.forms.editor.fields.emailLocked}</Caption1>
             {errors.fields && <Text style={{ color: tokens.colorPaletteRedForeground1 }}>{errors.fields}</Text>}
             <ol className={styles.list}>
                 {fields.map((field, index) => {
@@ -104,7 +103,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                                     <Caption1 className={styles.muted}>{field.attribute}</Caption1>
                                 </div>
                                 <div className={styles.itemActions}>
-                                    <Tooltip content={formText.fields.moveUp} relationship="label">
+                                    <Tooltip content={t.forms.editor.fields.moveUp} relationship="label">
                                         <Button
                                             size="small"
                                             appearance="subtle"
@@ -113,7 +112,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                                             onClick={() => move(index, -1)}
                                         />
                                     </Tooltip>
-                                    <Tooltip content={formText.fields.moveDown} relationship="label">
+                                    <Tooltip content={t.forms.editor.fields.moveDown} relationship="label">
                                         <Button
                                             size="small"
                                             appearance="subtle"
@@ -122,7 +121,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                                             onClick={() => move(index, 1)}
                                         />
                                     </Tooltip>
-                                    <Tooltip content={formText.fields.removeField} relationship="label">
+                                    <Tooltip content={t.forms.editor.fields.removeField} relationship="label">
                                         <Button
                                             size="small"
                                             appearance="subtle"
@@ -169,7 +168,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                 })}
             </ol>
 
-            <Field label={t.forms.fields.addField} hint={available.length === 0 ? formText.fields.noAttributeLeft : undefined}>
+            <Field label={t.forms.fields.addField} hint={available.length === 0 ? t.forms.editor.fields.noAttributeLeft : undefined}>
                 <Dropdown
                     placeholder={t.forms.fields.attribute}
                     selectedOptions={[]}
@@ -202,7 +201,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                             />
                         </Field>
                         <Checkbox
-                            label={formText.fields.gdprRequired}
+                            label={t.forms.editor.fields.gdprRequired}
                             checked={gdpr.required}
                             onChange={(_, d) => onGdprChange({ ...gdpr, required: d.checked === true })}
                         />
