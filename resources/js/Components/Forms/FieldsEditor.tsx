@@ -134,13 +134,13 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                             </div>
                             <div className={styles.grid}>
                                 <Field label={t.forms.fields.label} required {...errorFor(`fields.${index}.label`)}>
-                                    <Input value={field.label} maxLength={255} onChange={(_, d) => patch(index, { label: d.value })} />
+                                    <Input value={field.label} maxLength={150} onChange={(_, d) => patch(index, { label: d.value })} />
                                 </Field>
                                 {!typed && (
                                     <Field label={t.forms.fields.placeholder} {...errorFor(`fields.${index}.placeholder`)}>
                                         <Input
                                             value={field.placeholder ?? ''}
-                                            maxLength={255}
+                                            maxLength={150}
                                             onChange={(_, d) => patch(index, { placeholder: d.value === '' ? null : d.value })}
                                         />
                                     </Field>
@@ -152,7 +152,7 @@ export function FieldsEditor({ fields, gdpr, attributes, onFieldsChange, onGdprC
                                 >
                                     <Input
                                         value={field.help_text ?? ''}
-                                        maxLength={500}
+                                        maxLength={300}
                                         onChange={(_, d) => patch(index, { help_text: d.value === '' ? null : d.value })}
                                     />
                                 </Field>

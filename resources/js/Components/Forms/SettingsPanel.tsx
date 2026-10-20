@@ -4,6 +4,8 @@ import {
     Dropdown,
     Field,
     Input,
+    MessageBar,
+    MessageBarBody,
     Option,
     Radio,
     RadioGroup,
@@ -159,6 +161,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                             <Input
                                 type="url"
                                 placeholder="https://"
+                                maxLength={500}
                                 value={settings.doi_redirect_url ?? ''}
                                 onChange={(_, d) => set('doi_redirect_url', d.value === '' ? null : d.value)}
                             />
@@ -181,13 +184,18 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                         <Radio value="redirect" label={t.forms.editor.settings.redirect} />
                     </RadioGroup>
                 </Field>
+                {settings.double_opt_in && (
+                    <MessageBar intent="info">
+                        <MessageBarBody>{t.forms.editor.settings.doiAfterSubmitHint}</MessageBarBody>
+                    </MessageBar>
+                )}
                 <div className={styles.nested}>
                     {afterSubmit === 'message' ? (
                         <Field label={t.forms.settings.successMessage} required {...errorFor('settings.success_message')}>
                             <Textarea
                                 value={settings.success_message}
                                 resize="vertical"
-                                maxLength={1000}
+                                maxLength={500}
                                 onChange={(_, d) => set('success_message', d.value)}
                             />
                         </Field>
@@ -200,6 +208,7 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                             <Input
                                 type="url"
                                 placeholder="https://"
+                                maxLength={500}
                                 value={settings.redirect_url ?? ''}
                                 onChange={(_, d) => set('redirect_url', d.value)}
                             />

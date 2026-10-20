@@ -146,11 +146,8 @@ What it runs:
 3. [ ] *Paramètres → Expéditeurs, domaines & IP*: add each sender domain and publish the SPF, DKIM and DMARC records shown. Wait until they are verified.
 4. [ ] Same page: verify the default sender and any other sender addresses. Campaigns can only use a verified sender.
 5. [ ] *Paramètres → Identité visuelle*: logo, colour, default theme.
-6. [ ] If public forms are used, set the captcha (there is no settings screen for it yet):
-   ```bash
-   php artisan tinker --execute='$s = app(App\Modules\Settings\Services\SettingsService::class); foreach (["forms.captcha_provider" => "turnstile", "forms.captcha_site_key" => "…", "forms.captcha_secret" => "…"] as $k => $v) { $s->setSystemValue($k, $v, App\Domain\Enums\SettingValueType::String); }'
-   ```
-   `forms.captcha_provider` is `hcaptcha` or `turnstile`. Forms that have « Activer le captcha » ticked then require it.
+6. [ ] If public forms are used, set the captcha in *Marketing → Formulaires → Captcha des formulaires* (administrator): choose hCaptcha or Cloudflare Turnstile and enter the site key and the secret key (the secret is stored encrypted and never shown again). Forms that have « Activer le captcha » ticked then require it.
+   Fallback without the screen (secret not encrypted, not recommended): `php artisan tinker --execute='$s = app(App\Modules\Settings\Services\SettingsService::class); foreach (["forms.captcha_provider" => "turnstile", "forms.captcha_site_key" => "…", "forms.captcha_secret" => "…"] as $k => $v) { $s->setSystemValue($k, $v, App\Domain\Enums\SettingValueType::String); }'`
 7. [ ] *Paramètres → Utilisateurs & rôles*: invite staff with the right roles.
 8. [ ] *Paramètres → Clés API & webhooks*: create scoped keys for integrations (transactional sending, contacts), never a full-access key.
 

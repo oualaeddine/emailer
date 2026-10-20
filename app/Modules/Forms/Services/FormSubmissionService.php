@@ -6,6 +6,7 @@ use App\Domain\Enums\RecipientSource;
 use App\Domain\Enums\RecipientStatus;
 use App\Modules\Forms\Contracts\CaptchaVerifier;
 use App\Modules\Forms\Events\FormSubmitted;
+use App\Modules\Forms\Mail\FormSubmissionNotificationMail;
 use App\Modules\Forms\Models\Form;
 use App\Modules\Forms\Models\FormSubmission;
 use App\Modules\Recipients\Attributes\Contracts\ContactAttributeService;
@@ -18,6 +19,8 @@ use App\Modules\Suppression\Preferences\Services\DoubleOptInService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 /** docs/45 §45.7.4 — the public submit pipeline. */
@@ -27,6 +30,9 @@ class FormSubmissionService
 
     /** One double opt-in mail per address per this many minutes. */
     public const DOI_COOLDOWN_MINUTES = 10;
+
+    /** Same cap as the form request (`settings.notify_emails` max 10). */
+    public const NOTIFY_MAX = 10;
 
     public function __construct(
         private readonly RecipientService $recipients,
@@ -70,7 +76,7 @@ class FormSubmissionService
             return $this->result($form, $doubleOptIn ? 'pending_confirmation' : 'subscribed');
         }
 
-        /** @var array{0: FormSubmission, 1: bool, 2: Recipient} $stored */
+        /** @var array{0: FormSubmission, 1: bool, 2: Recipient, 3: bool} $stored */
         $stored = DB::transaction(function () use ($form, $email, $values, $request, $settings, $doubleOptIn): array {
             $existing = Recipient::query()->where('email', $email)->first();
             // With double opt-in every submission waits for the confirmation, also for a contact
@@ -107,18 +113,92 @@ class FormSubmissionService
                 'submissions_count' => DB::raw('submissions_count + 1'), 'last_submission_at' => now(),
             ]);
 
-            return [$submission, $pending, $recipient];
+            return [$submission, $pending, $recipient, $existing === null];
         });
 
-        [$submission, $pending, $recipient] = $stored;
+        [$submission, $pending, $recipient, $created] = $stored;
 
         if ($pending) {
             $this->sendConfirmation($recipient, $form);
         }
 
+        $this->notify($form, $recipient, $submission, $pending, $created);
+
         FormSubmitted::dispatch($form->id, $submission->id, $recipient->id, $submission->status);
 
         return $this->result($form, $submission->status);
+    }
+
+    /**
+     * Tells the addresses of `settings.notify_emails` (at most NOTIFY_MAX) about a stored
+     * submission: queued like the double opt-in mail, so the public answer never waits for SMTP,
+     * and a failure never fails a submission already saved. With double opt-in the notification
+     * is sent on submission and says the contact is still waiting for its confirmation.
+     */
+    private function notify(Form $form, Recipient $recipient, FormSubmission $submission, bool $pending, bool $created): void
+    {
+        $addresses = $this->notifyAddresses($form->settings ?? []);
+        if ($addresses === []) {
+            return;
+        }
+
+        try {
+            $mail = new FormSubmissionNotificationMail(
+                $form->name,
+                $this->notificationValues($form, $submission),
+                $pending ? FormSubmissionNotificationMail::STATUS_PENDING
+                    : ($created ? FormSubmissionNotificationMail::STATUS_CREATED : FormSubmissionNotificationMail::STATUS_UPDATED),
+                rtrim((string) config('app.url'), '/').'/contacts/'.$recipient->uuid,
+            );
+            foreach ($addresses as $address) {
+                try {
+                    Mail::to($address)->queue(clone $mail);
+                } catch (\Throwable $e) {
+                    Log::warning('Notification d’inscription non envoyée.', ['form_id' => $form->id, 'error' => $e->getMessage()]);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Notification d’inscription non envoyée.', ['form_id' => $form->id, 'error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return list<string>
+     */
+    private function notifyAddresses(array $settings): array
+    {
+        $addresses = [];
+        foreach (is_array($settings['notify_emails'] ?? null) ? $settings['notify_emails'] : [] as $address) {
+            $address = strtolower(trim((string) $address));
+            if ($address !== '' && filter_var($address, FILTER_VALIDATE_EMAIL) !== false) {
+                $addresses[$address] = $address;
+            }
+        }
+
+        return array_slice(array_values($addresses), 0, self::NOTIFY_MAX);
+    }
+
+    /**
+     * The submitted values of the form's own fields only, in field order (plain text: the mail
+     * view escapes them).
+     *
+     * @return list<array{label: string, value: string}>
+     */
+    private function notificationValues(Form $form, FormSubmission $submission): array
+    {
+        $data = $submission->data ?? [];
+        $rows = [['label' => 'E-mail', 'value' => $submission->email]];
+        foreach ($form->fields as $field) {
+            $name = strtoupper((string) ($field['attribute'] ?? ''));
+            if ($name === 'EMAIL' || ! array_key_exists($name, $data)) {
+                continue;
+            }
+            $value = is_array($data[$name]) ? implode(', ', array_map('strval', $data[$name])) : (string) $data[$name];
+            $rows[] = ['label' => (string) ($field['label'] ?? $name), 'value' => mb_substr($value, 0, 500)];
+        }
+
+        return $rows;
     }
 
     /** Suppression entry, or a suppressed / blocklisted contact. */

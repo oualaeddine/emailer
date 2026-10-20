@@ -66,7 +66,7 @@ export function CreateFormDialog({ open, onOpenChange, onCreated }: Props) {
                                 </MessageBar>
                             )}
                             <Field label={t.forms.name} required>
-                                <Input value={name} maxLength={255} autoFocus onChange={(_, d) => setName(d.value)} />
+                                <Input value={name} maxLength={150} autoFocus onChange={(_, d) => setName(d.value)} />
                             </Field>
                         </DialogContent>
                         <DialogActions>
