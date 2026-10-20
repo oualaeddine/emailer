@@ -37,10 +37,8 @@ scenario('campagne : de la création à la programmation', async (track) => {
     await page.getByRole('button', { name: 'Créer la campagne' }).click();
     await page.waitForURL(/\/campaigns\/[0-9a-f-]{36}\/setup/);
     const setupUrl = page.url();
-    // KNOWN APP BUG: after « Créer la campagne » the Fluent dialog leaves `#app[aria-hidden=true]`
-    // behind (the whole SPA is hidden from the accessibility tree, so getByRole finds nothing).
-    // A full reload clears it; drop this line once the app is fixed.
-    await page.goto(setupUrl);
+    // Regression guard: the dialog must not leave the app hidden from the accessibility tree.
+    await page.waitForFunction(() => document.getElementById('app')?.getAttribute('aria-hidden') !== 'true');
 
     // 2. sender
     await page.getByText(/Sélectionner l.expéditeur/).click();
@@ -156,8 +154,8 @@ scenario('campagne : de la création à la programmation', async (track) => {
     await page.getByRole('dialog').getByText('Envoyer au meilleur moment').click();
     await page.getByRole('button', { name: 'Programmer au meilleur moment' }).click();
     await page.waitForURL(/\/campaigns\?status_tab=running/);
-    // CSS selector on purpose: the stale `#app[aria-hidden]` (see above) hides everything from getByRole
-    await page.locator('[role=tab][aria-selected=true]', { hasText: 'En cours' }).waitFor();
+    await page.waitForFunction(() => document.getElementById('app')?.getAttribute('aria-hidden') !== 'true');
+    await page.getByRole('tab', { name: /En cours/, selected: true }).waitFor();
     await page.getByText(NAME).first().waitFor();
     assert.deepEqual([...new Set(watch.issues)], [], 'no failed request / page error along the way');
 });

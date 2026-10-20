@@ -60,8 +60,7 @@ scenario('formulaire double opt-in + automatisation', async (track) => {
     await page.getByRole('dialog').locator('input').fill(FORM);
     await page.getByRole('dialog').getByRole('button', { name: 'Créer' }).click();
     await page.waitForURL(/\/marketing\/forms\/[0-9a-f-]{36}$/);
-    const formUrl = page.url();
-    await page.goto(formUrl); // KNOWN APP BUG: stale #app[aria-hidden] after the dialog, see campaign.spec
+    await page.waitForFunction(() => document.getElementById('app')?.getAttribute('aria-hidden') !== 'true');
 
     await page.getByRole('combobox').filter({ hasText: 'Attribut' }).click();
     await page.getByRole('option', { name: /Prénom/ }).click();
