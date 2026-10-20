@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     Button,
     Checkbox,
@@ -33,6 +33,7 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import WebhooksPanel from '@/Components/Transactional/WebhooksPanel';
 import { useText } from '@/Hooks/useText';
+import { hasPermission } from '@/Lib/permissions';
 import {
     apiErrorMessage,
     createApiKey,
@@ -92,7 +93,21 @@ function formatDate(value: string | null): string {
 export default function Settings() {
     const styles = useStyles();
     const t = useText();
-    const [tab, setTab] = useState<TransactionalSettingsTab>('smtp');
+    const { props } = usePage<{ auth?: { permissions?: string[] } }>();
+    const permissions = props.auth?.permissions ?? [];
+    const canView = hasPermission(permissions, 'transactional.view');
+    const canManageKeys = hasPermission(permissions, 'api_keys.manage');
+    const canManageWebhooks = hasPermission(permissions, 'webhooks.manage');
+    const visibleTabs = (
+        [
+            ['smtp', canView],
+            ['api_keys', canManageKeys],
+            ['webhooks', canManageWebhooks],
+        ] as [TransactionalSettingsTab, boolean][]
+    )
+        .filter(([, allowed]) => allowed)
+        .map(([value]) => value);
+    const [tab, setTab] = useState<TransactionalSettingsTab>(visibleTabs[0] ?? 'smtp');
     const [notice, setNotice] = useState<Notice | null>(null);
     const [settings, setSettings] = useState<TransactionalSettings | null>(null);
     const [keys, setKeys] = useState<ApiKey[]>([]);
@@ -107,7 +122,10 @@ export default function Settings() {
 
     const load = useCallback(async () => {
         try {
-            const [s, k] = await Promise.allSettled([fetchTransactionalSettings(), fetchApiKeys()]);
+            const [s, k] = await Promise.allSettled([
+                canView ? fetchTransactionalSettings() : Promise.reject(new Error('forbidden')),
+                canManageKeys ? fetchApiKeys() : Promise.resolve([] as ApiKey[]),
+            ]);
             if (s.status === 'fulfilled') {
                 setSettings(s.value);
             }
@@ -117,7 +135,7 @@ export default function Settings() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [canView, canManageKeys]);
 
     useEffect(() => {
         void load();
@@ -188,17 +206,25 @@ export default function Settings() {
                 </div>
             )}
 
-            <TabList
-                selectedValue={tab}
-                onTabSelect={(_: SelectTabEvent, data: SelectTabData) => setTab(data.value as TransactionalSettingsTab)}
-            >
-                <Tab value="smtp">{t.transactional.settingsTabs.smtp}</Tab>
-                <Tab value="api_keys">{t.transactional.settingsTabs.api_keys}</Tab>
-                <Tab value="webhooks">{t.transactional.settingsTabs.webhooks}</Tab>
-            </TabList>
+            {visibleTabs.length === 0 ? (
+                <MessageBar intent="warning">
+                    <MessageBarBody>{t.common.forbidden}</MessageBarBody>
+                </MessageBar>
+            ) : (
+                <TabList
+                    selectedValue={tab}
+                    onTabSelect={(_: SelectTabEvent, data: SelectTabData) => setTab(data.value as TransactionalSettingsTab)}
+                >
+                    {visibleTabs.map((value) => (
+                        <Tab key={value} value={value}>
+                            {t.transactional.settingsTabs[value]}
+                        </Tab>
+                    ))}
+                </TabList>
+            )}
 
-            <div className={styles.card}>
-                {tab === 'smtp' && (
+            <div className={styles.card} hidden={visibleTabs.length === 0}>
+                {tab === 'smtp' && canView && (
                     <div className={styles.stack}>
                         <Text as="h2" size={500} weight="semibold">
                             {t.transactional.smtpRelay}
@@ -220,7 +246,7 @@ export default function Settings() {
                     </div>
                 )}
 
-                {tab === 'api_keys' && (
+                {tab === 'api_keys' && canManageKeys && (
                     <>
                         <div className={styles.toolbar}>
                             <Button appearance="primary" icon={<AddRegular />} onClick={openForm}>
@@ -281,7 +307,7 @@ export default function Settings() {
                     </>
                 )}
 
-                {tab === 'webhooks' && <WebhooksPanel />}
+                {tab === 'webhooks' && canManageWebhooks && <WebhooksPanel />}
             </div>
 
             <Dialog open={formOpen} onOpenChange={(_, data) => setFormOpen(data.open)}>

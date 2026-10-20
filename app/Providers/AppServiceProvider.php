@@ -78,5 +78,10 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
         // docs/45 §45.1 (WP-100) — API keys accepted as `Authorization: Bearer` or Brevo-style `api-key` header.
         \Laravel\Sanctum\Sanctum::getAccessTokenFromRequestUsing(fn (\Illuminate\Http\Request $request): ?string => \App\Modules\Transactional\Services\ApiKeyService::tokenFromRequest($request));
+        // docs/45 §45.7.6 — a token stops authenticating once its owner is deactivated or (soft-)deleted.
+        \Laravel\Sanctum\Sanctum::authenticateAccessTokensUsing(fn ($token, bool $isValid): bool => $isValid
+            && $token->tokenable instanceof \App\Modules\Identity\Models\User
+            && ! $token->tokenable->trashed()
+            && (bool) $token->tokenable->is_active);
     }
 }
