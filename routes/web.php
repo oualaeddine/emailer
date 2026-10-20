@@ -83,3 +83,4 @@ Route::middleware('signed')->group(function (): void {
 
 require __DIR__.'/web/mirror.php';
 require __DIR__.'/web/preferences.php';
+require __DIR__.'/web/forms.php';

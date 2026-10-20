@@ -12,4 +12,6 @@ enum RecipientSource: string
     case ExcelImport = 'excel_import';
     case PageJaunes = 'pagejaunes';
     case InternalContact = 'internal_contact';
+    case Form = 'form';
+    case TestSend = 'test_send';
 }
