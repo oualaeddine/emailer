@@ -1236,6 +1236,7 @@ Deviations: the rendering pipeline runs its personalise phase at message creatio
 
 | Method | Path | Permission | Request | Response |
 |---|---|---|---|---|
+| POST | `/forms/{id}/unpublish` | `forms.manage` | Counterpart of `publish` (WP-90). |
 | PUT | `/campaigns/{id}/ab-test` | `campaigns.create` | `AbTestInput` | `200 {data: CampaignV2Detail}` (`type` becomes `ab_test` when enabled) ; `409` unless draft |
 | POST | `/campaigns/{id}/ab-test/winner` | `campaigns.send` \| `campaigns.send_any` | `{ "variant_id": "uuid" }` | `200 {data: CampaignV2Detail}` (manual pick; dispatches remainder) ; `409` unless test phase running |
 
