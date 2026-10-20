@@ -109,7 +109,7 @@ export interface ReportCampaignHeader {
     preview_text: string | null;
     status: CampaignStatusV2;
     brevo_status: CampaignBrevoStatus;
-    sender: { name: string; email: string };
+    sender: { name: string | null; email: string | null } | null;
     sent_at: IsoDateTime | null;
     completed_at: IsoDateTime | null;
     tags: string[];

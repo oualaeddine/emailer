@@ -1,0 +1,10 @@
+{
+  "slug": "recu-transactionnel",
+  "name": "Reçu de commande",
+  "gallery_category": "transactional",
+  "description": "Reçu transactionnel avec récapitulatif de commande.",
+  "subject": "Reçu de commande",
+  "scope": "transactional",
+  "accent_color": "#242424",
+  "background_color": "#F5F5F5"
+}

@@ -4,8 +4,8 @@ namespace App\Modules\DeliveryEngine\Services;
 
 use App\Domain\Enums\MessageStatus;
 use App\Modules\Composer\Models\Draft;
-use App\Modules\Composer\Services\MergeVariableResolver;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
+use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Tracking\Models\Message;
 
@@ -16,20 +16,18 @@ use App\Modules\Tracking\Models\Message;
  */
 class ComposerSendService
 {
-    public function __construct(private readonly MergeVariableResolver $merge)
+    public function __construct(private readonly RenderingPipeline $rendering)
     {
     }
 
     public function send(Draft $draft, Recipient $recipient): Message
     {
-        $message = Message::query()->create([
+        $message = $this->rendering->createMessage([
             'draft_id' => $draft->id,
             'recipient_id' => $recipient->id,
-            'subject' => $this->merge->resolve((string) $draft->subject, $recipient),
-            'html_body' => $this->merge->resolve((string) $draft->html_body, $recipient),
             'status' => MessageStatus::Queued->value,
             'queued_at' => now(),
-        ]);
+        ], (string) $draft->subject, (string) $draft->html_body, $recipient, draft: $draft);
 
         SendEmailJob::dispatch($message->id);
 

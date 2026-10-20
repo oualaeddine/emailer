@@ -1,0 +1,18 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#8764B8" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #8764B8; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#8764B8">Votre marque</mj-text></mj-column></mj-section>
+    <mj-section background-color="#F3EFFA" padding="32px 24px"><mj-column><mj-text color="#8764B8" font-size="12px" font-weight="700" text-transform="uppercase" letter-spacing="1px">Vous nous manquez</mj-text><mj-text font-size="28px" font-weight="700" line-height="1.25">Cela fait un moment…</mj-text><mj-text font-size="16px">Voici ce que vous avez manqué et un petit geste pour vous revoir.</mj-text><mj-button href="#">Revenir nous voir</mj-button></mj-column></mj-section>
+    <mj-section padding="8px 24px"><mj-column><mj-text align="center" color="#616161">Votre cadeau de retour</mj-text><mj-text align="center" font-size="26px" font-weight="700" letter-spacing="4px" color="#8764B8" container-background-color="#F5F5F5">RETOUR10</mj-text></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Toujours intéressé(e) ?</mj-text><mj-text>Si vous ne souhaitez plus recevoir nos messages, vous pouvez vous désabonner en un clic ci-dessous. Aucun souci.</mj-text></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

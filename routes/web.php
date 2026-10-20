@@ -80,3 +80,6 @@ Route::middleware('signed')->group(function (): void {
         ->whereUuid('message')
         ->name('tracking.click');
 });
+
+require __DIR__.'/web/mirror.php';
+require __DIR__.'/web/preferences.php';

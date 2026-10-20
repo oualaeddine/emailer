@@ -64,6 +64,14 @@ class Template extends Model
     }
 
     /**
+     * @return BelongsTo<TemplateFolder, $this>
+     */
+    public function folder(): BelongsTo
+    {
+        return $this->belongsTo(TemplateFolder::class, 'folder_id');
+    }
+
+    /**
      * @return HasMany<TemplateVersion, $this>
      */
     public function versions(): HasMany

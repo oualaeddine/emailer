@@ -24,8 +24,8 @@ use App\Modules\Campaigns\Jobs\DispatchCampaignJob;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Models\CampaignAudience;
 use App\Modules\Campaigns\Models\CampaignRecipient;
-use App\Modules\Composer\Services\MergeVariableResolver;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
+use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
 use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Suppression\Models\SuppressionEntry;
@@ -66,7 +66,7 @@ class CampaignService
     public const DEFAULT_TIMEZONE = 'Africa/Algiers';
 
     public function __construct(
-        private readonly MergeVariableResolver $merge,
+        private readonly RenderingPipeline $rendering,
         private readonly AudienceResolverContract $audience,
     ) {}
 
@@ -542,16 +542,13 @@ class CampaignService
             );
             $mergeWith = $contact ?? $recipient;
 
-            $message = new Message;
-            $message->forceFill([
+            $message = $this->rendering->createMessage([
                 'campaign_id' => $campaign->id,
                 'recipient_id' => $recipient->id,
-                'subject' => $this->merge->resolve((string) $campaign->subject, $mergeWith),
-                'html_body' => $this->merge->resolve((string) $campaign->html_body, $mergeWith),
                 'status' => MessageStatus::Queued->value,
                 'queued_at' => now(),
                 'is_test' => true,
-            ])->save();
+            ], (string) $campaign->subject, (string) $campaign->html_body, $recipient, $campaign, $mergeWith);
 
             SendEmailJob::dispatch($message->id);
             $messageIds[] = $message->uuid;
@@ -704,14 +701,12 @@ class CampaignService
 
     private function dispatchToRecipient(Campaign $campaign, Recipient $recipient): Message
     {
-        $message = Message::query()->create([
+        $message = $this->rendering->createMessage([
             'campaign_id' => $campaign->id,
             'recipient_id' => $recipient->id,
-            'subject' => $this->merge->resolve((string) $campaign->subject, $recipient),
-            'html_body' => $this->merge->resolve((string) $campaign->html_body, $recipient),
             'status' => MessageStatus::Queued->value,
             'queued_at' => now(),
-        ]);
+        ], (string) $campaign->subject, (string) $campaign->html_body, $recipient, $campaign);
 
         SendEmailJob::dispatch($message->id);
 

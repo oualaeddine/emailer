@@ -15,16 +15,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $html_content
  * @property int|null $created_by
  * @property string|null $change_note
+ * @property array<string, mixed>|null $design_json
+ * @property string|null $editor_type
  */
 class TemplateVersion extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['template_id', 'version_number', 'html_content', 'created_by', 'change_note'];
+    protected $fillable = ['template_id', 'version_number', 'html_content', 'created_by', 'change_note', 'design_json', 'editor_type'];
 
     protected function casts(): array
     {
-        return ['created_at' => 'datetime'];
+        return ['created_at' => 'datetime', 'design_json' => 'array'];
     }
 
     /**

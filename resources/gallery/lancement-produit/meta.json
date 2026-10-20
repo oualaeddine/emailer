@@ -1,0 +1,10 @@
+{
+  "slug": "lancement-produit",
+  "name": "Lancement de produit",
+  "gallery_category": "announcement",
+  "description": "Présentation d’un nouveau produit avec ses trois atouts principaux.",
+  "subject": "Lancement de produit",
+  "scope": "marketing",
+  "accent_color": "#D83B01",
+  "background_color": "#F5F5F5"
+}

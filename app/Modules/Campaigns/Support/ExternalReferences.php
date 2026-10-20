@@ -19,7 +19,7 @@ class ExternalReferences
 
     public const UNSUBSCRIBE_PAGES_TABLE = 'unsubscribe_pages';
 
-    public const UPDATE_PROFILE_FORMS_TABLE = 'forms';
+    public const UPDATE_PROFILE_FORMS_TABLE = 'update_profile_forms';
 
     /** @var array<string, bool> */
     private static array $tables = [];

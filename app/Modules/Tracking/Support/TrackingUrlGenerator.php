@@ -49,11 +49,21 @@ class TrackingUrlGenerator
         );
     }
 
-    public function signedClickUrl(Message $message, string $targetUrl, ?Carbon $expiresAt = null): string
+    /**
+     * `$linkId` (WP-70) is the anchor's `data-link-id`; it travels signed as
+     * `lid` so the click tracker upserts the same `campaign_links` row the
+     * click map overlays. Omitted, the tracker derives it from the URL.
+     */
+    public function signedClickUrl(Message $message, string $targetUrl, ?Carbon $expiresAt = null, ?string $linkId = null): string
     {
+        $parameters = ['message' => $message->uuid, 'url' => $targetUrl];
+        if ($linkId !== null && $linkId !== '') {
+            $parameters['lid'] = $linkId;
+        }
+
         return URL::signedRoute(
             'tracking.click',
-            ['message' => $message->uuid, 'url' => $targetUrl],
+            $parameters,
             $expiresAt ?? Carbon::now()->addDays(self::DEFAULT_TTL_DAYS),
         );
     }

@@ -5,6 +5,7 @@ use App\Providers\AuthServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Modules\Suppression\Listeners\SuppressionListenerServiceProvider;
 use App\Modules\Recipients\Lists\ListsServiceProvider;
+use App\Modules\Templates\TemplatesServiceProvider;
 use App\Providers\HorizonServiceProvider;
 
 return [
@@ -14,4 +15,5 @@ return [
     HorizonServiceProvider::class,
     SuppressionListenerServiceProvider::class,
     ListsServiceProvider::class,
+    TemplatesServiceProvider::class,
 ];

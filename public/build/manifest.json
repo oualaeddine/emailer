@@ -1,10 +1,10 @@
 {
-  "_DocContent-DePpHTT8.js": {
-    "file": "assets/DocContent-DePpHTT8.js",
+  "_DocContent-B_2jKg4X.js": {
+    "file": "assets/DocContent-B_2jKg4X.js",
     "name": "DocContent",
     "imports": [
-      "_vendor-C_7FfyOp.js",
-      "_fluentui-mp8l7of6.js"
+      "_vendor-nfStYNJH.js",
+      "_fluentui-mKPwQTMF.js"
     ],
     "dynamicImports": [
       "resources/docs/ar/dialogs/dialog-campaign-wizard.md?raw",
@@ -61,19 +61,33 @@
       "resources/docs/fr/pages/templates.md?raw"
     ]
   },
-  "_fluentui-mp8l7of6.js": {
-    "file": "assets/fluentui-mp8l7of6.js",
+  "_fluentui-mKPwQTMF.js": {
+    "file": "assets/fluentui-mKPwQTMF.js",
     "name": "fluentui",
     "imports": [
-      "_vendor-C_7FfyOp.js"
+      "_vendor-nfStYNJH.js"
     ]
   },
-  "_vendor-C_7FfyOp.js": {
-    "file": "assets/vendor-C_7FfyOp.js",
+  "_grapesjs-D88KzZFl.js": {
+    "file": "assets/grapesjs-D88KzZFl.js",
+    "name": "grapesjs",
+    "imports": [
+      "_vendor-nfStYNJH.js"
+    ],
+    "css": [
+      "assets/grapesjs-kcEUIu4-.css"
+    ]
+  },
+  "_grapesjs-kcEUIu4-.css": {
+    "file": "assets/grapesjs-kcEUIu4-.css",
+    "src": "_grapesjs-kcEUIu4-.css"
+  },
+  "_vendor-nfStYNJH.js": {
+    "file": "assets/vendor-nfStYNJH.js",
     "name": "vendor"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CwEx5DL7.css",
+    "file": "assets/app-QVbyhFDB.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -393,77 +407,68 @@
     "src": "resources/docs/fr/pages/templates.md?raw",
     "isDynamicEntry": true
   },
+  "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx": {
+    "file": "assets/EmailBuilder-CVaJ3cgf.js",
+    "name": "EmailBuilder",
+    "src": "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-nfStYNJH.js",
+      "resources/js/app.tsx",
+      "_fluentui-mKPwQTMF.js",
+      "_grapesjs-D88KzZFl.js"
+    ],
+    "css": [
+      "assets/EmailBuilder-C31-JfDj.css",
+      "assets/app-QVbyhFDB.css"
+    ]
+  },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-DBYFj-gX.js",
+    "file": "assets/HelpCenter-C2XAwCTM.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-C_7FfyOp.js",
-      "_DocContent-DePpHTT8.js",
+      "_vendor-nfStYNJH.js",
+      "_DocContent-B_2jKg4X.js",
       "resources/js/app.tsx",
-      "_fluentui-mp8l7of6.js"
+      "_fluentui-mKPwQTMF.js"
     ],
     "css": [
-      "assets/app-CwEx5DL7.css"
+      "assets/app-QVbyhFDB.css"
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-BEcQfKEh.js",
+    "file": "assets/HelpDialogBody--fpEbkD3.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_vendor-C_7FfyOp.js",
+      "_vendor-nfStYNJH.js",
       "resources/js/app.tsx",
-      "_DocContent-DePpHTT8.js",
-      "_fluentui-mp8l7of6.js"
+      "_DocContent-B_2jKg4X.js",
+      "_fluentui-mKPwQTMF.js"
     ],
     "css": [
-      "assets/app-CwEx5DL7.css"
-    ]
-  },
-  "resources/js/Pages/Lab/editorSpike/compile.ts": {
-    "file": "assets/compile-DPAJkX4K.js",
-    "name": "compile",
-    "src": "resources/js/Pages/Lab/editorSpike/compile.ts",
-    "isDynamicEntry": true,
-    "imports": [
-      "_vendor-C_7FfyOp.js"
-    ]
-  },
-  "resources/js/Pages/Lab/editorSpike/engine.ts": {
-    "file": "assets/engine-BKz3DVOZ.js",
-    "name": "engine",
-    "src": "resources/js/Pages/Lab/editorSpike/engine.ts",
-    "isDynamicEntry": true,
-    "imports": [
-      "_vendor-C_7FfyOp.js",
-      "resources/js/app.tsx",
-      "_fluentui-mp8l7of6.js"
-    ],
-    "css": [
-      "assets/engine-bosMtiEL.css",
-      "assets/app-CwEx5DL7.css"
+      "assets/app-QVbyhFDB.css"
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-m91vHGN0.js",
+    "file": "assets/app-COJDySoK.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "imports": [
-      "_vendor-C_7FfyOp.js",
-      "_fluentui-mp8l7of6.js"
+      "_vendor-nfStYNJH.js",
+      "_fluentui-mKPwQTMF.js"
     ],
     "dynamicImports": [
       "resources/js/Components/Help/HelpDialogBody.tsx",
-      "resources/js/Components/Help/HelpCenter.tsx",
-      "resources/js/Pages/Lab/editorSpike/engine.ts",
-      "resources/js/Pages/Lab/editorSpike/compile.ts"
+      "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx",
+      "resources/js/Components/Help/HelpCenter.tsx"
     ],
     "css": [
-      "assets/app-CwEx5DL7.css"
+      "assets/app-QVbyhFDB.css"
     ]
   }
 }

@@ -1,0 +1,10 @@
+{
+  "slug": "enquete-satisfaction",
+  "name": "Enquête de satisfaction",
+  "gallery_category": "basic",
+  "description": "Invitation courte à répondre à une enquête.",
+  "subject": "Enquête de satisfaction",
+  "scope": "marketing",
+  "accent_color": "#0F6CBD",
+  "background_color": "#F5F5F5"
+}
