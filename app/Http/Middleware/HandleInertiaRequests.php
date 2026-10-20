@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Enums\BrandingSettingKey;
 use App\Modules\Identity\Http\Resources\UserResource;
+use App\Modules\Settings\Services\SettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -46,6 +48,21 @@ class HandleInertiaRequests extends Middleware
                 // array; the backend remains the authoritative enforcement.
                 'permissions' => $user?->role?->permissions->pluck('name')->values() ?? [],
             ],
+            // docs/07-ui-design.md §7.11 — organisation default theme; each
+            // user may override it in the browser (resources/js/Theme/ThemeContext.tsx).
+            'branding' => [
+                'defaultTheme' => $this->defaultTheme(),
+            ],
         ];
+    }
+
+    /**
+     * @return 'light'|'dark'|'system'
+     */
+    private function defaultTheme(): string
+    {
+        $value = app(SettingsService::class)->get(BrandingSettingKey::DefaultTheme->value, 'light');
+
+        return in_array($value, ['light', 'dark', 'system'], true) ? $value : 'light';
     }
 }

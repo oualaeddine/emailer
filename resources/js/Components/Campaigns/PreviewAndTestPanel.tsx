@@ -48,7 +48,7 @@ const useStyles = makeStyles({
     },
     phone: {
         borderRadius: '24px',
-        border: `8px solid ${tokens.colorNeutralForeground1}`,
+        border: `8px solid ${tokens.colorNeutralForeground1Static}`,
     },
     empty: {
         color: tokens.colorNeutralForeground3,

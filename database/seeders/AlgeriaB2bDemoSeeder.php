@@ -591,11 +591,11 @@ class AlgeriaB2bDemoSeeder extends Seeder
     {
         $catalog = [
             ['name' => 'Prospection B2B — Premier contact', 'category' => 'Prospection', 'subject' => 'Développez votre activité en Algérie avec nos solutions B2B'],
-            ['name' => 'Relance prospects froids', 'category' => 'Relance', 'subject' => 'On se recontacte ? Une offre pensée pour {{company_name}}'],
+            ['name' => 'Relance prospects froids', 'category' => 'Relance', 'subject' => 'On se recontacte ? Une offre pensée pour {{recipient.company_name}}'],
             ['name' => 'Invitation salon professionnel', 'category' => 'Événementiel', 'subject' => 'Rencontrons-nous au prochain salon B2B'],
             ['name' => 'Newsletter mensuelle partenaires', 'category' => 'Newsletter', 'subject' => 'Actualités du mois — Réseau B2B Algérie'],
             ['name' => 'Offre spéciale fin de trimestre', 'category' => 'Promotion', 'subject' => 'Offre exclusive avant la fin du trimestre'],
-            ['name' => 'Remerciement après commande', 'category' => 'Fidélisation', 'subject' => 'Merci pour votre confiance, {{first_name}}'],
+            ['name' => 'Remerciement après commande', 'category' => 'Fidélisation', 'subject' => 'Merci pour votre confiance, {{recipient.first_name}}'],
             ['name' => 'Annonce nouveau produit', 'category' => 'Lancement', 'subject' => 'Découvrez notre nouvelle gamme dès aujourd\'hui'],
             ['name' => 'Enquête de satisfaction', 'category' => 'Fidélisation', 'subject' => 'Votre avis compte — 2 minutes suffisent'],
             ['name' => 'Rappel de rendez-vous commercial', 'category' => 'Relance', 'subject' => 'Rappel : rendez-vous prévu cette semaine'],
@@ -679,13 +679,13 @@ class AlgeriaB2bDemoSeeder extends Seeder
         return <<<HTML
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1f2933;">
             <h1 style="color: #111111; border-left: 4px solid #FFD400; padding-left: 12px;">{$subject}</h1>
-            <p>Bonjour {{first_name}},</p>
+            <p>Bonjour {{recipient.first_name}},</p>
             <p>
                 Nous accompagnons les entreprises algériennes — du BTP à l'industrie
                 en passant par l'import-export — dans la digitalisation de leur relation
                 commerciale.
             </p>
-            <p><strong>{{company_name}}</strong>, découvrez comment nous pouvons vous aider
+            <p><strong>{{recipient.company_name}}</strong>, découvrez comment nous pouvons vous aider
             à générer plus de leads qualifiés partout en Algérie.</p>
             <p style="text-align: center; margin: 32px 0;">
                 <a href="#" style="background: #FFD400; color: #111111; font-weight: bold; padding: 12px 24px; border-radius: 6px; text-decoration: none;">{$cta}</a>

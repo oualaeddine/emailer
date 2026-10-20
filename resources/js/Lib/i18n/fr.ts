@@ -169,6 +169,12 @@ export const fr = {
             transactional: 'Transactionnel',
             settings: 'Paramètres',
         },
+        // next-dark
+        theme: 'Thème',
+        themeLight: 'Clair',
+        themeDark: 'Sombre',
+        themeSystem: 'Système',
+        themeOrganization: "Par défaut de l'organisation",
     },
     auth: {
         loginTitle: 'Connexion',
@@ -244,6 +250,8 @@ export const fr = {
         dark: 'Sombre',
         system: 'Système',
         saved: 'Paramètres enregistrés.',
+        // next-dark
+        defaultThemeHint: "S'applique à tous les utilisateurs qui n'ont pas choisi leur propre thème dans le menu du compte. « Système » suit le réglage clair/sombre de l'appareil.",
     },
     pagejaunes: {
         title: 'Annuaire PageJaunes',
@@ -1139,6 +1147,7 @@ export const fr = {
             recipients_selected: 'Destinataires sélectionnés',
             subject_filled: 'Objet renseigné',
             design_ready: 'Design prêt',
+            merge_tags: 'Balises de personnalisation',
             unsubscribe_link: 'Lien de désinscription présent',
             test_sent: 'E-mail de test envoyé',
             links_valid: 'Liens valides',
@@ -2510,6 +2519,10 @@ export const fr = {
             unknownStep: 'Étape supprimée',
         },
         },
+        // next-sender
+        sender: 'Expéditeur (facultatif)',
+        senderHint: 'Laissez vide pour utiliser l’adresse du compte SMTP. L’expéditeur doit être vérifié pour activer l’automatisation.',
+        senderClear: 'Retirer l’expéditeur',
     },
     // §43.4.18 — Settings/UpdateProfileForms + public preferences page (WP-74).
     preferences: {

@@ -17,6 +17,23 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PJ Mailer">
 
+    {{-- docs/07-ui-design.md §7.11 — resolve the theme before the bundle loads (same rules as
+         resources/js/Theme/ThemeContext.tsx) so dark mode never flashes white. --}}
+    <script>
+        (function () {
+            var org = @json(data_get($page ?? [], 'props.branding.defaultTheme', 'light'));
+            var choice = null;
+            try { choice = window.localStorage.getItem('pjm.theme'); } catch (e) {}
+            var pref = (choice === 'light' || choice === 'dark' || choice === 'system') ? choice : org;
+            var dark = pref === 'dark';
+            if (pref === 'system') {
+                try { dark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+            }
+            document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+            document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        })();
+    </script>
+
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
     @inertiaHead

@@ -43,6 +43,8 @@ class UpdateSettingsRequest extends FormRequest
         return [
             'settings' => ['required', 'array', 'min:1'],
             'settings.*' => ['nullable', 'string', 'max:1000'],
+            // docs/07-ui-design.md §7.11 — applied by the frontend theme resolver.
+            'settings.branding\\.default_theme' => ['nullable', 'in:light,dark,system'],
         ];
     }
 }

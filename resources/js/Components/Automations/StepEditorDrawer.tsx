@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-components';
 import { DeleteRegular, DismissRegular } from '@fluentui/react-icons';
 import ConditionBuilder from '@/Components/Contacts/ConditionBuilder';
+import SenderPicker from '@/Components/Senders/SenderPicker';
 import { useText } from '@/Hooks/useText';
 import type { AutomationTrigger, AutomationWaitUnit } from '@/Lib/types/automations';
 import { AttributeValueEditor } from './AttributeValueEditor';
@@ -207,6 +208,27 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
                             onChange={(values) => setConfig({ template_id: values[0] ?? '' })}
                         />
                     </Field>
+                    <div>
+                        <SenderPicker
+                            label={t.automations.sender}
+                            disabled={disabled}
+                            value={step.config.sender_id}
+                            onChange={(senderId) => setConfig({ sender_id: senderId })}
+                        />
+                        <Text block size={200} className={styles.muted}>
+                            {t.automations.senderHint}
+                        </Text>
+                        {errors['config.sender_id'] && (
+                            <MessageBar intent="error">
+                                <MessageBarBody>{errors['config.sender_id']}</MessageBarBody>
+                            </MessageBar>
+                        )}
+                        {step.config.sender_id && !disabled && (
+                            <Button appearance="subtle" size="small" onClick={() => setConfig({ sender_id: null })}>
+                                {t.automations.senderClear}
+                            </Button>
+                        )}
+                    </div>
                     <Field label={t.automations.editor.step.subject} {...state('subject')}>
                         <Input
                             disabled={disabled}

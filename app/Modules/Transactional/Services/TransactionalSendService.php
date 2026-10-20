@@ -8,6 +8,7 @@ use App\Domain\Enums\RecipientStatus;
 use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
 use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
+use App\Modules\DeliveryEngine\Support\CustomHeaders;
 use App\Modules\Identity\Models\User;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Senders\Models\Sender;
@@ -19,6 +20,7 @@ use App\Modules\Transactional\Events\TransactionalMessageQueued;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -27,6 +29,9 @@ use Illuminate\Validation\ValidationException;
  * The transactional nature of a message is stored as a `queued` event of
  * `message_events` whose metadata holds `source`, `tags`, `template_id`,
  * `sender_email`, `api_key_id`… (no column is added to `messages`, §45.8).
+ * next-sender: each message also stores its verified sender (`sender_id`)
+ * and its `delivery_options` (reply-to, cc, bcc, headers, attachments),
+ * applied by SendEmailJob.
  */
 class TransactionalSendService implements TransactionalSender
 {
@@ -38,6 +43,7 @@ class TransactionalSendService implements TransactionalSender
         private readonly RenderingPipeline $rendering,
         private readonly TrackingEventRecorder $events,
         private readonly AuditLogger $audit,
+        private readonly TransactionalAttachmentStore $attachments,
     ) {}
 
     public function send(array $input, array $context = []): array
@@ -54,6 +60,8 @@ class TransactionalSendService implements TransactionalSender
         $html = $this->mergeParams($html, $params, true);
         $scheduledAt = ! empty($input['scheduled_at']) ? Carbon::parse($input['scheduled_at']) : null;
         $replyTo = $input['reply_to']['email'] ?? $sender?->reply_to;
+        $headers = $this->headers($input['headers'] ?? null);
+        $files = $this->attachments->decode(is_array($input['attachments'] ?? null) ? $input['attachments'] : []);
 
         $meta = array_filter([
             'source' => $source,
@@ -72,36 +80,58 @@ class TransactionalSendService implements TransactionalSender
 
         $stepColumn = Schema::hasColumn('messages', 'automation_step_id');
 
-        $messages = DB::transaction(function () use ($to, $subject, $html, $meta, $context, $stepColumn): array {
-            $out = [];
-            foreach ($to as $address) {
-                $recipient = Recipient::withTrashed()->where('email', $address['email'])->first()
-                    ?? Recipient::query()->create([
-                        'email' => $address['email'],
-                        'first_name' => $address['name'] ?: null,
-                        'source' => RecipientSource::Api->value,
-                        'status' => RecipientStatus::Active->value,
-                        'custom_fields' => [],
-                    ]);
+        // Attachments are stored once, under the first message's uuid, and shared by every message of the request.
+        $firstUuid = (string) Str::uuid();
+        $options = array_filter([
+            'reply_to' => filled($input['reply_to']['email'] ?? null)
+                ? ['email' => (string) $input['reply_to']['email'], 'name' => $input['reply_to']['name'] ?? null]
+                : null,
+            'cc' => $this->addresses($input['cc'] ?? []),
+            'bcc' => $this->addresses($input['bcc'] ?? []),
+            'headers' => $headers,
+            'attachments' => $this->attachments->store($files, $firstUuid),
+        ], fn ($v) => $v !== null && $v !== []);
 
-                $attributes = [
-                    'campaign_id' => null,
-                    'recipient_id' => $recipient->id,
-                    'status' => MessageStatus::Queued->value,
-                    'queued_at' => now(),
-                    'is_test' => false,
-                ];
-                if ($stepColumn && ! empty($context['automation_step_id'])) {
-                    $attributes['automation_step_id'] = (int) $context['automation_step_id'];
+        try {
+            $messages = DB::transaction(function () use ($to, $subject, $html, $meta, $context, $stepColumn, $sender, $options, $firstUuid): array {
+                $out = [];
+                foreach ($to as $address) {
+                    $recipient = Recipient::withTrashed()->where('email', $address['email'])->first()
+                        ?? Recipient::query()->create([
+                            'email' => $address['email'],
+                            'first_name' => $address['name'] ?: null,
+                            'source' => RecipientSource::Api->value,
+                            'status' => RecipientStatus::Active->value,
+                            'custom_fields' => [],
+                        ]);
+
+                    $attributes = [
+                        'uuid' => $out === [] ? $firstUuid : null,
+                        'campaign_id' => null,
+                        'recipient_id' => $recipient->id,
+                        'status' => MessageStatus::Queued->value,
+                        'queued_at' => now(),
+                        'is_test' => false,
+                        'sender_id' => $sender?->id,
+                        'delivery_options' => $options !== [] ? $options : null,
+                    ];
+                    if ($stepColumn && ! empty($context['automation_step_id'])) {
+                        $attributes['automation_step_id'] = (int) $context['automation_step_id'];
+                    }
+
+                    $message = $this->rendering->createMessage($attributes, $subject, $html, $recipient);
+                    $this->events->recordEvent($message, self::QUEUED_EVENT, $meta);
+                    $out[] = $message;
                 }
 
-                $message = $this->rendering->createMessage($attributes, $subject, $html, $recipient);
-                $this->events->recordEvent($message, self::QUEUED_EVENT, $meta);
-                $out[] = $message;
+                return $out;
+            });
+        } catch (\Throwable $e) {
+            if ($files !== []) {
+                $this->attachments->delete($firstUuid);
             }
-
-            return $out;
-        });
+            throw $e;
+        }
 
         foreach ($messages as $message) {
             $job = new SendEmailJob($message->id);
@@ -216,6 +246,50 @@ class TransactionalSendService implements TransactionalSender
         }
 
         return $sender;
+    }
+
+    /**
+     * Custom headers (name => single-line value); reserved or malformed names are refused.
+     *
+     * @return array<string, string>
+     */
+    private function headers(mixed $headers): array
+    {
+        if ($headers === null || $headers === []) {
+            return [];
+        }
+        if (! is_array($headers)) {
+            throw ValidationException::withMessages(['headers' => 'Les en-têtes doivent être un objet nom → valeur.']);
+        }
+
+        foreach ($headers as $name => $value) {
+            if (! CustomHeaders::isAllowed($name, $value)) {
+                throw ValidationException::withMessages([
+                    'headers' => is_string($name) && CustomHeaders::isReserved($name)
+                        ? "L’en-tête « {$name} » est réservé et ne peut pas être personnalisé."
+                        : 'En-tête invalide : '.(string) $name.'.',
+                ]);
+            }
+        }
+
+        return $headers;
+    }
+
+    /**
+     * @param  mixed  $entries  [{email, name?}]
+     * @return list<array{email: string, name: ?string}>
+     */
+    private function addresses(mixed $entries): array
+    {
+        $out = [];
+        foreach (is_array($entries) ? $entries : [] as $entry) {
+            $email = strtolower(trim((string) ($entry['email'] ?? '')));
+            if ($email !== '') {
+                $out[$email] ??= ['email' => $email, 'name' => filled($entry['name'] ?? null) ? (string) $entry['name'] : null];
+            }
+        }
+
+        return array_values($out);
     }
 
     /**

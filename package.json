@@ -6,7 +6,8 @@
         "build": "vite build",
         "dev": "vite",
         "docs:screenshots": "tsx scripts/capture-screenshots.ts",
-        "docs:screenshots:fast": "tsx scripts/capture-screenshots.ts --skip-build"
+        "docs:screenshots:fast": "tsx scripts/capture-screenshots.ts --skip-build",
+        "test:e2e": "node tests/e2e/run.mjs"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

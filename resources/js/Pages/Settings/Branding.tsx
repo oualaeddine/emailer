@@ -16,6 +16,7 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import { fetchSettings, updateSettings } from '@/Lib/api/settings';
+import { normalizePreference, useThemeSettings } from '@/Theme/ThemeContext';
 
 const useStyles = makeStyles({
     card: {
@@ -35,6 +36,7 @@ const useStyles = makeStyles({
 export default function Branding() {
     const styles = useStyles();
     const t = useText();
+    const { setOrganizationDefault } = useThemeSettings();
 
     const [organizationName, setOrganizationName] = useState('');
     const [brandColor, setBrandColor] = useState('#FFD400');
@@ -65,6 +67,9 @@ export default function Branding() {
             'branding.brand_color': brandColor,
             'branding.default_theme': defaultTheme,
         });
+        // Apply the new organisation default right away (users without their
+        // own choice); every later Inertia response carries it too.
+        setOrganizationDefault(normalizePreference(defaultTheme));
         setSaved(true);
     }
 
@@ -100,7 +105,7 @@ export default function Branding() {
                             }
                         />
                     </Field>
-                    <Field label={t.settings.defaultTheme}>
+                    <Field label={t.settings.defaultTheme} hint={t.settings.defaultThemeHint}>
                         <Dropdown
                             value={
                                 defaultTheme === 'dark'

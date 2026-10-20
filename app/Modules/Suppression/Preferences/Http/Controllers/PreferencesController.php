@@ -10,6 +10,7 @@ use App\Modules\Suppression\Preferences\Services\PageDefaults;
 use App\Modules\Suppression\Preferences\Services\PageViewBuilder;
 use App\Modules\Suppression\Preferences\Services\PreferenceService;
 use App\Modules\Suppression\Preferences\Services\PreferenceTokenService;
+use App\Modules\Suppression\Preferences\Support\ConfirmationRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -105,13 +106,21 @@ class PreferencesController extends Controller
     }
 
     /** Double opt-in confirmation (signed POST). */
-    public function confirm(Request $request, string $token): View|Response
+    public function confirm(Request $request, string $token): View|Response|RedirectResponse
     {
         $recipient = $this->recipientFor($token);
         if ($recipient === null) {
             return $this->invalid();
         }
+        $redirect = app(ConfirmationRedirect::class);
+        $redirect->set(null);
         $this->doubleOptIn->confirm($recipient);
+
+        // Confirmation (submissions, lists, events) is done: a form may send the contact elsewhere.
+        $redirectUrl = $redirect->url();
+        if ($redirectUrl !== null) {
+            return redirect()->away($redirectUrl, 303);
+        }
 
         return view('preferences.page', $this->views->simple(
             'confirmed',

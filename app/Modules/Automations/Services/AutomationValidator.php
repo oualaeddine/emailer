@@ -243,6 +243,11 @@ class AutomationValidator
                 $errors += $this->referenceErrors($config['template_id'] ?? null, 'templates', "{$p}.template_id", 'Modèle introuvable.', $strict, 'Choisissez un modèle d’e-mail.');
                 if (($config['sender_id'] ?? null) !== null && Schema::hasTable('senders')) {
                     $errors += $this->referenceErrors($config['sender_id'], 'senders', "{$p}.sender_id", 'Expéditeur introuvable.', false, '');
+                    // next-sender — optional, but it must be verified before activation (lenient for drafts).
+                    if ($strict && ! isset($errors["{$p}.sender_id"])
+                        && DB::table('senders')->where('uuid', $config['sender_id'])->whereNull('verified_at')->exists()) {
+                        $errors["{$p}.sender_id"] = 'L’expéditeur doit être vérifié avant l’activation.';
+                    }
                 }
                 foreach (['subject' => 998, 'preview_text' => 255] as $key => $max) {
                     $value = $config[$key] ?? null;

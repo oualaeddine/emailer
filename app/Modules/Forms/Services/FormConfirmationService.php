@@ -9,6 +9,7 @@ use App\Modules\Recipients\Attributes\Contracts\ContactAttributeService;
 use App\Modules\Recipients\Lists\Contracts\ListMembershipService;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Recipients\Models\RecipientList;
+use App\Modules\Suppression\Preferences\Support\ConfirmationRedirect;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -25,6 +26,7 @@ class FormConfirmationService
     public function __construct(
         private readonly ContactAttributeService $attributes,
         private readonly ListMembershipService $lists,
+        private readonly ConfirmationRedirect $redirect,
     ) {}
 
     /** Idempotent; returns the number of submissions confirmed. */
@@ -44,6 +46,7 @@ class FormConfirmationService
                 ->get();
 
             $confirmedPerForm = [];
+            $redirectUrl = null;
             foreach ($submissions as $submission) {
                 $claimed = FormSubmission::query()->whereKey($submission->id)->where('status', 'pending_confirmation')
                     ->update(['status' => 'confirmed', 'confirmed_at' => now()]);
@@ -63,12 +66,22 @@ class FormConfirmationService
                     $this->lists->add($list, [$recipient->id], FormSubmissionService::SOURCE, ['formId' => $form->id]);
                 }
 
+                // Submissions run oldest to newest: the most recent form with a redirect wins.
+                $url = trim((string) (($form->settings ?? [])['doi_redirect_url'] ?? ''));
+                if ($url !== '' && ! $form->trashed() && preg_match('#^https?://#i', $url) === 1) {
+                    $redirectUrl = $url;
+                }
+
                 $confirmedPerForm[$form->id] = ($confirmedPerForm[$form->id] ?? 0) + 1;
             }
 
             foreach ($confirmedPerForm as $formId => $count) {
                 Form::withTrashed()->whereKey($formId)->increment('confirmed_count', $count);
                 ContactOptInConfirmed::dispatch($recipient->id, $formId);
+            }
+
+            if ($redirectUrl !== null) {
+                $this->redirect->set($redirectUrl);
             }
 
             return array_sum($confirmedPerForm);
