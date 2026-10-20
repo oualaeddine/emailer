@@ -188,7 +188,9 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
         setCampaign(updated);
         setConfirmOpen(false);
         notify(mode === 'now' ? t.campaignSetup.confirm.sent : t.campaignSetup.confirm.scheduled);
-        router.visit(`/campaigns?status_tab=${mode === 'now' ? 'running' : 'scheduled'}`);
+        // Land on the tab that lists the campaign: best-time and batch sends start
+        // as `running` with per-contact times, not as `scheduled`.
+        router.visit(`/campaigns?status_tab=${updated.status === 'scheduled' ? 'scheduled' : 'running'}`);
     }
 
     if (!campaign) {

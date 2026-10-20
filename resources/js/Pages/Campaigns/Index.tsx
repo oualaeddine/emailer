@@ -866,6 +866,8 @@ export default function CampaignsIndex() {
                                     onSelectionChange={(_, data) => setSelected(data.selectedItems)}
                                     columnSizingOptions={{
                                         name: { minWidth: 260, idealWidth: 320 },
+                                        status: { minWidth: 120, idealWidth: 130 },
+                                        recipients: { minWidth: 110, idealWidth: 110 },
                                         actions: { minWidth: 56, idealWidth: 56 },
                                     }}
                                     resizableColumns

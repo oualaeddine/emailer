@@ -41,15 +41,6 @@ td.fui-TableCell,
 th.fui-TableHeaderCell {
     overflow-wrap: break-word;
 }
-/* DataGrid cells are flex items with no minimum width: only `anywhere` lets
-   their text wrap; native table cells keep `break-word` so column sizing is
-   unchanged. */
-.fui-DataGridCell,
-.fui-DataGridHeaderCell,
-div.fui-TableCell,
-div.fui-TableHeaderCell {
-    overflow-wrap: anywhere;
-}
 
 @media (max-width: 719px) {
     .fui-DataGrid {
@@ -58,5 +49,11 @@ div.fui-TableHeaderCell {
     }
     .fui-DataGrid .fui-DataGridRow {
         min-width: 600px;
+    }
+    /* DataGrid cells are flex items with no minimum width: on phones only
+       `anywhere` lets long e-mails wrap instead of spilling over. */
+    .fui-DataGridCell,
+    div.fui-TableCell {
+        overflow-wrap: anywhere;
     }
 }

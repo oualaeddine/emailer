@@ -50,6 +50,7 @@ const useStyles = makeStyles({
     option: {
         display: 'flex',
         flexDirection: 'column',
+        alignSelf: 'stretch',
         gap: tokens.spacingVerticalXS,
         padding: tokens.spacingVerticalS,
         borderRadius: tokens.borderRadiusMedium,

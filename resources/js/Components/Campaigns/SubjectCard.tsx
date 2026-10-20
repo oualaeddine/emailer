@@ -34,6 +34,7 @@ const EMOJIS = [
 ];
 
 const useStyles = makeStyles({
+    tagMenu: { maxHeight: '320px', overflowY: 'auto' },
     fieldRow: {
         display: 'flex',
         gap: tokens.spacingHorizontalXS,
@@ -196,7 +197,7 @@ export function SubjectCard({ campaign, editable, expanded, onExpand, onCollapse
                             onMouseDown={() => (lastFocused.current = target)}
                         />
                     </MenuTrigger>
-                    <MenuPopover>
+                    <MenuPopover className={styles.tagMenu}>
                         <MenuList>
                             {mergeTags.map((tag) => (
                                 <MenuItem key={tag} onClick={() => insert(tag, target)}>
