@@ -257,7 +257,7 @@ If the `Workflow` tool is available and the user has opted in, each wave maps to
 | 1 | 41, 41U, 42, 43, 44, 45, 60S | ✅ merged; gate green locally; review: 3 blocking + 15 should-fix + 8 nits fixed; GrapesJS **GO** per [46](46-editor-spike.md) |
 | 2 | 50, 50U, 51, 52, 53, 54, 54U, 55, 56, 57 | ✅ merged; gate green locally; review: 5 blocking + 16 should-fix + 11 nits fixed |
 | 3 | 60, 62, 63, 70, 71, 72, 73, 74 | ✅ merged; gate green locally; review: 4 blocking + 12 should-fix + 10 nits fixed |
-| 4 | 61, 80, 81, 90, 90U, 91, 91U, 100, 101, 102 | ⬜ |
+| 4 | 61, 80, 81, 90, 90U, 91, 91U, 100, 101, 102 | ✅ merged; gate green locally; review: 5 blocking + 8 non-blocking fixed (fix-A/B/C); gate agents i18n-fix + help-hookup. Deferred follow-ups: A/B `variant` on preview/test-send; transactional `reply_to`/`cc`/`bcc`/`attachments`/`sender`/`headers` not applied at delivery; classic campaigns do not inject `preview_text`; per-form DOI template/redirect unused; saved-section thumbnails |
 
 ## 44.16 Orchestrator Session Prompt
 
