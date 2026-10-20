@@ -31,3 +31,4 @@ Schedule::job(new \App\Modules\Automations\Jobs\AdvanceAutomationRunsJob)->every
 Schedule::job(new \App\Modules\Webhooks\Jobs\SweepWebhookDeliveriesJob)->everyFiveMinutes();
 // docs/45 §45.9 — WP-81 nightly precompute of best send hours (contacts + account fallback).
 Schedule::job(new \App\Modules\DeliveryEngine\Scheduling\Jobs\ComputeBestSendHoursJob)->dailyAt('02:17');
+Schedule::command('transactional:prune-attachments')->daily();

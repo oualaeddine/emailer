@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $click_count
  * @property int|null $variant_id A/B test variant of a test-sample message (docs/45 §45.8 Slot O)
  * @property int|null $sender_id verified sender of a non-campaign message (next-sender)
- * @property array<string, mixed>|null $delivery_options {reply_to, cc[], bcc[], headers{}, attachments[]} (next-sender)
+ * @property array<string, mixed>|null $delivery_options {reply_to, cc[], bcc[], headers{}, text, attachments[]} (next-sender)
  */
 class Message extends Model
 {
