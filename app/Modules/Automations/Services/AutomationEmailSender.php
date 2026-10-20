@@ -8,6 +8,7 @@ use App\Modules\Automations\Models\AutomationStep;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
 use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Senders\Models\Sender;
 use App\Modules\Templates\Models\Template;
 use App\Modules\Tracking\Models\Message;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Schema;
  * the fallback — a non-campaign `Message` (campaign null, `is_test` false,
  * `automation_step_id` set) personalised by the rendering pipeline and
  * queued with `SendEmailJob`.
+ * next-sender: the step's `sender_id` reaches the message on both paths
+ * when that sender is still verified (otherwise the SMTP account's From).
  */
 class AutomationEmailSender
 {
@@ -44,8 +47,10 @@ class AutomationEmailSender
             ? (string) $config['subject']
             : (trim((string) ($template->subject ?? '')) !== '' ? (string) $template->subject : (string) $template->name);
 
+        $sender = $this->verifiedSender($config['sender_id'] ?? null);
+
         if (app()->bound(self::TRANSACTIONAL_SENDER)) {
-            return $this->sendThroughContract($step, $template, $recipient, $subject);
+            return $this->sendThroughContract($step, $template, $recipient, $subject, $sender);
         }
 
         $html = $this->withPreheader((string) $template->html_content, $config['preview_text'] ?? null);
@@ -56,6 +61,7 @@ class AutomationEmailSender
             'status' => MessageStatus::Queued->value,
             'queued_at' => now(),
             'is_test' => false,
+            'sender_id' => $sender?->id,
         ];
 
         if (self::$hasStepColumn ??= Schema::hasColumn('messages', 'automation_step_id')) {
@@ -69,14 +75,25 @@ class AutomationEmailSender
         return $message;
     }
 
-    private function sendThroughContract(AutomationStep $step, Template $template, Recipient $recipient, string $subject): Message
+    private function verifiedSender(mixed $uuid): ?Sender
+    {
+        if (! is_string($uuid) || $uuid === '') {
+            return null;
+        }
+
+        $sender = Sender::query()->where('uuid', $uuid)->first();
+
+        return $sender?->isVerified() ? $sender : null;
+    }
+
+    private function sendThroughContract(AutomationStep $step, Template $template, Recipient $recipient, string $subject, ?Sender $sender): Message
     {
         $name = trim(((string) $recipient->first_name).' '.((string) $recipient->last_name));
         $input = array_filter([
             'to' => [array_filter(['email' => $recipient->email, 'name' => $name !== '' ? $name : null])],
             'template_id' => $template->uuid,
             'subject' => $subject,
-            'sender_id' => $step->config['sender_id'] ?? null,
+            'sender_id' => $sender?->uuid,
             'tags' => ['automation'],
             'preview_text' => $step->config['preview_text'] ?? null,
         ], fn ($value): bool => $value !== null);
