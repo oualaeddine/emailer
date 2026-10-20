@@ -8,6 +8,7 @@ use App\Domain\Enums\SuppressionReason;
 use App\Modules\DeliveryEngine\Exceptions\SmtpConcurrencyLimitException;
 use App\Modules\DeliveryEngine\Models\SendAttempt;
 use App\Modules\DeliveryEngine\Models\SmtpAccount;
+use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
 use App\Modules\DeliveryEngine\Services\FailoverEngine;
 use App\Modules\DeliveryEngine\Services\QuotaManager;
 use App\Modules\DeliveryEngine\Services\RetryEngine;
@@ -68,6 +69,7 @@ class SendEmailJob implements ShouldQueue
         SmtpManagerContract $smtpManager,
         RetryEngine $retryEngine,
         FailoverEngine $failover,
+        RenderingPipeline $rendering,
     ): void {
         $message = Message::find($this->messageId);
 
@@ -103,11 +105,10 @@ class SendEmailJob implements ShouldQueue
         $quota->reserve($account);
         $quota->reserveDomainSlot($account, $domain);
 
-        $email = (new Email())
-            ->from($account->from_name ? new Address($account->from_email, $account->from_name) : new Address($account->from_email))
-            ->to($recipient->email)
-            ->subject($message->subject)
-            ->html($message->html_body);
+        $email = $rendering->render($message)->applyTo(
+            (new Email())->from($account->from_name ? new Address($account->from_email, $account->from_name) : new Address($account->from_email)),
+            $recipient->email,
+        );
 
         foreach ($message->draft?->attachments ?? [] as $attachment) {
             $email->attach(
