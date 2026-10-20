@@ -1,0 +1,10 @@
+Bonjour there,
+
+Votre devis est prêt : consulter [{APP_URL}/t/c/11111111-2222-4333-8444-555555555555?expires=1795082400&url=https%3A%2F%2Fapp.example.com%2Fdevis%2F42&signature={SIG}].
+
+Version web : {APP_URL}/m/11111111-2222-4333-8444-555555555555?signature={SIG}
+
+--
+Karim · LinkedIn [{APP_URL}/t/c/11111111-2222-4333-8444-555555555555?expires=1795082400&url=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fkarim&signature={SIG}]
+
+Se désinscrire : {APP_URL}/unsubscribe/Y2xpZW50QGV4YW1wbGUuY29t?expires=1795082400&signature={SIG}

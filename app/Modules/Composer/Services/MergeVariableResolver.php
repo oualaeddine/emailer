@@ -16,6 +16,12 @@ use Throwable;
  * `{{unsubscribe_url}}`/`{{unsubscribe}}`/`{{current_date}}`, `{{ contact.NAME }}` for every contact
  * attribute definition (case-insensitive), with fallback `{{recipient.first_name|there}}` or
  * `{{ contact.PRENOM | default:"cher client" }}`.
+ *
+ * Extra variables (docs/45 §45.5.1 MergeTag groups `links` / `campaign`, §45.6.3) are passed by
+ * the rendering pipeline as `$variables`, keyed by lower-cased path: `mirror`, `update_profile`,
+ * `campaign.name`, `campaign.subject`, `sender.name`, `sender.email`. Unknown or empty variables
+ * fall back to the filter default (or to an empty string), so `{{ mirror }}` renders `""` when the
+ * caller supplies no mirror URL.
  */
 class MergeVariableResolver
 {
@@ -28,14 +34,46 @@ class MergeVariableResolver
 
     public function __construct(private readonly ?ContactAttributeService $attributes = null) {}
 
-    public function resolve(string $content, Recipient $recipient, ?string $unsubscribeUrl = null): string
+    /**
+     * @param  array<string, string|null>  $variables  extra variables keyed by path (case-insensitive)
+     */
+    public function resolve(string $content, Recipient $recipient, ?string $unsubscribeUrl = null, array $variables = []): string
     {
+        return $this->replace($content, $recipient, $unsubscribeUrl, $variables, false);
+    }
+
+    /**
+     * Same as {@see resolve()} for an HTML body: resolved values are
+     * HTML-escaped (contact data can never inject markup); author-written
+     * `default:` fallbacks are inserted as written.
+     *
+     * @param  array<string, string|null>  $variables
+     */
+    public function resolveHtml(string $content, Recipient $recipient, ?string $unsubscribeUrl = null, array $variables = []): string
+    {
+        return $this->replace($content, $recipient, $unsubscribeUrl, $variables, true);
+    }
+
+    /**
+     * @param  array<string, string|null>  $variables
+     */
+    private function replace(string $content, Recipient $recipient, ?string $unsubscribeUrl, array $variables, bool $escape): string
+    {
+        $variables = array_change_key_case($variables, CASE_LOWER);
+
         return (string) preg_replace_callback(
             self::PATTERN,
-            function (array $matches) use ($recipient, $unsubscribeUrl): string {
-                $value = $this->resolvePath($matches[1], $recipient, $unsubscribeUrl);
+            function (array $matches) use ($recipient, $unsubscribeUrl, $variables, $escape): string {
+                $key = strtolower($matches[1]);
+                $value = array_key_exists($key, $variables)
+                    ? $variables[$key]
+                    : $this->resolvePath($matches[1], $recipient, $unsubscribeUrl);
 
-                return $value !== null && $value !== '' ? $value : $this->fallback($matches[2] ?? '');
+                if ($value === null || $value === '') {
+                    return $this->fallback($matches[2] ?? '');
+                }
+
+                return $escape ? htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) : $value;
             },
             $content,
         );
