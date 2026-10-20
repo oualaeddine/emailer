@@ -2456,7 +2456,7 @@ export const fr = {
             stats: '%d entrés · %d terminés',
             subject: 'Objet (vide = objet du modèle)',
             previewText: 'Texte d’aperçu (facultatif)',
-            templateHint: 'Modèles transactionnels uniquement : les e-mails d’automatisation passent par l’envoi transactionnel.',
+            templateHint: 'Choisissez l’un de vos modèles, marketing ou transactionnel.',
             amount: 'Durée',
             unit: 'Unité',
             list: 'Liste',

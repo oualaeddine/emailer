@@ -151,7 +151,8 @@ export async function searchAutomationForms(q: string): Promise<LookupOption[]> 
 export async function searchAutomationTemplates(q: string): Promise<LookupOption[]> {
     const response = await axios.get<PaginatedResponse<TemplateV2>>(`${BASE}/templates`, {
         params: {
-            scope: 'transactional',
+            // Marketing and transactional templates alike (docs/45 §45.7.5 sets no scope);
+            // automation e-mails are delivered through the transactional sender.
             is_gallery: 0,
             is_archived: 0,
             ...(q ? { q } : {}),

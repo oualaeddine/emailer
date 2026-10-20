@@ -46,6 +46,7 @@ import type {
     SmtpStrategy,
 } from '@/Lib/types/campaigns';
 import { apiErrorMessage, apiValidationErrors } from '@/Components/Campaigns/campaignUi';
+import { CheckboxGroup } from '@/Components/Common/CheckboxGroup';
 
 const MAX_TAGS = 20;
 const MAX_TAG_LENGTH = 50;
@@ -497,7 +498,7 @@ export function AdvancedSettingsDialog({ open, campaign, onClose, onSaved }: Adv
                                         validationState={windowInvalid || errors.send_window ? 'error' : 'none'}
                                         validationMessage={errors.send_window}
                                     >
-                                        <div className={styles.days}>
+                                        <CheckboxGroup className={styles.days}>
                                             {WEEKDAYS.map((day) => (
                                                 <Checkbox
                                                     key={day}
@@ -506,7 +507,7 @@ export function AdvancedSettingsDialog({ open, campaign, onClose, onSaved }: Adv
                                                     onChange={(_, data) => toggleDay(day, data.checked === true)}
                                                 />
                                             ))}
-                                        </div>
+                                        </CheckboxGroup>
                                     </Field>
                                     <div className={styles.inline}>
                                         <Field label={s.sendWindowStart}>

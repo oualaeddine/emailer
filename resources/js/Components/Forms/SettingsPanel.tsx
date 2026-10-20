@@ -83,6 +83,9 @@ export function SettingsPanel({ settings, listIds, lists, knownListNames, templa
                     <Combobox
                         multiselect
                         freeform
+                        // Not natively required: the search box is emptied after each pick,
+                        // which made the browser block "Enregistrer". list_ids is validated server-side.
+                        required={false}
                         placeholder={t.forms.editor.settings.listsPlaceholder}
                         value={query}
                         selectedOptions={listIds}

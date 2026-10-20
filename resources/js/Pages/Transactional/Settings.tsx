@@ -47,6 +47,7 @@ import type {
     TransactionalSettings,
     TransactionalSettingsTab,
 } from '@/Lib/types/transactional';
+import { CheckboxGroup } from '@/Components/Common/CheckboxGroup';
 
 const SCOPES: ApiKeyScope[] = [
     'transactional:send',
@@ -319,7 +320,7 @@ export default function Settings() {
                                 <Input value={name} maxLength={100} onChange={(_, data) => setName(data.value)} />
                             </Field>
                             <Field label={t.apiKeys.scopes} required>
-                                <div className={styles.scopes}>
+                                <CheckboxGroup className={styles.scopes}>
                                     {SCOPES.map((scope) => (
                                         <Checkbox
                                             key={scope}
@@ -328,7 +329,7 @@ export default function Settings() {
                                             onChange={(_, data) => toggleScope(scope, data.checked === true)}
                                         />
                                     ))}
-                                </div>
+                                </CheckboxGroup>
                             </Field>
                         </DialogContent>
                         <DialogActions>

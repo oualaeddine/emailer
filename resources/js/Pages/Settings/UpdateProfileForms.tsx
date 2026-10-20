@@ -44,6 +44,7 @@ import {
 import type { PageDesign } from '@/Lib/types/common';
 import type { ContactList } from '@/Lib/types/lists';
 import type { UpdateProfileField, UpdateProfileForm, UpdateProfileFormContent } from '@/Lib/types/preferences';
+import { CheckboxGroup } from '@/Components/Common/CheckboxGroup';
 
 const useStyles = makeStyles({
     header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: tokens.spacingVerticalL },
@@ -298,7 +299,7 @@ export default function UpdateProfileForms() {
                                 </div>
 
                                 <Field label={t.preferences.lists} hint={t.preferences.listsHelp}>
-                                    <div className={styles.lists}>
+                                    <CheckboxGroup className={styles.lists}>
                                         {allLists.map((l) => (
                                             <Checkbox
                                                 key={l.id}
@@ -309,7 +310,7 @@ export default function UpdateProfileForms() {
                                                 }
                                             />
                                         ))}
-                                    </div>
+                                    </CheckboxGroup>
                                 </Field>
 
                                 <Text weight="semibold">{t.preferences.content}</Text>
