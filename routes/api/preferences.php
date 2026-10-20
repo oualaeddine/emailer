@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Suppression\Preferences\Http\Controllers\DoubleOptInController;
 use App\Modules\Suppression\Preferences\Http\Controllers\UnsubscribePageController;
 use App\Modules\Suppression\Preferences\Http\Controllers\UpdateProfileFormController;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,7 @@ Route::post('update-profile-forms/{id}/default', [UpdateProfileFormController::c
 Route::get('update-profile-forms/{id}', [UpdateProfileFormController::class, 'show']);
 Route::patch('update-profile-forms/{id}', [UpdateProfileFormController::class, 'update']);
 Route::delete('update-profile-forms/{id}', [UpdateProfileFormController::class, 'destroy']);
+
+// Double opt-in send trigger (forms — Wave 4 — call DoubleOptInService directly).
+Route::post('recipients/{uuid}/double-opt-in', [DoubleOptInController::class, 'send'])
+    ->name('recipients.double-opt-in');

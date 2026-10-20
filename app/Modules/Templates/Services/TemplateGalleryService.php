@@ -33,11 +33,11 @@ class TemplateGalleryService
             ->where('is_gallery', true)
             ->where('is_archived', false)
             ->whereNotNull('gallery_category')
-            ->selectRaw('gallery_category as `key`, count(*) as aggregate')
+            ->selectRaw('gallery_category as category_key, count(*) as aggregate')
             ->groupBy('gallery_category')
             ->orderBy('gallery_category')
             ->get()
-            ->map(fn ($row) => ['key' => (string) $row->key, 'count' => (int) $row->aggregate])
+            ->map(fn ($row) => ['key' => (string) $row->category_key, 'count' => (int) $row->aggregate])
             ->all();
     }
 }

@@ -73,13 +73,11 @@ class TemplateThumbnailService
             return null;
         }
 
-        $dir = sys_get_temp_dir().'/thumb-'.bin2hex(random_bytes(6));
-        $input = $dir.'.html';
-        $output = $dir.'.png';
+        $output = sys_get_temp_dir().'/thumb-'.bin2hex(random_bytes(6)).'.png';
 
         try {
-            file_put_contents($input, $html);
-            if (! $this->execute([$node, $script, $input, $output]) || ! is_file($output)) {
+            // The HTML is untrusted: it goes to the renderer on stdin ("-"), never as an argument.
+            if (! $this->execute([$node, $script, '-', $output], $html) || ! is_file($output)) {
                 return null;
             }
 
@@ -87,7 +85,6 @@ class TemplateThumbnailService
 
             return $png === false || $png === '' ? null : $png;
         } finally {
-            @unlink($input);
             @unlink($output);
         }
     }
@@ -95,11 +92,12 @@ class TemplateThumbnailService
     /**
      * @param  list<string>  $command
      */
-    protected function execute(array $command): bool
+    protected function execute(array $command, string $stdin = ''): bool
     {
         try {
             $process = new Process($command, base_path());
             $process->setTimeout(60);
+            $process->setInput($stdin);
             $process->run();
 
             if (! $process->isSuccessful()) {

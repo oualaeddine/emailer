@@ -73,7 +73,7 @@ class GeoIpUpdateCommand extends Command
 
             return self::SUCCESS;
         } catch (Throwable $e) {
-            $this->error('GeoLite2 update failed: '.$e->getMessage());
+            $this->error('GeoLite2 update failed: '.str_replace([$licenseKey, rawurlencode($licenseKey), urlencode($licenseKey)], '***', $e->getMessage()));
 
             return self::FAILURE;
         } finally {

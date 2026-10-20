@@ -108,7 +108,7 @@ class PreferenceService
         $column = $record instanceof UnsubscribePage ? 'unsubscribe_page_id' : 'update_profile_form_id';
         $inUse = DB::table('campaigns')
             ->where($column, $record->id)
-            ->whereIn('status', ['scheduled', 'sending'])
+            ->whereIn('status', ['scheduled', 'running', 'paused', 'suspended'])
             ->exists();
         if ($inUse) {
             throw new ConflictHttpException('Cette page est utilisée par une campagne planifiée ou en cours d’envoi.');

@@ -3,6 +3,7 @@
 namespace App\Modules\Templates\Http\Requests;
 
 use App\Domain\Enums\PermissionName;
+use App\Modules\Templates\Services\MjmlCompiler;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -38,6 +39,11 @@ class ValidateMjmlRequest extends FormRequest
                 function (string $attribute, mixed $value, Closure $fail) use ($maxBytes): void {
                     if (is_string($value) && strlen($value) > $maxBytes) {
                         $fail('Le code MJML ne doit pas dépasser 1 Mo.');
+                    }
+                },
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (is_string($value) && MjmlCompiler::containsInclude($value)) {
+                        $fail(MjmlCompiler::INCLUDE_FORBIDDEN);
                     }
                 },
                 function (string $attribute, mixed $value, Closure $fail): void {

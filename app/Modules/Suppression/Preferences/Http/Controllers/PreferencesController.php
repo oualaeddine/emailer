@@ -13,6 +13,7 @@ use App\Modules\Suppression\Preferences\Services\PreferenceTokenService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Contracts\View\View;
 
 /**
@@ -62,6 +63,18 @@ class PreferencesController extends Controller
 
         $form = $this->formFor($request);
         $all = (bool) ($data['unsubscribe_all'] ?? false);
+        if (! $all) {
+            $missing = [];
+            foreach ($form?->fields ?? [] as $field) {
+                $value = $data['attributes'][$field['attribute']] ?? null;
+                if (! empty($field['required']) && trim((string) $value) === '') {
+                    $missing['attributes.'.$field['attribute']] = ['Le champ « '.($field['label'] ?? $field['attribute']).' » est obligatoire.'];
+                }
+            }
+            if ($missing !== []) {
+                throw \Illuminate\Validation\ValidationException::withMessages($missing);
+            }
+        }
         $this->preferences->apply($recipient, $form, $data['attributes'] ?? [], $data['list_ids'] ?? [], $all);
 
         $message = $all
@@ -71,7 +84,27 @@ class PreferencesController extends Controller
         return redirect()->to($request->fullUrl())->with('preferences_message', $message);
     }
 
-    /** Double opt-in confirmation link. */
+    /** Double opt-in landing (GET): no state change, a button POSTs to the signed confirm route. */
+    public function confirmLanding(Request $request, string $token): View|Response
+    {
+        $recipient = $this->recipientFor($token);
+        if ($recipient === null) {
+            return $this->invalid();
+        }
+
+        return view('preferences.page', [
+            ...$this->views->simple('confirm', 'Confirmer mon inscription', ''),
+            'content' => ['title' => 'Confirmer mon inscription', 'button_label' => 'Confirmer mon inscription'],
+            'message' => 'Cliquez sur le bouton pour confirmer votre inscription.',
+            'action' => URL::temporarySignedRoute(
+                'preferences.confirm.store',
+                now()->addHour(),
+                ['token' => $token],
+            ),
+        ]);
+    }
+
+    /** Double opt-in confirmation (signed POST). */
     public function confirm(Request $request, string $token): View|Response
     {
         $recipient = $this->recipientFor($token);
