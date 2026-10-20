@@ -57,3 +57,14 @@ th.fui-TableHeaderCell {
         overflow-wrap: anywhere;
     }
 }
+
+/* docs/07-ui-design.md §7.11 — canvas behind the FluentProvider (overscroll,
+   first paint before React mounts). data-theme is set by the inline script in
+   app.blade.php, then kept in sync by resources/js/Theme/ThemeContext.tsx.
+   The value mirrors colorNeutralBackground3 of pageJaunesDarkTheme; light keeps
+   the browser's white canvas. */
+html[data-theme='dark'],
+html[data-theme='dark'] body {
+    background-color: #181611;
+    color: #ffffff;
+}

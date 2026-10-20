@@ -3,9 +3,8 @@ import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
-import { FluentProvider } from '@fluentui/react-components';
 import { StrictMode, type ComponentType } from 'react';
-import { pageJaunesLightTheme } from '@/Theme/theme';
+import { ThemeRoot, organizationDefaultFromProps } from '@/Theme/ThemeContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'PageJaunes Mailer';
 
@@ -24,9 +23,9 @@ createInertiaApp({
     setup({ el, App, props }) {
         createRoot(el).render(
             <StrictMode>
-                <FluentProvider theme={pageJaunesLightTheme}>
+                <ThemeRoot initialOrganizationDefault={organizationDefaultFromProps(props.initialPage.props)}>
                     <App {...props} />
-                </FluentProvider>
+                </ThemeRoot>
             </StrictMode>,
         );
     },
