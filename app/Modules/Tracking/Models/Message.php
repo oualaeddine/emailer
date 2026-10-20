@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $status
  * @property int $open_count
  * @property int $click_count
+ * @property int|null $variant_id A/B test variant of a test-sample message (docs/45 §45.8 Slot O)
  */
 class Message extends Model
 {
