@@ -2510,6 +2510,10 @@ export const fr = {
             unknownStep: 'Étape supprimée',
         },
         },
+        // next-sender
+        sender: 'Expéditeur (facultatif)',
+        senderHint: 'Laissez vide pour utiliser l’adresse du compte SMTP. L’expéditeur doit être vérifié pour activer l’automatisation.',
+        senderClear: 'Retirer l’expéditeur',
     },
     // §43.4.18 — Settings/UpdateProfileForms + public preferences page (WP-74).
     preferences: {

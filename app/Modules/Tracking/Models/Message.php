@@ -33,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $open_count
  * @property int $click_count
  * @property int|null $variant_id A/B test variant of a test-sample message (docs/45 §45.8 Slot O)
+ * @property int|null $sender_id verified sender of a non-campaign message (next-sender)
+ * @property array<string, mixed>|null $delivery_options {reply_to, cc[], bcc[], headers{}, attachments[]} (next-sender)
  */
 class Message extends Model
 {
@@ -59,6 +61,8 @@ class Message extends Model
         'queued_at',
         'provider_message_id',
         'last_provider_response',
+        'sender_id',
+        'delivery_options',
     ];
 
     protected function casts(): array
@@ -72,6 +76,7 @@ class Message extends Model
             'bounced_at' => 'datetime',
             'failed_at' => 'datetime',
             'is_test' => 'boolean',
+            'delivery_options' => 'array',
         ];
     }
 

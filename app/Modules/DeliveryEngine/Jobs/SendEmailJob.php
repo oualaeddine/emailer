@@ -14,6 +14,8 @@ use App\Modules\DeliveryEngine\Services\QuotaManager;
 use App\Modules\DeliveryEngine\Services\RetryEngine;
 use App\Modules\DeliveryEngine\Services\RotationEngine;
 use App\Modules\DeliveryEngine\Services\SmtpManagerContract;
+use App\Modules\DeliveryEngine\Support\CustomHeaders;
+use App\Modules\Senders\Models\Sender;
 use App\Modules\Suppression\Services\SuppressionManager;
 use App\Modules\Tracking\Models\Message;
 use Illuminate\Bus\Queueable;
@@ -110,6 +112,7 @@ class SendEmailJob implements ShouldQueue
             $recipient->email,
         );
         $this->applyCampaignEnvelope($email, $message, $account, $recipient->email);
+        $this->applyMessageEnvelope($email, $message, $account);
 
         foreach ($message->draft?->attachments ?? [] as $attachment) {
             $email->attach(
@@ -235,26 +238,79 @@ class SendEmailJob implements ShouldQueue
             return;
         }
 
-        $sender = $campaign->sender_id !== null
-            ? \App\Modules\Senders\Models\Sender::query()->find($campaign->sender_id)
-            : null;
+        $sender = $campaign->sender_id !== null ? Sender::query()->find($campaign->sender_id) : null;
 
-        if ($sender !== null && $sender->isVerified()) {
-            $email->from(new Address($sender->email, (string) $sender->name));
-            if (strcasecmp($sender->email, (string) $account->from_email) !== 0) {
-                $email->sender(new Address($account->from_email));
-            }
-        }
-
-        $replyTo = trim((string) ($campaign->reply_to ?: $sender?->reply_to));
-        if ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
-            $email->replyTo($replyTo);
-        }
+        $this->applySender($email, $sender, $account);
+        $this->applyReplyTo($email, (string) ($campaign->reply_to ?: $sender?->reply_to));
 
         if (! $message->is_test) {
             $url = app(\App\Modules\Suppression\Support\UnsubscribeUrlGenerator::class)->signedUrlFor($recipientEmail);
             $email->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$url.'>');
             $email->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+        }
+    }
+
+    /**
+     * next-sender — non-campaign messages (transactional API, automations):
+     * the message's verified sender becomes the From (same envelope rule as
+     * campaigns), then its `delivery_options` are applied: Reply-To (else the
+     * sender's), Cc, Bcc, custom headers (never a reserved one) and the
+     * stored attachments.
+     */
+    private function applyMessageEnvelope(Email $email, Message $message, SmtpAccount $account): void
+    {
+        if ($message->campaign_id !== null) {
+            return;
+        }
+
+        $sender = $message->sender_id !== null ? Sender::query()->find($message->sender_id) : null;
+        $options = is_array($message->delivery_options) ? $message->delivery_options : [];
+
+        $this->applySender($email, $sender, $account);
+        $this->applyReplyTo($email, (string) ($options['reply_to']['email'] ?? $sender?->reply_to), (string) ($options['reply_to']['name'] ?? ''));
+
+        foreach (['cc' => 'addCc', 'bcc' => 'addBcc'] as $key => $method) {
+            foreach ((array) ($options[$key] ?? []) as $entry) {
+                $address = (string) ($entry['email'] ?? '');
+                if (filter_var($address, FILTER_VALIDATE_EMAIL)) {
+                    $email->{$method}(new Address($address, (string) ($entry['name'] ?? '')));
+                }
+            }
+        }
+
+        foreach ((array) ($options['headers'] ?? []) as $name => $value) {
+            if (CustomHeaders::isAllowed($name, $value)) {
+                $email->getHeaders()->addTextHeader($name, $value);
+            }
+        }
+
+        foreach ((array) ($options['attachments'] ?? []) as $file) {
+            $disk = Storage::disk((string) ($file['disk'] ?? 'local'));
+            $path = (string) ($file['path'] ?? '');
+            if ($path !== '' && $disk->exists($path)) {
+                $email->attach((string) $disk->get($path), (string) ($file['name'] ?? basename($path)), $file['mime'] ?? null);
+            }
+        }
+    }
+
+    /** A verified sender is the From; the SMTP account stays the envelope `Sender` when it differs. */
+    private function applySender(Email $email, ?Sender $sender, SmtpAccount $account): void
+    {
+        if ($sender === null || ! $sender->isVerified()) {
+            return;
+        }
+
+        $email->from(new Address($sender->email, (string) $sender->name));
+        if (strcasecmp($sender->email, (string) $account->from_email) !== 0) {
+            $email->sender(new Address($account->from_email));
+        }
+    }
+
+    private function applyReplyTo(Email $email, string $replyTo, string $name = ''): void
+    {
+        $replyTo = trim($replyTo);
+        if ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+            $email->replyTo(new Address($replyTo, $name));
         }
     }
 }
