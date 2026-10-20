@@ -17,11 +17,11 @@ import {
     TableHeader,
     TableHeaderCell,
     TableRow,
-    Text,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, MailOpenPersonRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { SenderFormDialog } from '@/Components/Senders/SenderFormDialog';
@@ -107,21 +107,24 @@ export default function Senders() {
     return (
         <AppShell>
             <Head title={t.senders.title} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.senders.title}
-                </Text>
-                <Button
-                    appearance="primary"
-                    icon={<AddRegular />}
-                    onClick={() => {
-                        setEditing(null);
-                        setFormOpen(true);
-                    }}
-                >
-                    {t.senders.addSender}
-                </Button>
-            </div>
+            <PageHelp
+                topic="senders"
+                title={t.senders.title}
+                actions={
+                    <>
+                        <Button
+                            appearance="primary"
+                            icon={<AddRegular />}
+                            onClick={() => {
+                                setEditing(null);
+                                setFormOpen(true);
+                            }}
+                        >
+                            {t.senders.addSender}
+                        </Button>
+                    </>
+                }
+            />
 
             {notice && (
                 <div className={styles.messages}>

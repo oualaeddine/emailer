@@ -26,6 +26,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, DocumentRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { DesignFields } from '@/Components/Preferences/DesignFields';
@@ -156,14 +157,17 @@ export default function UnsubscribePages() {
     return (
         <AppShell>
             <Head title={t.unsubscribePages.title} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.unsubscribePages.title}
-                </Text>
-                <Button appearance="primary" icon={<AddRegular />} onClick={() => openForm(null)}>
-                    {t.unsubscribePages.createPage}
-                </Button>
-            </div>
+            <PageHelp
+                topic="unsubscribe-pages"
+                title={t.unsubscribePages.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<AddRegular />} onClick={() => openForm(null)}>
+                            {t.unsubscribePages.createPage}
+                        </Button>
+                    </>
+                }
+            />
 
             {notice && (
                 <div className={styles.messages}>

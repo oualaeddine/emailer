@@ -28,7 +28,6 @@ import {
     TableHeaderCell,
     TableRow,
     Text,
-    Title2,
     makeStyles,
     tokens,
     type BadgeProps,
@@ -44,6 +43,7 @@ import {
     PlayRegular,
     SearchRegular,
 } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { CreateFormDialog } from '@/Components/Forms/CreateFormDialog';
@@ -200,10 +200,15 @@ export default function Forms() {
     return (
         <AppShell>
             <Head title={t.forms.title} />
-            <div className={styles.header}>
-                <Title2 as="h1">{t.forms.title}</Title2>
-                {createButton}
-            </div>
+            <PageHelp
+                topic="forms"
+                title={t.forms.title}
+                actions={
+                    <>
+                        {createButton}
+                    </>
+                }
+            />
 
             {notice && (
                 <MessageBar intent={notice.intent} className={styles.messages}>

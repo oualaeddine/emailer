@@ -17,6 +17,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, LockClosedRegular, TagRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { AttributeFormDialog } from '@/Components/Attributes/AttributeFormDialog';
@@ -90,16 +91,19 @@ export default function Attributes() {
     return (
         <AppShell>
             <Head title={t.attributes.title} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.attributes.title}
-                </Text>
-                {canManage && (
-                    <Button appearance="primary" icon={<AddRegular />} onClick={openCreate}>
-                        {t.attributes.createAttribute}
-                    </Button>
-                )}
-            </div>
+            <PageHelp
+                topic="attributes"
+                title={t.attributes.title}
+                actions={
+                    <>
+                        {canManage && (
+                            <Button appearance="primary" icon={<AddRegular />} onClick={openCreate}>
+                                {t.attributes.createAttribute}
+                            </Button>
+                        )}
+                    </>
+                }
+            />
 
             {notice && (
                 <div className={styles.messages}>

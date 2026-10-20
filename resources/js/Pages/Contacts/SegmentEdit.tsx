@@ -26,6 +26,7 @@ import {
     type TableColumnDefinition,
 } from '@fluentui/react-components';
 import { ArrowClockwiseRegular, ArrowLeftRegular, MailRegular, SaveRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import ConditionBuilder, {
     countRuleTree,
@@ -345,6 +346,7 @@ export default function SegmentEdit({ uuid }: SegmentEditProps) {
         <AppShell>
             <Head title={segment ? `${segment.name} — ${t.segments.title}` : title} />
             <form onSubmit={save}>
+                <PageHelp topic="segment-edit" hideHeaderRow />
                 <div className={styles.header}>
                     <div className={styles.titleBlock}>
                         <Button

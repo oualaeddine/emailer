@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Card, Spinner, Tab, TabList, Text, makeStyles, tokens } from '@fluentui/react-components';
 import type { SelectTabData } from '@fluentui/react-components';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { ActivityTimeline } from '@/Components/ContactDetail/ActivityTimeline';
 import { AttributesForm } from '@/Components/ContactDetail/AttributesForm';
@@ -59,6 +60,7 @@ export default function Show() {
             <Link href="/contacts" className={styles.back}>
                 {t.contactDetail.backToContacts}
             </Link>
+            <PageHelp topic="contact-detail" hideHeaderRow />
 
             {failed && <Text role="alert">{t.common.genericError}</Text>}
             {!contact && !failed && <Spinner label={t.common.loading} />}

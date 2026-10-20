@@ -17,6 +17,7 @@ import {
     useToastController,
 } from '@fluentui/react-components';
 import { DataBarVerticalRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
@@ -197,6 +198,7 @@ export default function CampaignReport({ campaignId }: { campaignId: string }) {
         <AppShell>
             <Head title={campaignName ? `${t.campaignReport.title} — ${campaignName}` : t.campaignReport.title} />
             <Toaster toasterId={toasterId} position="bottom-end" />
+            <PageHelp topic="campaign-report" hideHeaderRow />
             <div className={styles.root}>
                 <ReportHeader
                     campaignId={campaignId}

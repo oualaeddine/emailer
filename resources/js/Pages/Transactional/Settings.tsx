@@ -28,6 +28,7 @@ import {
 } from '@fluentui/react-components';
 import type { SelectTabData, SelectTabEvent } from '@fluentui/react-components';
 import { AddRegular, CopyRegular, KeyRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import WebhooksPanel from '@/Components/Transactional/WebhooksPanel';
@@ -177,11 +178,7 @@ export default function Settings() {
     return (
         <AppShell>
             <Head title={t.transactional.settingsTitle} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.transactional.settingsTitle}
-                </Text>
-            </div>
+            <PageHelp topic="transactional-settings" title={t.transactional.settingsTitle} />
 
             {notice && (
                 <div className={styles.messages}>

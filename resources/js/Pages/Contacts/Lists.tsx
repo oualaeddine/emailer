@@ -26,7 +26,6 @@ import {
     Select,
     Spinner,
     Text,
-    Title2,
     createTableColumn,
     makeStyles,
     tokens,
@@ -41,6 +40,7 @@ import {
     MoreHorizontalRegular,
     PeopleListRegular,
 } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
@@ -260,12 +260,17 @@ export default function ContactsLists() {
     return (
         <AppShell>
             <Head title={t.lists.title} />
-            <div className={styles.header}>
-                <Title2>{t.lists.title}</Title2>
-                <Button appearance="primary" icon={<AddRegular />} onClick={() => openListDialog({ mode: 'create' })}>
-                    {t.lists.createList}
-                </Button>
-            </div>
+            <PageHelp
+                topic="lists"
+                title={t.lists.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<AddRegular />} onClick={() => openListDialog({ mode: 'create' })}>
+                            {t.lists.createList}
+                        </Button>
+                    </>
+                }
+            />
             {error && (
                 <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
                     <MessageBarBody>{error}</MessageBarBody>
