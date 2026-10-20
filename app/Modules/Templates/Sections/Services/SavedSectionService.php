@@ -3,7 +3,9 @@
 namespace App\Modules\Templates\Sections\Services;
 
 use App\Modules\Identity\Models\User;
+use App\Modules\Templates\Jobs\RenderThumbnailJob;
 use App\Modules\Templates\Sections\Models\SavedSection;
+use App\Modules\Templates\Services\TemplateThumbnailService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,6 +44,10 @@ class SavedSectionService
             'component' => $this->withoutIds($component),
             'created_by' => $user?->id,
         ]);
+
+        if (TemplateThumbnailService::enabled()) {
+            RenderThumbnailJob::dispatch(TemplateThumbnailService::MODEL_SAVED_SECTION, $section->id);
+        }
 
         return $section->load('createdBy');
     }

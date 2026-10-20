@@ -2,7 +2,10 @@
 /**
  * Renders HTML to a 600x800 PNG with Playwright/Chromium.
  *
- *   node scripts/thumbnail.mjs <input.html|-> <output.png> [settleMs]
+ *   node scripts/thumbnail.mjs <input.html|-> <output.png> [settleMs] [--fit]
+ *
+ * `--fit` crops the 600px-wide shot to the content height (max 800px) instead
+ * of the fixed 600x800 frame (used for short saved sections).
  *
  * `-` reads the HTML from stdin (used by TemplateThumbnailService; the HTML is
  * never passed as a shell argument). The HTML is untrusted user content, so:
@@ -66,7 +69,8 @@ export async function isAllowedUrl(rawUrl, resolver = lookup) {
 }
 
 async function main() {
-    const [input, output, settle] = process.argv.slice(2);
+    const fit = process.argv.includes('--fit');
+    const [input, output, settle] = process.argv.slice(2).filter((a) => a !== '--fit');
     if (!input || !output) {
         console.error('usage: thumbnail.mjs <input.html|-> <output.png> [settleMs]');
         process.exit(2);
@@ -112,7 +116,12 @@ async function main() {
         const page = await context.newPage();
         await page.setContent(html, { waitUntil: 'load', timeout: 15000 }).catch(() => {});
         await page.waitForTimeout(Math.min(Number(settle ?? 2000), 5000));
-        await page.screenshot({ path: output, type: 'png', clip: { x: 0, y: 0, width: 600, height: 800 } });
+        let height = 800;
+        if (fit) {
+            const content = await page.evaluate(() => Math.ceil(document.documentElement.scrollHeight)).catch(() => 800);
+            height = Math.min(800, Math.max(40, Number(content) || 800));
+        }
+        await page.screenshot({ path: output, type: 'png', clip: { x: 0, y: 0, width: 600, height } });
     } catch (error) {
         console.error(error.message);
         process.exit(1);
