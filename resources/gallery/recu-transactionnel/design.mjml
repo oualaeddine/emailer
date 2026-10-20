@@ -1,0 +1,19 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#242424" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #242424; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#242424">Votre marque</mj-text><mj-text color="#616161" font-size="12px" padding-top="0">Reçu</mj-text></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Merci pour votre commande</mj-text><mj-text>Nous avons bien reçu votre paiement. Voici le récapitulatif de votre commande.</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 24px"><mj-column><mj-table padding="0"><tr><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;">Article 1 × 1</td><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;text-align:right;">2 500 DA</td></tr><tr><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;">Article 2 × 2</td><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;text-align:right;">3 000 DA</td></tr><tr><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;">Livraison</td><td style="padding:6px 0;border-bottom:1px solid #E0E0E0;text-align:right;">400 DA</td></tr><tr><td style="padding:10px 0;font-weight:700;">Total</td><td style="padding:10px 0;font-weight:700;text-align:right;">5 900 DA</td></tr></mj-table></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Adresse de livraison</mj-text><mj-text>Nom du client</mj-text><mj-text>Adresse, Ville, Code postal</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 24px 28px"><mj-column><mj-button href="#">Suivre ma commande</mj-button></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Pour toute question, répondez à cet e-mail.</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

@@ -1,0 +1,10 @@
+{
+  "slug": "bienvenue",
+  "name": "Bienvenue",
+  "gallery_category": "welcome",
+  "description": "Message de bienvenue avec trois premières étapes.",
+  "subject": "Bienvenue",
+  "scope": "marketing",
+  "accent_color": "#107C10",
+  "background_color": "#F5F5F5"
+}

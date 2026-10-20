@@ -26,7 +26,7 @@ class StoreTemplateRequest extends FormRequest
             'html_content' => ['required', 'string'],
             'editor_type' => ['sometimes', 'in:dnd,html,rich_text'],
             'scope' => ['sometimes', 'in:marketing,transactional'],
-            'folder_id' => ['sometimes', 'nullable', 'string'],
+            'folder_id' => ['sometimes', 'nullable', 'string', 'exists:template_folders,uuid'],
             'design_json' => ['sometimes', 'nullable', 'array'],
             'subject' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];

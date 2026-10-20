@@ -1,0 +1,19 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#0B6A6A" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #0B6A6A; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#0B6A6A">Votre marque</mj-text><mj-text color="#616161" font-size="12px" padding-top="0">Invitation</mj-text></mj-column></mj-section>
+    <mj-section background-color="#E8F5F5" padding="32px 24px"><mj-column><mj-text color="#0B6A6A" font-size="12px" font-weight="700" text-transform="uppercase" letter-spacing="1px">Vous êtes invité(e)</mj-text><mj-text font-size="28px" font-weight="700" line-height="1.25">Soirée de rencontre clients</mj-text><mj-text font-size="16px">Rejoignez-nous pour une soirée d’échanges, de démonstrations et de convivialité.</mj-text><mj-button href="#">Je m’inscris</mj-button></mj-column></mj-section>
+    <mj-section padding="12px 12px"><mj-column><mj-text font-weight="700">Date</mj-text><mj-text>Samedi 15 [mois], 18 h</mj-text></mj-column><mj-column><mj-text font-weight="700">Lieu</mj-text><mj-text>Nom du lieu, Alger</mj-text></mj-column><mj-column><mj-text font-weight="700">Durée</mj-text><mj-text>Environ 3 heures</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Au programme</mj-text><mj-text padding-top="2px" padding-bottom="2px">• Accueil et café de bienvenue</mj-text><mj-text padding-top="2px" padding-bottom="2px">• Présentation de nos nouveautés</mj-text><mj-text padding-top="2px" padding-bottom="2px">• Ateliers et échanges</mj-text><mj-text padding-top="2px" padding-bottom="2px">• Cocktail de clôture</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 24px 28px"><mj-column><mj-button href="#">Réserver ma place</mj-button></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

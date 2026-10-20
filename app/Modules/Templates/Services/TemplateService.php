@@ -6,6 +6,7 @@ use App\Modules\Composer\Models\Draft;
 use App\Modules\Identity\Models\User;
 use App\Modules\Templates\Events\TemplateSaved;
 use App\Modules\Templates\Models\Template;
+use App\Modules\Templates\Models\TemplateFolder;
 use App\Modules\Templates\Models\TemplateVersion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -81,7 +82,7 @@ class TemplateService
      * docs/45 §45.4.4 — duplicate; works on gallery templates (the copy lands
      * in "Mes modèles": `is_gallery = false`).
      *
-     * @param  array{name?: string|null, scope?: string|null}  $overrides
+     * @param  array{name?: string|null, scope?: string|null, folder_id?: int|null}  $overrides
      */
     public function duplicate(Template $source, User $author, array $overrides = []): Template
     {
@@ -94,6 +95,7 @@ class TemplateService
                 'editor_type' => $source->editor_type,
                 'scope' => $overrides['scope'] ?? $source->scope,
                 'subject' => $source->subject,
+                'folder_id' => $overrides['folder_id'] ?? null,
                 'is_gallery' => false,
                 'gallery_category' => null,
                 'created_by' => $author->id,
@@ -127,6 +129,8 @@ class TemplateService
         }
         if (($filters['folder_id'] ?? null) === 'none') {
             $query->whereNull('folder_id');
+        } elseif (! empty($filters['folder_id'])) {
+            $query->whereIn('folder_id', TemplateFolder::query()->where('uuid', $filters['folder_id'])->select('id'));
         }
         if (! empty($filters['q'])) {
             $needle = '%'.addcslashes((string) $filters['q'], '%_\\').'%';
@@ -179,6 +183,26 @@ class TemplateService
         $template->update(['is_archived' => true]);
 
         return $template;
+    }
+
+    public function unarchive(Template $template): Template
+    {
+        $template->update(['is_archived' => false]);
+
+        return $template;
+    }
+
+    /**
+     * docs/45 §45.6.2 — restore: the restored HTML becomes a NEW version.
+     */
+    public function restoreVersion(Template $template, TemplateVersion $version, User $author): Template
+    {
+        return $this->update(
+            $template,
+            $author,
+            $version->html_content,
+            'Restauré depuis la version '.$version->version_number,
+        );
     }
 
     /**

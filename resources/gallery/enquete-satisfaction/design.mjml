@@ -1,0 +1,17 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#0F6CBD" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #0F6CBD; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#0F6CBD">Votre marque</mj-text></mj-column></mj-section>
+    <mj-section background-color="#EBF3FC" padding="32px 24px"><mj-column><mj-text color="#0F6CBD" font-size="12px" font-weight="700" text-transform="uppercase" letter-spacing="1px">Votre avis compte</mj-text><mj-text font-size="28px" font-weight="700" line-height="1.25">Aidez-nous à nous améliorer</mj-text><mj-text font-size="16px">Répondre prend moins de deux minutes.</mj-text><mj-button href="#">Répondre à l’enquête</mj-button></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Pourquoi cette enquête ?</mj-text><mj-text>Vos réponses nous aident à améliorer nos produits et notre service. Elles sont confidentielles et utilisées uniquement à cette fin.</mj-text></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

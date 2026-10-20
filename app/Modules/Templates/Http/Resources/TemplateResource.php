@@ -35,7 +35,7 @@ class TemplateResource extends JsonResource
             'updated_at' => $this->updated_at?->toIso8601String(),
             'editor_type' => $this->editor_type ?? 'html',
             'scope' => $this->scope ?? 'marketing',
-            'folder_id' => null,
+            'folder_id' => $this->folder_id !== null ? ($this->relationLoaded('folder') ? $this->folder?->uuid : $this->folder()->value('uuid')) : null,
             'is_gallery' => (bool) $this->is_gallery,
             'gallery_category' => $this->gallery_category,
             'thumbnail_url' => $this->thumbnail_path ? Storage::disk('public')->url($this->thumbnail_path) : null,

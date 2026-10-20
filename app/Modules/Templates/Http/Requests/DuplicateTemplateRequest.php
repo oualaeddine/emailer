@@ -22,7 +22,7 @@ class DuplicateTemplateRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'nullable', 'string', 'max:150'],
-            'folder_id' => ['sometimes', 'nullable', 'string'],
+            'folder_id' => ['sometimes', 'nullable', 'string', 'exists:template_folders,uuid'],
             'scope' => ['sometimes', 'nullable', 'in:marketing,transactional'],
         ];
     }
