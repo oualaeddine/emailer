@@ -14,4 +14,5 @@ enum RecipientSource: string
     case InternalContact = 'internal_contact';
     case Form = 'form';
     case TestSend = 'test_send';
+    case Api = 'api';
 }
