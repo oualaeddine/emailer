@@ -674,7 +674,7 @@
     "isDynamicEntry": true
   },
   "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx": {
-    "file": "assets/EmailBuilder-B5ue3rYr.js",
+    "file": "assets/EmailBuilder-CMmKy3qE.js",
     "name": "EmailBuilder",
     "src": "resources/js/Components/Editor/EmailBuilder/EmailBuilder.tsx",
     "isDynamicEntry": true,
@@ -690,7 +690,7 @@
     ]
   },
   "resources/js/Components/Help/HelpCenter.tsx": {
-    "file": "assets/HelpCenter-BgDc35eG.js",
+    "file": "assets/HelpCenter-djz6eWpz.js",
     "name": "HelpCenter",
     "src": "resources/js/Components/Help/HelpCenter.tsx",
     "isDynamicEntry": true,
@@ -705,7 +705,7 @@
     ]
   },
   "resources/js/Components/Help/HelpDialogBody.tsx": {
-    "file": "assets/HelpDialogBody-FWXeGNt_.js",
+    "file": "assets/HelpDialogBody-Dg48clZA.js",
     "name": "HelpDialogBody",
     "src": "resources/js/Components/Help/HelpDialogBody.tsx",
     "isDynamicEntry": true,
@@ -720,7 +720,7 @@
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-DyuBjZRv.js",
+    "file": "assets/app-C0_48vHo.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
