@@ -16,7 +16,7 @@ Le nom de la campagne se renomme en cliquant sur le crayon. **Enregistrer et qui
 
 ## Tester avant d'envoyer
 
-**Aperçu & test** affiche le rendu bureau et mobile et envoie un test à cinq adresses au plus. Vérifiez les balises de personnalisation et les liens.
+**Aperçu & test** affiche le rendu bureau et mobile et envoie un test à cinq adresses au plus. Vérifiez les balises de personnalisation et les liens. Si la campagne a un test A/B actif, le sélecteur **Version du test A/B** bascule l'aperçu et l'envoi de test entre la version A et la version B (objet, texte d'aperçu et, pour un test de contenu, le contenu). Les envois de test ne comptent pas dans les résultats du test A/B.
 
 ## Programmer
 

@@ -34,10 +34,14 @@ Dans tous les cas, terminez votre journée par **Se déconnecter**, dans le menu
 
 Les pages accessibles dépendent de votre rôle. Un **Opérateur marketing** rédige et envoie, mais n'accède pas à la gestion des utilisateurs ; un **Lecteur** consulte les résultats sans pouvoir modifier quoi que ce soit. Si une rubrique attendue n'apparaît pas dans le menu, c'est une question de droits : contactez votre administrateur, qui les ajuste depuis la page [Utilisateurs](help:admin-users).
 
+## Changer votre mot de passe
+
+Ouvrez le menu du compte (votre nom, en haut à droite) puis **Changer le mot de passe**. Saisissez votre **Mot de passe actuel**, puis deux fois le **Nouveau mot de passe** : 12 caractères minimum, avec majuscules, minuscules et chiffres, et différent de l'actuel. Après l'enregistrement, vos autres sessions ouvertes sont fermées ; celle-ci reste active. Faites-le dès votre première connexion si un administrateur vous a transmis un mot de passe initial.
+
 ## En cas de problème
 
 - **« Identifiants incorrects ou compte désactivé. »** : ce même message apparaît pour un mot de passe erroné et pour un compte désactivé, par sécurité. Vérifiez d'abord la disposition du clavier (AZERTY/QWERTY) et la touche Verr. Maj., puis contactez l'administrateur si le message persiste.
-- **Mot de passe oublié** : l'application ne propose pas de réinitialisation automatique. Un administrateur définit un nouveau mot de passe pour vous depuis la page [Utilisateurs](help:admin-users).
+- **Mot de passe oublié** : l'application ne propose pas de réinitialisation automatique. Un administrateur définit un nouveau mot de passe pour vous depuis la page [Utilisateurs](help:admin-users) ; changez-le ensuite vous-même avec **Changer le mot de passe**.
 - **Vous êtes déconnecté sans raison apparente** : la session expire après une période d'inactivité. Reconnectez-vous ; votre travail en cours dans le [Rédacteur d'e-mail](help:composer) a été enregistré automatiquement en brouillon.
 - **La page ne s'affiche pas correctement** : videz le cache du navigateur (Ctrl+F5). L'application est prévue pour les versions récentes de Chrome, Edge et Firefox.
 

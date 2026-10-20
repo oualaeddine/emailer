@@ -22,6 +22,6 @@ L'éditeur glisser-déposer compose l'e-mail à partir de **blocs**, sans écrir
 ## Conseils
 
 - Gardez une largeur de contenu raisonnable et un bouton d'appel à l'action bien visible.
-- Enregistrez un bloc réussi dans l'onglet **Enregistrés** pour le réutiliser.
+- Enregistrez un bloc réussi dans l'onglet **Enregistrés** pour le réutiliser. Une miniature de la section apparaît au-dessus de son nom quelques instants après l'enregistrement.
 - Testez toujours la version mobile : une grande partie de vos contacts lit ses e-mails sur téléphone.
 - Pour réutiliser un design sur plusieurs envois, créez plutôt un [modèle](help:template-edit).

@@ -25,11 +25,11 @@ La colonne **Dernière connexion** est un bon indicateur de comptes oubliés : u
 
 ![Fenêtre de création d'un utilisateur](/docs/screenshots/admin-users/02-dialog.png)
 
-Le compte est actif immédiatement. Transmettez le mot de passe initial à la personne par un canal séparé et demandez-lui de le changer à sa première [connexion](help:login).
+Le compte est actif immédiatement. Transmettez le mot de passe initial à la personne par un canal séparé et demandez-lui de le changer dès sa première [connexion](help:login), avec **Changer le mot de passe** dans le menu du compte.
 
 ## Modifier un utilisateur
 
-Le bouton crayon de la ligne ouvre la même fenêtre en mode modification. Seuls le **nom**, le **rôle** et le **statut** sont modifiables : l'adresse e-mail et le mot de passe n'apparaissent plus, car l'adresse sert d'identifiant permanent et le mot de passe ne se réaffiche jamais.
+Le bouton crayon de la ligne ouvre la même fenêtre en mode modification. Le **nom**, le **rôle** et le **statut** sont modifiables, et vous pouvez définir un **nouveau mot de passe** (laissez le champ vide pour le conserver). L'adresse e-mail n'apparaît plus, car elle sert d'identifiant permanent. Sur votre propre compte, le champ mot de passe est absent : passez par **Changer le mot de passe** dans le menu du compte.
 
 Changer le rôle prend effet dès la prochaine navigation de la personne concernée : les pages auxquelles elle n'a plus droit disparaissent de son menu.
 
@@ -58,11 +58,11 @@ C'est la bonne pratique lors d'un départ : la désactivation coupe l'accès san
 
 ## Traçabilité
 
-La création d'un utilisateur, le changement de rôle et la désactivation sont enregistrés dans le [Journal d'audit](help:audit-log) avec l'auteur, la date et l'adresse IP. Les mots de passe ne sont jamais consignés.
+La création d'un utilisateur, le changement de rôle, la désactivation et les changements ou réinitialisations de mot de passe sont enregistrés dans le [Journal d'audit](help:audit-log) avec l'auteur, la date et l'adresse IP. Les mots de passe ne sont jamais consignés.
 
 ## En cas de problème
 
 - **« Cette adresse est déjà utilisée »** : un compte existe déjà avec cette adresse, peut-être désactivé. Recherchez-le dans la liste et réactivez-le plutôt que d'en créer un second.
 - **Un collègue ne voit pas une page** : c'est presque toujours son rôle. Comparez avec le tableau ci-dessus, puis ajustez le rôle et demandez-lui de recharger la page.
 - **Un utilisateur ne peut pas envoyer de campagne créée par quelqu'un d'autre** : c'est le comportement attendu du rôle Opérateur marketing, qui n'envoie que ses propres campagnes. Passez-le Responsable marketing si ce besoin est permanent.
-- **Un compte affiche « Jamais » en dernière connexion** : le mot de passe initial n'a probablement jamais été transmis ou reçu. Modifiez le compte et communiquez de nouveau les accès.
+- **Un compte affiche « Jamais » en dernière connexion** : le mot de passe initial n'a probablement jamais été transmis ou reçu. Modifiez le compte, définissez un nouveau mot de passe et communiquez de nouveau les accès.
