@@ -1,0 +1,19 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#986F0B" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #986F0B; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#F5F5F5" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700" color="#986F0B">Votre marque</mj-text></mj-column></mj-section>
+    <mj-section background-color="#FBF5E6" padding="32px 24px"><mj-column><mj-text color="#986F0B" font-size="12px" font-weight="700" text-transform="uppercase" letter-spacing="1px">Édition saisonnière</mj-text><mj-text font-size="28px" font-weight="700" line-height="1.25">Une sélection pour la saison</mj-text><mj-text font-size="16px">Nos idées et offres du moment, à découvrir sans attendre.</mj-text><mj-button href="#">Voir la sélection</mj-button></mj-column></mj-section>
+    <mj-section padding="12px 12px"><mj-column><mj-text font-weight="700">Idée n° 1</mj-text><mj-text>Décrivez une offre ou un produit de saison.</mj-text></mj-column><mj-column><mj-text font-weight="700">Idée n° 2</mj-text><mj-text>Mettez en avant un second produit ou service.</mj-text></mj-column></mj-section>
+    <mj-section padding="20px 24px"><mj-column><mj-text font-size="18px" font-weight="700">Un mot de l’équipe</mj-text><mj-text>Toute l’équipe vous souhaite une belle saison. Merci de votre fidélité.</mj-text></mj-column></mj-section>
+    <mj-section padding="12px 24px 28px"><mj-column><mj-button href="#">Profiter de l’offre</mj-button></mj-column></mj-section>
+    <mj-section background-color="#F5F5F5" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

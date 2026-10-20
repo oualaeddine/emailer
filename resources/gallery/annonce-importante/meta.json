@@ -1,0 +1,10 @@
+{
+  "slug": "annonce-importante",
+  "name": "Annonce importante",
+  "gallery_category": "announcement",
+  "description": "Un message sobre pour communiquer une information importante à vos contacts.",
+  "subject": "Annonce importante",
+  "scope": "marketing",
+  "accent_color": "#5C2E91",
+  "background_color": "#F5F5F5"
+}

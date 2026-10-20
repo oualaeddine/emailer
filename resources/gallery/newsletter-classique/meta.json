@@ -1,0 +1,10 @@
+{
+  "slug": "newsletter-classique",
+  "name": "Newsletter classique",
+  "gallery_category": "newsletter",
+  "description": "Une newsletter mensuelle avec une grande accroche, deux articles et un appel à l’action.",
+  "subject": "Newsletter classique",
+  "scope": "marketing",
+  "accent_color": "#0F6CBD",
+  "background_color": "#F5F5F5"
+}

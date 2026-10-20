@@ -1,0 +1,15 @@
+<mjml lang="fr">
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Arial, sans-serif"></mj-all>
+      <mj-text color="#242424" font-size="14px" line-height="1.5"></mj-text>
+      <mj-section background-color="#FFFFFF"></mj-section>
+      <mj-button background-color="#0F6CBD" color="#FFFFFF" border-radius="4px" font-weight="600"></mj-button>
+    </mj-attributes>
+    <mj-style>a { color: #0F6CBD; text-decoration: underline; }</mj-style>
+  </mj-head>
+  <mj-body background-color="#FFFFFF" width="600px">
+    <mj-section padding="20px 24px"><mj-column><mj-text>Bonjour,</mj-text><mj-text>Écrivez ici votre message, comme vous le feriez dans un e-mail personnel : court, clair et direct.</mj-text><mj-text>Merci de votre attention,</mj-text><mj-text>Prénom Nom — Votre marque</mj-text></mj-column></mj-section>
+    <mj-section background-color="#FFFFFF" padding="16px 24px"><mj-column><mj-text align="center" color="#616161" font-size="12px">Votre marque · Adresse postale de votre entreprise</mj-text><mj-text align="center" color="#616161" font-size="12px" padding-top="0">Vous recevez cet e-mail car vous êtes inscrit(e) à nos communications. <a href="{{unsubscribe_url}}">Se désabonner</a></mj-text></mj-column></mj-section>
+  </mj-body>
+</mjml>

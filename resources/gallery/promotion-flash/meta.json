@@ -1,0 +1,10 @@
+{
+  "slug": "promotion-flash",
+  "name": "Promotion flash",
+  "gallery_category": "promotion",
+  "description": "Offre limitée dans le temps avec un code promo mis en avant.",
+  "subject": "Promotion flash",
+  "scope": "marketing",
+  "accent_color": "#C4314B",
+  "background_color": "#F5F5F5"
+}

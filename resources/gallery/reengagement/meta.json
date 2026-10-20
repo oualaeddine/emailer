@@ -1,0 +1,10 @@
+{
+  "slug": "reengagement",
+  "name": "Réengagement",
+  "gallery_category": "promotion",
+  "description": "Message pour reprendre contact avec des contacts inactifs.",
+  "subject": "Réengagement",
+  "scope": "marketing",
+  "accent_color": "#8764B8",
+  "background_color": "#F5F5F5"
+}

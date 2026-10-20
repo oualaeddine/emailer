@@ -27,7 +27,7 @@ class UpdateTemplateRequest extends FormRequest
             'html_content' => ['sometimes', 'string'],
             'editor_type' => ['sometimes', 'in:dnd,html,rich_text'],
             'scope' => ['sometimes', 'in:marketing,transactional'],
-            'folder_id' => ['sometimes', 'nullable', 'string'],
+            'folder_id' => ['sometimes', 'nullable', 'string', 'exists:template_folders,uuid'],
             'design_json' => ['sometimes', 'nullable', 'array'],
             'subject' => ['sometimes', 'nullable', 'string', 'max:255'],
             'change_note' => ['sometimes', 'nullable', 'string', 'max:255'],

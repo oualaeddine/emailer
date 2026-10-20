@@ -1,0 +1,10 @@
+{
+  "slug": "digest-hebdomadaire",
+  "name": "Digest hebdomadaire",
+  "gallery_category": "newsletter",
+  "description": "Sélection de quatre liens à lire cette semaine.",
+  "subject": "Digest hebdomadaire",
+  "scope": "marketing",
+  "accent_color": "#2B579A",
+  "background_color": "#F5F5F5"
+}

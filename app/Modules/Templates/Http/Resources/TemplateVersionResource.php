@@ -20,7 +20,11 @@ class TemplateVersionResource extends JsonResource
             'version_number' => $this->version_number,
             'html_content' => $this->html_content,
             'change_note' => $this->change_note,
-            'author' => $this->whenLoaded('createdBy', fn () => $this->createdBy?->name),
+            'author' => $this->whenLoaded('createdBy', fn () => $this->createdBy !== null
+                ? ['id' => $this->createdBy->uuid, 'name' => $this->createdBy->name]
+                : null),
+            'editor_type' => $this->getAttribute('editor_type') ?? 'html',
+            'is_current' => (bool) $this->getAttribute('is_current'),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

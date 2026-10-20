@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Modules\Templates\Services;
+
+use App\Modules\Campaigns\Models\Campaign;
+use App\Modules\Templates\Models\Template;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Process;
+use Throwable;
+
+/**
+ * docs/45 §45.6.2 — 600x800 PNG thumbnails via Playwright/Chromium
+ * (`scripts/thumbnail.mjs`). Every failure mode (node, playwright or Chromium
+ * missing, timeout, unsupported model) is a graceful no-op: `null` is returned
+ * and `thumbnail_path` is left untouched.
+ */
+class TemplateThumbnailService
+{
+    public const MODEL_TEMPLATE = 'template';
+
+    public const MODEL_CAMPAIGN = 'campaign';
+
+    public const MODEL_SAVED_SECTION = 'saved_section';
+
+    /** Whether the listener should queue thumbnails on save (off under tests unless enabled). */
+    public static function enabled(): bool
+    {
+        return (bool) config('templates.thumbnails', ! app()->environment('testing'));
+    }
+
+    /**
+     * @return string|null the stored path on the public disk, or null when nothing was rendered
+     */
+    public function renderFor(string $modelType, int $modelId): ?string
+    {
+        $model = match ($modelType) {
+            self::MODEL_TEMPLATE => Template::query()->find($modelId),
+            self::MODEL_CAMPAIGN => Campaign::query()->find($modelId),
+            default => null, // saved_section arrives with WP-61
+        };
+        if ($model === null) {
+            return null;
+        }
+
+        $html = (string) ($model instanceof Template ? $model->html_content : $model->html_body);
+        if (trim($html) === '') {
+            return null;
+        }
+
+        $png = $this->renderHtml($html);
+        if ($png === null) {
+            return null;
+        }
+
+        $path = 'thumbnails/'.$modelType.'s/'.$model->uuid.'.png';
+        Storage::disk('public')->put($path, $png);
+        $model->forceFill(['thumbnail_path' => $path])->saveQuietly();
+
+        return $path;
+    }
+
+    /**
+     * @return string|null PNG bytes
+     */
+    public function renderHtml(string $html): ?string
+    {
+        $node = (string) config('templates.node_binary', 'node');
+        $script = base_path('scripts/thumbnail.mjs');
+        if (! is_file($script) || ! is_dir(base_path('node_modules/playwright'))) {
+            Log::info('Thumbnail skipped: playwright is not installed.');
+
+            return null;
+        }
+
+        $dir = sys_get_temp_dir().'/thumb-'.bin2hex(random_bytes(6));
+        $input = $dir.'.html';
+        $output = $dir.'.png';
+
+        try {
+            file_put_contents($input, $html);
+            if (! $this->execute([$node, $script, $input, $output]) || ! is_file($output)) {
+                return null;
+            }
+
+            $png = file_get_contents($output);
+
+            return $png === false || $png === '' ? null : $png;
+        } finally {
+            @unlink($input);
+            @unlink($output);
+        }
+    }
+
+    /**
+     * @param  list<string>  $command
+     */
+    protected function execute(array $command): bool
+    {
+        try {
+            $process = new Process($command, base_path());
+            $process->setTimeout(60);
+            $process->run();
+
+            if (! $process->isSuccessful()) {
+                Log::info('Thumbnail skipped: renderer exited with '.$process->getExitCode().'.', ['stderr' => mb_substr($process->getErrorOutput(), 0, 300)]);
+
+                return false;
+            }
+
+            return true;
+        } catch (Throwable $e) {
+            Log::info('Thumbnail skipped: '.$e->getMessage());
+
+            return false;
+        }
+    }
+}

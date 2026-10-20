@@ -1,0 +1,10 @@
+{
+  "slug": "texte-minimal",
+  "name": "Texte minimal",
+  "gallery_category": "basic",
+  "description": "Un e-mail de texte simple, sans décor, proche d’un message personnel.",
+  "subject": "Texte minimal",
+  "scope": "marketing",
+  "accent_color": "#0F6CBD",
+  "background_color": "#FFFFFF"
+}
