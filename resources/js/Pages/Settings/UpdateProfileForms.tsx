@@ -26,6 +26,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { AddRegular, DeleteRegular, DocumentEditRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { DesignFields } from '@/Components/Preferences/DesignFields';
@@ -166,14 +167,17 @@ export default function UpdateProfileForms() {
     return (
         <AppShell>
             <Head title={t.preferences.title} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.preferences.title}
-                </Text>
-                <Button appearance="primary" icon={<AddRegular />} onClick={() => openForm(null)}>
-                    {t.preferences.createForm}
-                </Button>
-            </div>
+            <PageHelp
+                topic="update-profile-forms"
+                title={t.preferences.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<AddRegular />} onClick={() => openForm(null)}>
+                            {t.preferences.createForm}
+                        </Button>
+                    </>
+                }
+            />
 
             {notice && (
                 <div className={styles.messages}>

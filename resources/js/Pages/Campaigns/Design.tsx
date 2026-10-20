@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import { MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmailBuilderLazy, type EmailBuilderSaveResult, type EmailBuilderSource } from '@/Components/Editor/EmailBuilder';
 import { useText } from '@/Hooks/useText';
@@ -69,6 +70,7 @@ export default function CampaignDesign({ campaignId }: Props) {
     return (
         <AppShell>
             <Head title={`${t.campaignSetup.design.title} — ${name}`} />
+            <PageHelp topic="campaign-design" hideHeaderRow />
             {error && (
                 <MessageBar intent="error">
                     <MessageBarBody>{error}</MessageBarBody>

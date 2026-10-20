@@ -931,4 +931,32 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
             },
         ],
     },
+    automations: {
+        topicSlug: 'automations',
+        title: "Automatisations",
+        purpose:
+            "Une automatisation envoie automatiquement des e-mails à vos contacts lorsqu'un déclencheur se produit (inscription à une liste, entrée dans un segment, date…). La page liste vos scénarios avec leur statut et leurs résultats.",
+        howToUse: [
+            {
+                step: 1,
+                title: "Créer une automatisation",
+                description: "Cliquez sur « Créer une automatisation », nommez-la et choisissez le scénario de départ.",
+            },
+            {
+                step: 2,
+                title: "Définir le déclencheur",
+                description: "Indiquez ce qui fait entrer un contact dans le scénario : ajout à une liste, segment, date ou événement.",
+            },
+            {
+                step: 3,
+                title: "Composer les étapes",
+                description: "Enchaînez e-mails et délais d'attente ; chaque e-mail utilise un expéditeur vérifié et un modèle.",
+            },
+            {
+                step: 4,
+                title: "Activer et suivre",
+                description: "Activez l'automatisation puis suivez les contacts entrés, les envois et les résultats depuis la liste.",
+            },
+        ],
+    },
 };

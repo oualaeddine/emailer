@@ -17,6 +17,7 @@ import {
     useToastController,
 } from '@fluentui/react-components';
 import { ArrowLeftRegular, CalendarLtrRegular, CheckmarkRegular, DismissRegular, EditRegular, EyeRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaignV2, updateCampaignV2 } from '@/Lib/api/campaigns';
@@ -309,6 +310,7 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
                     )}
                 </div>
             </header>
+            <PageHelp topic="campaign-setup" hideHeaderRow />
 
             {campaign.status === 'suspended' && campaign.suspended_reason && (
                 <MessageBar intent="warning" style={{ marginBottom: tokens.spacingVerticalM }}>

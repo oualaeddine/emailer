@@ -26,7 +26,6 @@ import {
     Tab,
     TabList,
     Text,
-    Title2,
     Toast,
     ToastTitle,
     Toaster,
@@ -47,6 +46,7 @@ import {
     PauseRegular,
     PlayRegular,
 } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { CreateAutomationDialog } from '@/Components/Automations/CreateAutomationDialog';
@@ -339,12 +339,17 @@ export default function AutomationsIndex() {
         <AppShell>
             <Head title={t.automations.title} />
             <Toaster toasterId={toasterId} position="bottom-end" />
-            <div className={styles.header}>
-                <Title2 as="h1">{t.automations.title}</Title2>
-                <Button appearance="primary" icon={<AddRegular />} onClick={() => setCreateOpen(true)}>
-                    {t.automations.createAutomation}
-                </Button>
-            </div>
+            <PageHelp
+                topic="automations"
+                title={t.automations.title}
+                actions={
+                    <>
+                        <Button appearance="primary" icon={<AddRegular />} onClick={() => setCreateOpen(true)}>
+                            {t.automations.createAutomation}
+                        </Button>
+                    </>
+                }
+            />
 
             <div className={styles.main}>
                 <TabList

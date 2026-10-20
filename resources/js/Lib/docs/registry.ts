@@ -321,6 +321,16 @@ export const docTopics: DocTopic[] = [
         related: ['unsubscribe-pages', 'attributes'],
     },
     {
+        slug: 'automations',
+        kind: 'pages',
+        title: { fr: "Automatisations", ar: "الأتمتة" },
+        group: 'automations',
+        route: '/automations',
+        permissions: ['automations.manage'],
+        keywords: { fr: ['automatisation', 'scénario', 'workflow', 'déclencheur', 'étapes'], ar: ['أتمتة', 'سيناريو'] },
+        related: ['lists', 'segments', 'templates', 'senders'],
+    },
+    {
         slug: 'smtp',
         kind: 'pages',
         title: { fr: "Comptes SMTP", ar: "حسابات SMTP" },

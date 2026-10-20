@@ -21,6 +21,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { ChevronDownRegular, ChevronRightRegular, MailInboxRegular, SearchRegular } from '@fluentui/react-icons';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { useText } from '@/Hooks/useText';
@@ -245,16 +246,19 @@ export default function Logs() {
     return (
         <AppShell>
             <Head title={t.transactional.logsTitle} />
-            <div className={styles.header}>
-                <Text as="h1" size={700} weight="semibold">
-                    {t.transactional.logsTitle}
-                </Text>
-                <Switch
-                    checked={realtime}
-                    onChange={(_, data) => setRealtime(data.checked)}
-                    label={t.transactional.realtime}
-                />
-            </div>
+            <PageHelp
+                topic="transactional-logs"
+                title={t.transactional.logsTitle}
+                actions={
+                    <>
+                        <Switch
+                            checked={realtime}
+                            onChange={(_, data) => setRealtime(data.checked)}
+                            label={t.transactional.realtime}
+                        />
+                    </>
+                }
+            />
 
             <div className={styles.filters}>
                 <Field className={styles.search} label={t.common.search}>
