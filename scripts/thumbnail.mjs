@@ -87,7 +87,9 @@ async function main() {
 
     let browser;
     try {
-        browser = await chromium.launch();
+        // THUMBNAIL_CHROMIUM_PATH lets a server use a system Chromium instead of
+        // the browser downloaded by `npx playwright install chromium`.
+        browser = await chromium.launch({ executablePath: process.env.THUMBNAIL_CHROMIUM_PATH || undefined });
     } catch (error) {
         console.error(`chromium unavailable: ${error.message}`);
         process.exit(3);

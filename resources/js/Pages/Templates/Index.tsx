@@ -90,7 +90,7 @@ const useStyles = makeStyles({
         gap: tokens.spacingHorizontalL,
         '@media (max-width: 720px)': { gridTemplateColumns: '1fr' },
     },
-    tree: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS },
+    tree: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS, alignSelf: 'start' },
     treeRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
     treeButton: { flexGrow: 1, justifyContent: 'flex-start' },
     toolbar: { display: 'flex', gap: tokens.spacingHorizontalS, marginBottom: tokens.spacingVerticalM, flexWrap: 'wrap' },

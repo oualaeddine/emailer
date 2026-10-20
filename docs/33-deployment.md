@@ -34,6 +34,7 @@ Web tier is stateless (sessions in Redis/DB, not local files) so it scales horiz
 
 - `docker-compose.yml` for development: `app` (PHP-FPM + Nginx or Octane), `postgres` (app DB), `postgres-pagejaunes-fixture` (local stand-in for the external DB), `redis`, `mailhog`-style fake SMTP catcher, `node` (Vite dev server for HMR).
 - Production images built via multi-stage Dockerfile (composer install → npm build → slim runtime image), no dev dependencies/tools in the runtime image, non-root container user.
+- Template and campaign thumbnails (WP-62) are rendered by `scripts/thumbnail.mjs` with Playwright. The worker image needs Node and a Chromium: run `npx playwright install --with-deps chromium` at build time, or point `THUMBNAIL_CHROMIUM_PATH` at a system Chromium. Without one, thumbnails are skipped (logged at info level) and cards show the « Miniature en cours de génération » placeholder.
 
 ## 33.4 Environment Variables (key groups)
 
@@ -46,6 +47,7 @@ Web tier is stateless (sessions in Redis/DB, not local files) so it scales horiz
 | Storage | `FILESYSTEM_DISK`, `AWS_*` (or equivalent S3-compatible credentials) |
 | Mail/Tracking | `MAILER_TRACKING_DOMAIN` |
 | Verification Provider | `EMAIL_VERIFICATION_PROVIDER`, `EMAIL_VERIFICATION_API_KEY` |
+| Thumbnails | `THUMBNAIL_CHROMIUM_PATH` (optional system Chromium for `scripts/thumbnail.mjs`) |
 
 All secrets sourced from a secrets manager (cloud provider's native secrets store or Vault) in staging/production, injected as environment variables at container start — never baked into images, never committed.
 
