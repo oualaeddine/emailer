@@ -42,6 +42,7 @@ import { AutomationLookupsProvider, useAutomationLookups } from '@/Components/Au
 import { ReentrySettings } from '@/Components/Automations/ReentrySettings';
 import { StepEditorDrawer } from '@/Components/Automations/StepEditorDrawer';
 import { apiErrorMessage, apiStatus, apiValidationErrors } from '@/Components/Campaigns/campaignUi';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { useText } from '@/Hooks/useText';
 import {
     activateAutomation,
@@ -458,6 +459,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
     return (
         <>
             <Head title={`${pageTitle} — ${t.automations.title}`} />
+            <PageHelp topic="automation-edit" hideHeaderRow />
             <div className={styles.header}>
                 <div className={styles.titleBlock}>
                     <Button appearance="subtle" icon={<ArrowLeftRegular />} aria-label={t.common.back} onClick={() => router.visit('/automations')} />
@@ -544,7 +546,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
                         validationMessage={fieldErrors.name ?? (attempted && nameMissing ? t.automations.editor.editor.nameRequired : undefined)}
                         validationState={fieldErrors.name || (attempted && nameMissing) ? 'error' : 'none'}
                     >
-                        <Input value={name} maxLength={255} disabled={busy} onChange={(_, data) => changeMeta(setName, ['name'])(data.value)} />
+                        <Input value={name} maxLength={150} disabled={busy} onChange={(_, data) => changeMeta(setName, ['name'])(data.value)} />
                     </Field>
                     <Field
                         label={`${t.automations.description} (${t.common.optional})`}

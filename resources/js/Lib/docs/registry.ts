@@ -41,6 +41,20 @@ export const docTopics: DocTopic[] = [
         group: 'general',
         route: '/login',
         keywords: { fr: ['connexion', 'mot de passe', 'identifiants'], ar: ['تسجيل الدخول', 'كلمة المرور'] },
+        related: ['two-factor', 'admin-users'],
+    },
+    {
+        slug: 'two-factor',
+        kind: 'pages',
+        title: { fr: 'Double authentification', ar: 'المصادقة الثنائية' },
+        group: 'general',
+        // Covers both /two-factor/setup (enrolment) and /two-factor/challenge (login code).
+        routePattern: '/two-factor/{step}',
+        keywords: {
+            fr: ['double authentification', '2fa', 'code', 'qr code', 'authenticator', 'récupération', 'téléphone perdu'],
+            ar: ['المصادقة الثنائية', 'رمز التحقق', 'رموز الاسترداد', 'تطبيق المصادقة'],
+        },
+        related: ['login', 'admin-users', 'dashboard'],
     },
     {
         slug: 'dashboard',
@@ -208,7 +222,20 @@ export const docTopics: DocTopic[] = [
         route: '/marketing/forms',
         permissions: ['forms.manage'],
         keywords: { fr: ['formulaire', 'inscription', 'double opt-in', 'intégration'], ar: [] },
-        related: ['lists', 'attributes'],
+        related: ['form-edit', 'lists', 'attributes'],
+    },
+    {
+        slug: 'form-edit',
+        kind: 'pages',
+        title: { fr: "Éditeur de formulaire d’inscription", ar: "محرر نموذج الاشتراك" },
+        group: 'marketing',
+        routePattern: '/marketing/forms/{form}',
+        permissions: ['forms.manage'],
+        keywords: {
+            fr: ['formulaire', 'champs', 'double opt-in', 'captcha', 'publier', 'iframe', 'intégration', 'consentement', 'redirection'],
+            ar: ['نموذج', 'حقول', 'تأكيد مزدوج', 'كابتشا', 'نشر', 'تضمين'],
+        },
+        related: ['forms', 'lists', 'attributes', 'templates', 'automations'],
     },
     {
         slug: 'templates',
@@ -328,7 +355,20 @@ export const docTopics: DocTopic[] = [
         route: '/automations',
         permissions: ['automations.manage'],
         keywords: { fr: ['automatisation', 'scénario', 'workflow', 'déclencheur', 'étapes'], ar: ['أتمتة', 'سيناريو'] },
-        related: ['lists', 'segments', 'templates', 'senders'],
+        related: ['automation-edit', 'lists', 'segments', 'templates', 'senders'],
+    },
+    {
+        slug: 'automation-edit',
+        kind: 'pages',
+        title: { fr: "Éditeur d’automatisation", ar: "محرر الأتمتة" },
+        group: 'automations',
+        routePattern: '/automations/{automation}',
+        permissions: ['automations.manage'],
+        keywords: {
+            fr: ['automatisation', 'déclencheur', 'étape', 'attendre', 'condition', 'expéditeur', 'activer', 'pause', 'réentrée', 'activité'],
+            ar: ['أتمتة', 'مُشغِّل', 'خطوة', 'انتظار', 'شرط', 'تفعيل'],
+        },
+        related: ['automations', 'forms', 'lists', 'segments', 'templates', 'senders'],
     },
     {
         slug: 'smtp',
@@ -414,14 +454,6 @@ export const docTopics: DocTopic[] = [
         permissions: ['suppression.manage'],
         related: ['suppression'],
     },
-    {
-        slug: 'dialog-campaign-wizard',
-        kind: 'dialogs',
-        title: { fr: 'Assistant — Nouvelle campagne', ar: 'معالج — حملة جديدة' },
-        group: 'marketing',
-        permissions: ['campaigns.create'],
-        related: ['campaigns', 'campaign-setup', 'flow-create-send-campaign'],
-    },
 
     // ---- Flows -----------------------------------------------------------
     {
@@ -454,11 +486,14 @@ export const docTopics: DocTopic[] = [
     {
         slug: 'flow-create-send-campaign',
         kind: 'flows',
-        title: { fr: 'Guide — Créer et envoyer une campagne', ar: 'دليل — إنشاء وإرسال حملة' },
+        title: { fr: 'Guide — Envoyer une campagne pas à pas', ar: 'دليل — إرسال حملة خطوة بخطوة' },
         group: 'flows',
         permissions: ['campaigns.create'],
-        keywords: { fr: ['campagne', 'assistant', 'planifier'], ar: ['حملة', 'جدولة'] },
-        related: ['campaigns', 'campaign-setup', 'campaign-report', 'reporting'],
+        keywords: {
+            fr: ['envoyer', 'campagne', 'étapes', 'pas à pas', 'programmer', 'planifier', 'test', 'aperçu', 'liste de vérification', 'expéditeur', 'destinataires', 'lots', 'meilleur moment', 'pause', 'dupliquer'],
+            ar: ['حملة', 'إرسال', 'خطوات', 'جدولة', 'اختبار', 'معاينة', 'قائمة التحقق', 'المرسل', 'المستلمون', 'دفعات', 'أفضل وقت', 'إيقاف مؤقت', 'مضاعفة'],
+        },
+        related: ['campaigns', 'campaign-setup', 'campaign-design', 'campaign-report', 'flow-analyze-results'],
     },
     {
         slug: 'flow-analyze-results',

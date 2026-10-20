@@ -77,21 +77,6 @@ const shots: Shot[] = [
         actions: (page) => openDialog(page, fr.templates.newTemplate),
     },
 
-    { name: 'campaigns/01-campaigns', url: '/campaigns' },
-    {
-        name: 'campaigns/02-detail-drawer',
-        url: '/campaigns',
-        actions: async (page) => {
-            await page.getByRole('row').nth(1).click();
-            await settle(page);
-        },
-    },
-    {
-        name: 'campaigns/03-wizard',
-        url: '/campaigns',
-        actions: (page) => openDialog(page, fr.campaigns.newCampaign),
-    },
-
     { name: 'recipients/01-recipients', url: '/contacts' },
     {
         name: 'recipients/02-dialog',

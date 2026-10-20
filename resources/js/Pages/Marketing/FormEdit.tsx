@@ -22,6 +22,7 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { DesignPanel } from '@/Components/Forms/DesignPanel';
 import { FieldsEditor } from '@/Components/Forms/FieldsEditor';
 import { FormPreview } from '@/Components/Forms/FormPreview';
+import { PageHelp } from '@/Components/Help/PageHelp';
 import { SettingsPanel } from '@/Components/Forms/SettingsPanel';
 import { SharePanel } from '@/Components/Forms/SharePanel';
 import { EMAIL_ATTRIBUTE, areValidEmails, draftFromForm, draftToInput, isHttpUrl, type FormDraft } from '@/Components/Forms/model';
@@ -317,6 +318,7 @@ export default function FormEdit({ uuid }: FormEditProps) {
     return (
         <AppShell>
             <Head title={`${form.name} — ${t.forms.title}`} />
+            <PageHelp topic="form-edit" hideHeaderRow />
             <form onSubmit={onSubmit}>
                 <div className={styles.header}>
                     <div className={styles.titleBlock}>
@@ -389,7 +391,7 @@ export default function FormEdit({ uuid }: FormEditProps) {
                                     validationMessage={errors.name}
                                     validationState={errors.name ? 'error' : 'none'}
                                 >
-                                    <Input value={draft.name} maxLength={255} onChange={(_, d) => change({ name: d.value })} />
+                                    <Input value={draft.name} maxLength={150} onChange={(_, d) => change({ name: d.value })} />
                                 </Field>
                                 <SettingsPanel
                                     key={form.id}

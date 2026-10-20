@@ -84,6 +84,38 @@ export async function fetchFormSubmissions(id: Uuid, query: FormSubmissionsQuery
 }
 
 // ---------------------------------------------------------------------------
+// Captcha settings (`settings.manage`)
+// ---------------------------------------------------------------------------
+
+export type CaptchaProvider = 'none' | 'hcaptcha' | 'turnstile';
+
+/** `GET /forms/captcha-settings`: the secret is never returned, only whether one is saved. */
+export interface CaptchaSettings {
+    provider: CaptchaProvider;
+    site_key: string;
+    has_secret: boolean;
+}
+
+export interface CaptchaSettingsInput {
+    provider: CaptchaProvider;
+    site_key: string;
+    /** Write-only; empty keeps the saved one. */
+    secret: string;
+}
+
+export async function fetchCaptchaSettings(): Promise<CaptchaSettings> {
+    const response = await axios.get<DataItem<CaptchaSettings>>(`${BASE}/forms/captcha-settings`);
+
+    return response.data.data;
+}
+
+export async function updateCaptchaSettings(input: CaptchaSettingsInput): Promise<CaptchaSettings> {
+    const response = await axios.put<DataItem<CaptchaSettings>>(`${BASE}/forms/captcha-settings`, input);
+
+    return response.data.data;
+}
+
+// ---------------------------------------------------------------------------
 // Builder lookups
 // ---------------------------------------------------------------------------
 

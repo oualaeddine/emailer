@@ -11,6 +11,7 @@ use App\Domain\Events\UserLoggedIn;
 use App\Domain\Events\UserLoginFailed;
 use App\Domain\Events\UserPasswordChanged;
 use App\Domain\Events\UserRoleChanged;
+use App\Domain\Events\UserTwoFactorReset;
 use App\Modules\Identity\Listeners\AuditListener as IdentityAuditListener;
 use App\Modules\Identity\Listeners\NotifyUserOfRoleChange;
 use App\Modules\Settings\Listeners\AuditListener as SettingsAuditListener;
@@ -47,6 +48,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         UserPasswordChanged::class => [
             [IdentityAuditListener::class, 'handleUserPasswordChanged'],
+        ],
+        UserTwoFactorReset::class => [
+            [IdentityAuditListener::class, 'handleUserTwoFactorReset'],
         ],
         TwoFactorEnabled::class => [
             [IdentityAuditListener::class, 'handleTwoFactorEnabled'],

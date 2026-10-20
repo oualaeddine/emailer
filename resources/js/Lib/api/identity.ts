@@ -59,3 +59,8 @@ export async function fetchRoles(): Promise<Role[]> {
 
     return response.data.data;
 }
+
+/** POST /api/v1/users/{uuid}/two-factor/reset — administrator reset of another user's 2FA. */
+export async function resetUserTwoFactor(id: string): Promise<void> {
+    await axios.post(`/api/v1/users/${id}/two-factor/reset`);
+}

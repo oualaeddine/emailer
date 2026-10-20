@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import {
     Button,
     Card,
@@ -14,6 +14,7 @@ import {
 } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
 import { BrandMark } from '@/Components/Shell/BrandMark';
+import { PageHelp } from '@/Components/Help/PageHelp';
 
 const useStyles = makeStyles({
     page: {
@@ -58,6 +59,10 @@ const useStyles = makeStyles({
     toggle: {
         textAlign: 'center',
     },
+    back: {
+        textAlign: 'center',
+        marginTop: tokens.spacingVerticalM,
+    },
 });
 
 interface ChallengeForm {
@@ -77,6 +82,11 @@ export default function TwoFactorChallenge() {
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
         post('/two-factor/challenge');
+    }
+
+    function handleBackToLogin() {
+        // Cancels the pending challenge server-side, then lands on /login.
+        router.post('/two-factor/challenge/cancel');
     }
 
     function toggleMode() {
@@ -136,7 +146,15 @@ export default function TwoFactorChallenge() {
                         </Link>
                     </div>
                 </form>
+                <div className={styles.back}>
+                    <Link as="button" type="button" onClick={handleBackToLogin}>
+                        {t.auth.twoFactor.backToLogin}
+                    </Link>
+                </div>
             </Card>
+            <div style={{ width: '100%', maxWidth: '480px' }}>
+                <PageHelp topic="two-factor" hideHeaderRow />
+            </div>
         </div>
     );
 }

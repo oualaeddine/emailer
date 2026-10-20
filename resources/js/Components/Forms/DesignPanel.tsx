@@ -38,13 +38,13 @@ export function DesignPanel({ design, onChange, errors = {} }: Props) {
         <div className={styles.root}>
             <Text weight="semibold">{t.forms.editor.design.content}</Text>
             <Field label={t.forms.design.title} {...errorFor('title')}>
-                <Input value={design.title} maxLength={255} onChange={(_, d) => set('title', d.value)} />
+                <Input value={design.title} maxLength={200} onChange={(_, d) => set('title', d.value)} />
             </Field>
             <Field label={t.forms.design.description} {...errorFor('description')}>
-                <Textarea value={design.description} resize="vertical" maxLength={2000} onChange={(_, d) => set('description', d.value)} />
+                <Textarea value={design.description} resize="vertical" maxLength={1000} onChange={(_, d) => set('description', d.value)} />
             </Field>
             <Field label={t.forms.design.buttonText} required {...errorFor('button_text')}>
-                <Input value={design.button_text} maxLength={100} onChange={(_, d) => set('button_text', d.value)} />
+                <Input value={design.button_text} maxLength={60} onChange={(_, d) => set('button_text', d.value)} />
             </Field>
 
             <Text weight="semibold" className={styles.heading}>

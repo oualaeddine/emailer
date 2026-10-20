@@ -14,10 +14,12 @@ Un scénario se compose de trois éléments :
 
 ## Créer une automatisation
 
-1. Cliquez sur **Créer une automatisation**, nommez-la et choisissez le scénario de départ.
-2. Définissez le **déclencheur** : ajout à une [liste](help:lists), entrée dans un [segment](help:segments), date ou événement.
-3. Composez les **étapes** : enchaînez e-mails et délais d'attente. Chaque e-mail utilise un [expéditeur](help:senders) vérifié et un [modèle](help:templates).
+1. Cliquez sur **Créer une automatisation**, nommez-la et choisissez le **déclencheur** (ajout à une [liste](help:lists), formulaire envoyé, campagne ouverte ou cliquée, attribut modifié, anniversaire d'une date), puis **Créer et ouvrir l'éditeur**.
+2. Dans l'[éditeur](help:automation-edit), complétez le déclencheur et, si besoin, filtrez les contacts concernés (par exemple selon un [segment](help:segments)).
+3. Composez les **étapes** : enchaînez e-mails et délais d'attente. Chaque e-mail utilise un [modèle](help:templates) et, au choix, un [expéditeur](help:senders) vérifié.
 4. **Activez** l'automatisation.
+
+Tout le détail des déclencheurs, des étapes et des réglages se trouve dans la page [Éditeur d'automatisation](help:automation-edit).
 
 ## Suivre les résultats
 

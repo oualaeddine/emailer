@@ -202,7 +202,16 @@ export const fr = {
             recoveryCodesTitle: 'Codes de récupération',
             recoveryCodesIntro:
                 'Conservez ces codes à usage unique en lieu sûr. Ils permettent de vous connecter si vous perdez l’accès à votre application d’authentification. Ils ne seront plus affichés.',
-            recoveryCodesContinue: 'J’ai enregistré mes codes — continuer',
+            recoveryCodesAcknowledge: 'J’ai conservé mes codes en lieu sûr',
+            recoveryCodesContinue: 'Continuer',
+            copyCodes: 'Copier les codes',
+            codesCopied: 'Codes copiés dans le presse-papiers.',
+            codesCopyFailed: 'Copie automatique impossible : les codes sont sélectionnés, appuyez sur Ctrl+C (ou ⌘+C).',
+            downloadCodes: 'Télécharger (.txt)',
+            codesFileName: 'pagejaunes-mailer-codes-recuperation.txt',
+            codesFileHeader: 'PageJaunes Mailer — codes de récupération (usage unique)',
+            logout: 'Se déconnecter',
+            backToLogin: 'Retour à la connexion',
         },
     },
     dashboard: {
@@ -236,6 +245,16 @@ export const fr = {
         password: 'Mot de passe',
         newPassword: 'Nouveau mot de passe (laisser vide pour ne pas changer)',
         passwordConfirmation: 'Confirmer le nouveau mot de passe',
+        resetTwoFactor: {
+            action: 'Réinitialiser la double authentification',
+            title: 'Réinitialiser la double authentification ?',
+            // `{name}` is replaced with the user's name.
+            body:
+                'La double authentification de {name} sera supprimée : ses codes de récupération deviennent inutilisables, ses sessions sont fermées et ses clés API sont révoquées. À sa prochaine connexion, cette personne devra configurer de nouveau son application d’authentification.',
+            confirm: 'Réinitialiser',
+            success: 'Double authentification réinitialisée.',
+            failed: 'La réinitialisation a échoué. Réessayez.',
+        },
         changePassword: {
             menu: 'Changer le mot de passe',
             title: 'Changer le mot de passe',
@@ -2282,6 +2301,23 @@ export const fr = {
             updateExisting: 'Mettre à jour les contacts existants',
             notifyEmails: 'Prévenir ces adresses à chaque inscription',
         },
+        captchaSettings: {
+            button: 'Captcha des formulaires',
+            title: 'Captcha des formulaires',
+            intro: 'Fournisseur utilisé par tous les formulaires dont « Activer le captcha » est coché. Créez la clé de site et la clé secrète chez le fournisseur choisi.',
+            provider: 'Fournisseur',
+            providers: {
+                none: 'Aucun (captcha désactivé)',
+                hcaptcha: 'hCaptcha',
+                turnstile: 'Cloudflare Turnstile',
+            },
+            siteKey: 'Clé de site',
+            secret: 'Clé secrète',
+            secretSaved: 'Clé secrète enregistrée',
+            secretSavedHint: 'Elle n’est jamais réaffichée. Saisissez une nouvelle clé pour la remplacer, ou laissez vide pour la conserver.',
+            replaceSecret: 'Remplacer la clé secrète',
+            saved: 'Réglages du captcha enregistrés.',
+        },
         share: {
             hostedUrl: 'Lien de partage rapide',
             iframe: 'Code iframe',
@@ -2328,7 +2364,9 @@ export const fr = {
             afterSubmit: 'Après l’inscription',
             showMessage: 'Afficher un message de remerciement',
             redirect: 'Rediriger vers une URL',
-            notifyEmailsHelp: 'Une adresse e-mail par ligne.',
+            notifyEmailsHelp: 'Une adresse e-mail par ligne (10 au plus).',
+            doiAfterSubmitHint:
+                'Avec le double opt-in, le message de remerciement et la redirection ci-dessous ne s’appliquent pas : le visiteur voit « Consultez votre boîte de réception pour confirmer votre inscription. ». Seule la redirection après confirmation (ci-dessus) est appliquée.',
             invalidUrl: 'Saisissez une URL complète commençant par http:// ou https://.',
             invalidEmails: 'Une ou plusieurs adresses e-mail sont invalides.',
         },

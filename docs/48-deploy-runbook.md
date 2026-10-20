@@ -62,6 +62,15 @@ CACHE_STORE=redis
 SESSION_DRIVER=database            # needed so a password change signs out other sessions
 REDIS_HOST=… / REDIS_PASSWORD=…
 
+# System e-mails (double opt-in confirmations, form sign-up notifications)
+# go through Laravel's mailer, NOT the SMTP accounts configured in the app.
+# With MAIL_MAILER=log they are silently written to the log instead of sent.
+MAIL_MAILER=smtp
+MAIL_HOST=…
+MAIL_PORT=587
+MAIL_USERNAME=…
+MAIL_PASSWORD=…
+MAIL_SCHEME=null                           # "smtps" for port 465
 MAIL_FROM_ADDRESS=no-reply@pagejaunes.dz   # becomes the default sender
 MAIL_FROM_NAME="PageJaunes"
 
@@ -146,11 +155,8 @@ What it runs:
 3. [ ] *Paramètres → Expéditeurs, domaines & IP*: add each sender domain and publish the SPF, DKIM and DMARC records shown. Wait until they are verified.
 4. [ ] Same page: verify the default sender and any other sender addresses. Campaigns can only use a verified sender.
 5. [ ] *Paramètres → Identité visuelle*: logo, colour, default theme.
-6. [ ] If public forms are used, set the captcha (there is no settings screen for it yet):
-   ```bash
-   php artisan tinker --execute='$s = app(App\Modules\Settings\Services\SettingsService::class); foreach (["forms.captcha_provider" => "turnstile", "forms.captcha_site_key" => "…", "forms.captcha_secret" => "…"] as $k => $v) { $s->setSystemValue($k, $v, App\Domain\Enums\SettingValueType::String); }'
-   ```
-   `forms.captcha_provider` is `hcaptcha` or `turnstile`. Forms that have « Activer le captcha » ticked then require it.
+6. [ ] If public forms are used, set the captcha in *Marketing → Formulaires → Captcha des formulaires* (administrator): choose hCaptcha or Cloudflare Turnstile and enter the site key and the secret key (the secret is stored encrypted and never shown again). Forms that have « Activer le captcha » ticked then require it.
+   Fallback without the screen (secret not encrypted, not recommended): `php artisan tinker --execute='$s = app(App\Modules\Settings\Services\SettingsService::class); foreach (["forms.captcha_provider" => "turnstile", "forms.captcha_site_key" => "…", "forms.captcha_secret" => "…"] as $k => $v) { $s->setSystemValue($k, $v, App\Domain\Enums\SettingValueType::String); }'`
 7. [ ] *Paramètres → Utilisateurs & rôles*: invite staff with the right roles.
 8. [ ] *Paramètres → Clés API & webhooks*: create scoped keys for integrations (transactional sending, contacts), never a full-access key.
 
@@ -167,6 +173,26 @@ Against the production URL, with a test list containing only internal addresses:
 The automated suite can also be pointed at a **staging** copy (it needs seeded demo
 users, so never at production): `npm run test:e2e` (see `tests/e2e/README.md`).
 
+## 8b. Récupération d'accès / Access recovery
+
+Use these only when an administrator is locked out and no other administrator can use
+*Utilisateurs → Réinitialiser la double authentification* (or reset the password from the user edit dialog).
+Both commands ask for confirmation unless `--force` is given, drop the user's sessions (with the
+`database` session driver) and API tokens, and write an audit entry with no actor
+(`user.two_factor_reset` / `user.password_reset`, `new_values.source = cli`). Secrets are never logged.
+
+```bash
+# Lost phone and recovery codes: wipe the TOTP enrolment; the user sets it up again at next login.
+php artisan users:reset-two-factor admin@example.com [--force]
+
+# Lost password: set a random 20-character password, printed once. The user should change it
+# from the account menu right after signing in.
+php artisan users:reset-password admin@example.com [--force]
+```
+
+An unknown e-mail address prints an error and exits with code 1. The password is only shown in the
+terminal output: don't run the command through a shared or logged session.
+
 ## 9. Monitoring
 
 - Horizon dashboard `/horizon` (administrators only) and the in-app *Files d'attente* page.
@@ -175,6 +201,19 @@ users, so never at production): `npm run test:e2e` (see `tests/e2e/README.md`).
 - Database backups per [33-deployment.md §33.5](33-deployment.md#335-backups), starting on day one.
 
 ## 10. Later deployments and rollback
+
+The repository ships `scripts/deploy.sh` (production: `emailer.pagesjaunes-dz.com`). It pulls
+`main` (fast-forward only), runs `composer install --no-dev`, `migrate --force`, rebuilds the
+caches and terminates Horizon so systemd (`horizon-emailer.service`) restarts it on the new code.
+It does not rebuild the front end: `public/build` is committed with every release.
+
+```bash
+mysqldump --single-transaction pagejaunes_mailer > backup-$(date +%F-%H%M).sql   # always first
+sudo -u pagesjaunes-emailer bash scripts/deploy.sh
+php artisan horizon:status
+```
+
+Equivalent manual sequence (with maintenance mode):
 
 ```bash
 php artisan down --render="errors::503"

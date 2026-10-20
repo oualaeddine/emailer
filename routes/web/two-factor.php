@@ -14,3 +14,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('two-factor/challenge', [TwoFactorChallengeController::class, 'create'])
     ->name('two-factor.challenge');
 Route::post('two-factor/challenge', [TwoFactorChallengeController::class, 'store']);
+// Abandon the pending challenge (parked identity) and go back to the login form.
+Route::post('two-factor/challenge/cancel', [TwoFactorChallengeController::class, 'cancel'])
+    ->name('two-factor.challenge.cancel');

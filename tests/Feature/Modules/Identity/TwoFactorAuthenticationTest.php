@@ -74,6 +74,63 @@ class TwoFactorAuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_invalid_recovery_code_error_is_attached_to_the_recovery_field(): void
+    {
+        $this->twoFactorUser();
+
+        $this->post('/login', ['email' => 'secure@example.com', 'password' => 'password123']);
+
+        $this->post('/two-factor/challenge', ['recovery_code' => 'ZZZZZ-ZZZZZ'])
+            ->assertSessionHasErrors(['recovery_code' => 'Le code de vérification est invalide.']);
+        $this->assertGuest();
+    }
+
+    public function test_challenge_lockout_shows_the_french_message_under_the_field(): void
+    {
+        $this->twoFactorUser();
+        $this->post('/login', ['email' => 'secure@example.com', 'password' => 'password123']);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/two-factor/challenge', ['code' => '000000'])->assertSessionHasErrors('code');
+        }
+
+        // Even a valid code is refused while locked out, as a validation error
+        // (redirect back with the message) so Inertia renders it under the field.
+        $valid = $this->google2fa->getCurrentOtp(User::firstWhere('email', 'secure@example.com')->two_factor_secret);
+        $response = $this->from('/two-factor/challenge')->post('/two-factor/challenge', ['code' => $valid]);
+
+        $response->assertRedirect('/two-factor/challenge');
+        $response->assertSessionHasErrors('code');
+        $this->assertMatchesRegularExpression(
+            '/^Trop de tentatives de vérification\. Réessayez dans \d+ secondes\.$/u',
+            session('errors')->first('code'),
+        );
+        $this->assertGuest();
+
+        // A JSON caller still gets a real 429.
+        $this->postJson('/two-factor/challenge', ['code' => $valid])
+            ->assertStatus(429)
+            ->assertJsonValidationErrors('code');
+
+        // Lockout on the recovery-code form is reported under that field.
+        $this->post('/two-factor/challenge', ['recovery_code' => 'AAAAA-BBBBB'])
+            ->assertSessionHasErrors('recovery_code');
+        $this->assertGuest();
+    }
+
+    public function test_challenge_can_be_cancelled_back_to_login(): void
+    {
+        $this->twoFactorUser();
+        $this->post('/login', ['email' => 'secure@example.com', 'password' => 'password123']);
+        $this->assertNotNull(session('two_factor.login.id'));
+
+        $this->post('/two-factor/challenge/cancel')->assertRedirect(route('login'));
+
+        $this->assertNull(session('two_factor.login.id'));
+        $this->get('/two-factor/challenge')->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
     public function test_recovery_code_completes_login_and_is_consumed(): void
     {
         $user = $this->twoFactorUser();

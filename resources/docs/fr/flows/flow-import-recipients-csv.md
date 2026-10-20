@@ -88,9 +88,9 @@ Certains contacts peuvent apparaître directement en statut **Supprimé** : leur
 
 ## 8. Utiliser les contacts dans une campagne
 
-Regroupez les contacts importés dans une liste de destinataires, puis ouvrez [Campagnes](help:campaigns) et cliquez sur **Nouvelle campagne**. Dans l'étape **Destinataires** de l'assistant, choisissez **Liste de destinataires** et indiquez l'identifiant de cette liste.
+Regroupez les contacts importés dans une liste de destinataires, puis ouvrez [Campagnes](help:campaigns) et cliquez sur **Créer une campagne**. Dans la carte **Destinataires** de la page de configuration, cliquez sur **Ajouter des destinataires** et cochez cette liste dans **Envoyer à**.
 
-Le pas-à-pas complet de l'envoi est décrit dans [Créer et envoyer une campagne](help:flow-create-send-campaign).
+Le pas-à-pas complet de l'envoi est décrit dans [Envoyer une campagne pas à pas](help:flow-create-send-campaign).
 
 ## 9. Vérifier après le premier envoi
 
