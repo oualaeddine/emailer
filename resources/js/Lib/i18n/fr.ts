@@ -234,6 +234,17 @@ export const fr = {
         createTitle: 'Créer un utilisateur',
         editTitle: 'Modifier un utilisateur',
         password: 'Mot de passe',
+        newPassword: 'Nouveau mot de passe (laisser vide pour ne pas changer)',
+        passwordConfirmation: 'Confirmer le nouveau mot de passe',
+        changePassword: {
+            menu: 'Changer le mot de passe',
+            title: 'Changer le mot de passe',
+            current: 'Mot de passe actuel',
+            new: 'Nouveau mot de passe',
+            confirm: 'Confirmer le nouveau mot de passe',
+            hint: '12 caractères minimum, avec majuscules, minuscules et chiffres.',
+            success: 'Mot de passe modifié.',
+        },
     },
     roles: {
         administrator: 'Administrateur',

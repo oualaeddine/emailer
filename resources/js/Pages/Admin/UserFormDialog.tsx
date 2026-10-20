@@ -14,6 +14,7 @@ import {
     Option,
     Switch,
 } from '@fluentui/react-components';
+import { usePage } from '@inertiajs/react';
 import { useText } from '@/Hooks/useText';
 import { HelpButton } from '@/Components/Help/HelpButton';
 import type { Role, User } from '@/Lib/types/identity';
@@ -22,6 +23,7 @@ export interface UserFormValues {
     name: string;
     email: string;
     password: string;
+    password_confirmation: string;
     role_id: number | null;
     is_active: boolean;
 }
@@ -43,11 +45,15 @@ interface UserFormDialogProps {
 export function UserFormDialog({ open, onOpenChange, roles, user, onSubmit, errors }: UserFormDialogProps) {
     const t = useText();
     const isEditing = user != null;
+    // Admins change their own password through the account menu (current password required).
+    const authUserId = usePage<{ auth: { user: { id: string } | null } }>().props.auth.user?.id;
+    const isSelf = isEditing && user.id === authUserId;
 
     const [values, setValues] = useState<UserFormValues>({
         name: user?.name ?? '',
         email: user?.email ?? '',
         password: '',
+        password_confirmation: '',
         role_id: user?.role?.id ?? null,
         is_active: user?.is_active ?? true,
     });
@@ -130,6 +136,38 @@ export function UserFormDialog({ open, onOpenChange, roles, user, onSubmit, erro
                                     ))}
                                 </Dropdown>
                             </Field>
+                            {isEditing && !isSelf && (
+                                <>
+                                    <Field
+                                        label={t.users.newPassword}
+                                        validationState={errors?.password ? 'error' : 'none'}
+                                        validationMessage={errors?.password}
+                                    >
+                                        <Input
+                                            type="password"
+                                            autoComplete="new-password"
+                                            value={values.password}
+                                            onChange={(_, data) => setValues((v) => ({ ...v, password: data.value }))}
+                                        />
+                                    </Field>
+                                    {values.password !== '' && (
+                                        <Field
+                                            label={t.users.passwordConfirmation}
+                                            validationState={errors?.password_confirmation ? 'error' : 'none'}
+                                            validationMessage={errors?.password_confirmation}
+                                        >
+                                            <Input
+                                                type="password"
+                                                autoComplete="new-password"
+                                                value={values.password_confirmation}
+                                                onChange={(_, data) =>
+                                                    setValues((v) => ({ ...v, password_confirmation: data.value }))
+                                                }
+                                            />
+                                        </Field>
+                                    )}
+                                </>
+                            )}
                             {isEditing && (
                                 <Field label={t.users.status}>
                                     <Switch
