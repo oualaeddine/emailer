@@ -113,7 +113,7 @@ class FormSubmissionService
         [$submission, $pending, $recipient] = $stored;
 
         if ($pending) {
-            $this->sendConfirmation($recipient);
+            $this->sendConfirmation($recipient, $form);
         }
 
         FormSubmitted::dispatch($form->id, $submission->id, $recipient->id, $submission->status);
@@ -154,7 +154,7 @@ class FormSubmissionService
      * still stored and confirmed by any earlier link); queued, and a mail failure never
      * fails a submission already saved.
      */
-    private function sendConfirmation(Recipient $recipient): void
+    private function sendConfirmation(Recipient $recipient, Form $form): void
     {
         $key = 'forms:doi-cooldown:'.hash('sha256', strtolower($recipient->email));
         if (! Cache::add($key, true, now()->addMinutes(self::DOI_COOLDOWN_MINUTES))) {
@@ -162,7 +162,7 @@ class FormSubmissionService
         }
 
         try {
-            $this->doubleOptIn->send($recipient->refresh());
+            $this->doubleOptIn->send($recipient->refresh(), $form->doi_template_id);
         } catch (\Throwable $e) {
             report($e);
         }

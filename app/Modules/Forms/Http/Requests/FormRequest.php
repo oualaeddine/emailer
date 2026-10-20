@@ -55,6 +55,13 @@ class FormRequest extends BaseRequest
 
     public function messages(): array
     {
-        return ['name.required' => 'Le nom du formulaire est obligatoire.'];
+        $invalidUrl = 'Saisissez une URL complète commençant par http:// ou https://.';
+
+        return [
+            'name.required' => 'Le nom du formulaire est obligatoire.',
+            'settings.doi_redirect_url.url' => $invalidUrl,
+            'settings.redirect_url.url' => $invalidUrl,
+            'settings.doi_template_id.exists' => 'Le modèle d’e-mail de confirmation est introuvable.',
+        ];
     }
 }
