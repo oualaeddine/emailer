@@ -10,9 +10,10 @@ use App\Modules\Recipients\Models\RecipientList;
 use App\Modules\Tracking\Models\Message;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
- * Seeds one sent campaign with rollup rows (the WP-70 tables are created by {@see RollupTables}).
+ * Seeds one sent campaign with rollup rows (the WP-70 tables come from the real migrations).
  */
 trait SeedsReportData
 {
@@ -59,7 +60,7 @@ trait SeedsReportData
     private function link(Campaign $campaign, string $linkId, string $url, int $unique, int $total): void
     {
         DB::table('campaign_links')->insert([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(), 'campaign_id' => $campaign->id, 'link_id' => $linkId,
+            'uuid' => (string) Str::uuid(), 'campaign_id' => $campaign->id, 'link_id' => $linkId,
             'url' => $url, 'url_hash' => sha1($url), 'label' => null,
             'unique_clicks' => $unique, 'total_clicks' => $total, 'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -88,7 +89,9 @@ trait SeedsReportData
     private function event(Message $message, string $type, array $attributes = []): void
     {
         DB::table('message_events')->insert(array_merge([
-            'message_id' => $message->id, 'event_type' => $type, 'occurred_at' => now(),
+            'uuid' => (string) Str::uuid(), 'message_id' => $message->id,
+            'campaign_id' => $message->campaign_id, 'recipient_id' => $message->recipient_id,
+            'event_type' => $type, 'occurred_at' => now(),
             'created_at' => now(), 'updated_at' => now(),
         ], $attributes));
     }

@@ -8,7 +8,6 @@ use App\Modules\Identity\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Tests\Feature\Modules\Reporting\Support\RollupTables;
 use Tests\Feature\Modules\Reporting\Support\SeedsReportData;
 use Tests\TestCase;
 
@@ -25,7 +24,6 @@ class StatisticsTest extends TestCase
     {
         parent::setUp();
         Carbon::setTestNow('2026-10-20 12:00:00');
-        RollupTables::ensure();
         $this->seed(RolePermissionSeeder::class);
         $this->manager = User::factory()->withRole(RoleName::MarketingManager)->create();
     }

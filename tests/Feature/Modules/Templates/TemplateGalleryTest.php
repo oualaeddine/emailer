@@ -91,6 +91,6 @@ class TemplateGalleryTest extends TestCase
             ->assertJsonPath('data.editor_type', 'dnd');
         $this->assertNotNull($copy->json('data.design_json'));
 
-        $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=0')->assertJsonCount(1, 'data');
+        $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=0&scope=marketing')->assertJsonCount(1, 'data');
     }
 }

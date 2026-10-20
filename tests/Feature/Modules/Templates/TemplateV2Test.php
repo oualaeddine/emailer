@@ -75,7 +75,7 @@ class TemplateV2Test extends TestCase
 
         $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=1&per_page=10')
             ->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Gal');
-        $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=0&per_page=10')
+        $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=0&scope=marketing&per_page=10')
             ->assertJsonCount(1, 'data')->assertJsonPath('data.0.name', 'Mine');
         $this->actingAs($this->manager)->getJson('/api/v1/templates?sort=bogus&per_page=10')->assertStatus(422);
     }
