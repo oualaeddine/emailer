@@ -90,6 +90,7 @@ export default function TemplateEdit({ templateId }: Props) {
                     onExit={() => router.visit('/templates')}
                     onSendTest={sendTest}
                     restore={lastVersion !== null ? { versionNumber: lastVersion } : null}
+                    templateId={template.id}
                 />
             )}
         </AppShell>

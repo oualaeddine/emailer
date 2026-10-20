@@ -4,4 +4,11 @@
  * `EmailBuilder.tsx` chunk.
  */
 export { EmailBuilderLazy, prefetchEmailBuilder } from './EmailBuilderLazy';
-export type { EmailBuilderProps, EmailBuilderRestoreOption, EmailBuilderSaveResult, EmailBuilderSource } from './types';
+export type {
+    DynamicBlockRecord,
+    EmailBuilderProps,
+    EmailBuilderRestoreOption,
+    EmailBuilderSaveResult,
+    EmailBuilderSource,
+    EmailDesignWithDynamic,
+} from './types';
