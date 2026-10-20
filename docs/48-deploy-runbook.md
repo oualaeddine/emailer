@@ -59,7 +59,7 @@ PAGEJAUNES_DB_PASSWORD=…
 
 QUEUE_CONNECTION=redis
 CACHE_STORE=redis
-SESSION_DRIVER=redis               # or database
+SESSION_DRIVER=database            # needed so a password change signs out other sessions
 REDIS_HOST=… / REDIS_PASSWORD=…
 
 MAIL_FROM_ADDRESS=no-reply@pagejaunes.dz   # becomes the default sender
