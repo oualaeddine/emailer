@@ -544,7 +544,10 @@ class AlgeriaB2bDemoSeeder extends Seeder
         DB::table('segments')->insert([
             'uuid' => (string) Str::uuid(),
             'recipient_list_id' => $dynamicList['id'],
-            'rules' => json_encode(['status' => 'active', 'wilaya' => 'Alger']),
+            'rules' => json_encode(['operator' => 'AND', 'conditions' => [
+                ['field' => 'status', 'operator' => 'equals', 'value' => 'active'],
+                ['field' => 'custom_fields.wilaya', 'operator' => 'equals', 'value' => 'Alger'],
+            ]]),
             'last_evaluated_at' => $this->periodEnd,
             'cached_count' => count($matching),
             'created_at' => $this->periodStart,

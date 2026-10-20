@@ -576,7 +576,7 @@ class CampaignService
                 'status' => MessageStatus::Queued->value,
                 'queued_at' => now(),
                 'is_test' => true,
-            ], (string) $campaign->subject, (string) $campaign->html_body, $recipient, $campaign, $mergeWith);
+            ], (string) $campaign->subject, $this->htmlWithPreheader($campaign), $recipient, $campaign, $mergeWith);
 
             SendEmailJob::dispatch($message->id);
             $messageIds[] = $message->uuid;
@@ -734,11 +734,17 @@ class CampaignService
             'recipient_id' => $recipient->id,
             'status' => MessageStatus::Queued->value,
             'queued_at' => now(),
-        ], (string) $campaign->subject, (string) $campaign->html_body, $recipient, $campaign);
+        ], (string) $campaign->subject, $this->htmlWithPreheader($campaign), $recipient, $campaign);
 
         SendEmailJob::dispatch($message->id);
 
         return $message;
+    }
+
+    /** The campaign's preview text as the hidden inbox preheader (docs/43 §43.4.2 Subject card). */
+    private function htmlWithPreheader(Campaign $campaign): string
+    {
+        return \App\Modules\Campaigns\AbTesting\Services\AbTestService::withPreheader((string) $campaign->html_body, $campaign->preview_text);
     }
 
     private function copyAudienceRows(Campaign $from, Campaign $to): void

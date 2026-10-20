@@ -26,7 +26,6 @@ import { useText } from '@/Hooks/useText';
 import { apiErrorMessage, createAttribute, fetchAttributes, updateAttribute } from '@/Lib/api/attributes';
 import { hasPermission } from '@/Lib/permissions';
 import type { ContactAttribute } from '@/Lib/types/attributes';
-import type { AuthenticatedUser } from '@/Lib/types/identity';
 
 const useStyles = makeStyles({
     header: {
@@ -57,8 +56,8 @@ const formatDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { 
 export default function Attributes() {
     const styles = useStyles();
     const t = useText();
-    const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
-    const canManage = hasPermission(props.auth.user.permissions, 'attributes.manage');
+    const { props } = usePage<{ auth?: { permissions?: string[] } }>();
+    const canManage = hasPermission(props.auth?.permissions ?? [], 'attributes.manage');
 
     const [attributes, setAttributes] = useState<ContactAttribute[]>([]);
     const [loading, setLoading] = useState(true);

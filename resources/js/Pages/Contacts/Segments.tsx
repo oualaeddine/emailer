@@ -53,7 +53,7 @@ import { useText } from '@/Hooks/useText';
 import { deleteSegment, duplicateSegment, fetchSegmentFolders, fetchSegments } from '@/Lib/api/segments';
 import { hasPermission } from '@/Lib/permissions';
 import type { Folder } from '@/Lib/types/common';
-import type { AuthenticatedUser, PaginatedResponse } from '@/Lib/types/identity';
+import type { PaginatedResponse } from '@/Lib/types/identity';
 import type { Segment, SegmentListQuery } from '@/Lib/types/segments';
 
 const useStyles = makeStyles({
@@ -125,9 +125,9 @@ const formatDate = (iso: string | null) => (iso ? new Date(iso).toLocaleString('
 export default function Segments() {
     const styles = useStyles();
     const t = useText();
-    const { props } = usePage<{ auth: { user: AuthenticatedUser } }>();
-    const canManage = hasPermission(props.auth.user.permissions, 'segments.manage');
-    const canUseInCampaign = hasPermission(props.auth.user.permissions, 'campaigns.create');
+    const { props } = usePage<{ auth?: { permissions?: string[] } }>();
+    const canManage = hasPermission(props.auth?.permissions ?? [], 'segments.manage');
+    const canUseInCampaign = hasPermission(props.auth?.permissions ?? [], 'campaigns.create');
 
     const [response, setResponse] = useState<PaginatedResponse<Segment> | null>(null);
     const [loading, setLoading] = useState(true);

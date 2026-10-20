@@ -116,6 +116,8 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
     const [error, setError] = useState<string | null>(null);
     const pollTimer = useRef<number | null>(null);
     const polls = useRef(0);
+    // `pending` on links_valid means "not checked yet" until the user starts a check.
+    const checkingRef = useRef(false);
     const onLoadedRef = useRef(onLoaded);
     onLoadedRef.current = onLoaded;
 
@@ -130,7 +132,7 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
         setChecklist(next);
         setUnavailable(false);
         onLoadedRef.current?.(next);
-        const pending = next.items.some((item) => item.key === 'links_valid' && item.status === 'pending');
+        const pending = checkingRef.current && next.items.some((item) => item.key === 'links_valid' && item.status === 'pending');
         stopPolling();
         if (pending && polls.current < MAX_POLLS) {
             polls.current += 1;
@@ -138,6 +140,7 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
                 void fetchCampaignChecklist(campaignId).then(apply).catch(() => undefined);
             }, POLL_MS);
         } else {
+            checkingRef.current = false;
             setCheckingLinks(false);
         }
     }, [campaignId]);
@@ -168,15 +171,21 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
     }, [load, refreshKey]);
 
     async function handleCheckLinks() {
+        checkingRef.current = true;
         setCheckingLinks(true);
         setError(null);
         try {
             polls.current = 0;
             apply(await checkCampaignLinks(campaignId));
         } catch (err) {
+            checkingRef.current = false;
             setCheckingLinks(false);
             setError(apiErrorMessage(err));
         }
+    }
+
+    function displayStatus(item: CampaignChecklistItem): CampaignChecklistItemStatus {
+        return item.key === 'links_valid' && item.status === 'pending' && !checkingLinks ? 'skipped' : item.status;
     }
 
     function icon(status: CampaignChecklistItemStatus): ReactElement {
@@ -232,12 +241,12 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
 
                             return (
                                 <li key={item.key} className={styles.item}>
-                                    <span className={styles.icon}>{icon(item.status)}</span>
+                                    <span className={styles.icon}>{icon(displayStatus(item))}</span>
                                     <div className={styles.text}>
                                         <div className={styles.titleRow}>
                                             <Text weight="semibold">{t.campaignSetup.checklistItems[item.key] ?? item.key}</Text>
-                                            <Badge appearance="outline" size="small" color={STATUS_BADGE[item.status]}>
-                                                {t.campaignSetup.checklistItemStatus[item.status]}
+                                            <Badge appearance="outline" size="small" color={STATUS_BADGE[displayStatus(item)]}>
+                                                {t.campaignSetup.checklistItemStatus[displayStatus(item)]}
                                             </Badge>
                                         </div>
                                         {item.message && (

@@ -54,6 +54,7 @@ import type {
     WebhookSubscriptionEvent,
     WebhookType,
 } from '@/Lib/types/webhooks';
+import { CheckboxGroup } from '@/Components/Common/CheckboxGroup';
 
 /** Subscription identifiers offered per type (docs/45 §45.7.7); `sent` is a synonym of `request`. */
 const TRANSACTIONAL_EVENTS: TransactionalWebhookEvent[] = [
@@ -509,7 +510,7 @@ export default function WebhooksPanel() {
                                     </Select>
                                 </Field>
                                 <Field label={t.webhooks.eventsLabel} required>
-                                    <div className={styles.events}>
+                                    <CheckboxGroup className={styles.events}>
                                         {available.map((e) => (
                                             <Checkbox
                                                 key={e}
@@ -518,7 +519,7 @@ export default function WebhooksPanel() {
                                                 onChange={(_, data) => toggleEvent(e, data.checked === true)}
                                             />
                                         ))}
-                                    </div>
+                                    </CheckboxGroup>
                                 </Field>
                                 <Field label={t.webhooks.headers}>
                                     <div className={styles.stack}>

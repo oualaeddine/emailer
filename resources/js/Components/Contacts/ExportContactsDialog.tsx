@@ -24,6 +24,7 @@ import { useText } from '@/Hooks/useText';
 import { exportContacts, pollOperation } from '@/Lib/api/contacts';
 import type { ContactColumnKey, ContactExportFormat, ContactExportOperation, ContactSelection } from '@/Lib/types/contacts';
 import { formatText, type ContactColumnDescriptor } from '@/Components/Contacts/contactColumns';
+import { CheckboxGroup } from '@/Components/Common/CheckboxGroup';
 
 const useStyles = makeStyles({
     content: {
@@ -146,7 +147,7 @@ export function ExportContactsDialog({ open, onOpenChange, selection, count, def
                                     </RadioGroup>
                                 </Field>
                                 <Field label={t.contacts.exportColumns} required>
-                                    <div className={styles.columns}>
+                                    <CheckboxGroup className={styles.columns}>
                                         {orderedCatalog.map((column) => (
                                             <Checkbox
                                                 key={column.key}
@@ -161,7 +162,7 @@ export function ExportContactsDialog({ open, onOpenChange, selection, count, def
                                                 }
                                             />
                                         ))}
-                                    </div>
+                                    </CheckboxGroup>
                                 </Field>
                             </>
                         )}

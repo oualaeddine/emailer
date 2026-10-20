@@ -17,7 +17,7 @@ const useStyles = makeStyles({
         backgroundColor: tokens.colorNeutralBackground3,
         overflow: 'hidden',
     },
-    img: { width: '100%', height: '100%', objectFit: 'cover' },
+    img: { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' },
 });
 
 export interface PickerItem {

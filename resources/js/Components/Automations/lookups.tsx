@@ -169,6 +169,10 @@ export function EntityPicker({ kind, values, onChange, single = false, disabled,
                 className={styles.input}
                 multiselect={!single}
                 freeform
+                // A required <Field> would make the search box natively `required`; it is
+                // emptied after each pick, so the browser blocked the form submit. The
+                // selection itself is validated by the caller.
+                required={false}
                 disabled={disabled}
                 aria-label={ariaLabel}
                 aria-invalid={invalid || undefined}

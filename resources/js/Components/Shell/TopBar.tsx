@@ -12,6 +12,7 @@ import {
     Toolbar,
     ToolbarButton,
     makeStyles,
+    mergeClasses,
     tokens,
 } from '@fluentui/react-components';
 import { NavigationRegular, SignOutRegular, ArrowDownloadRegular, AddRegular } from '@fluentui/react-icons';
@@ -65,6 +66,16 @@ const useStyles = makeStyles({
             display: 'none',
         },
     },
+    createButton: {
+        '@media (max-width: 479px)': {
+            minWidth: 'auto',
+        },
+    },
+    brandText: {
+        '@media (max-width: 479px)': {
+            display: 'none',
+        },
+    },
 });
 
 interface TopBarProps {
@@ -102,12 +113,13 @@ export function TopBar({ user, onToggleNav }: TopBarProps) {
                     onClick={onToggleNav}
                 />
                 <BrandMark size={28} />
-                <span className={styles.brand}>PageJaunes Mailer</span>
+                <span className={mergeClasses(styles.brand, styles.brandText)}>PageJaunes Mailer</span>
             </span>
             <Toolbar>
                 {canCreateCampaign && (
                     <Button
                         appearance="primary"
+                        className={styles.createButton}
                         icon={<AddRegular />}
                         as="a"
                         href="/campaigns?create=1"

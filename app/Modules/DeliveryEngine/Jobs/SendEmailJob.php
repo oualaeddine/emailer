@@ -109,6 +109,7 @@ class SendEmailJob implements ShouldQueue
             (new Email())->from($account->from_name ? new Address($account->from_email, $account->from_name) : new Address($account->from_email)),
             $recipient->email,
         );
+        $this->applyCampaignEnvelope($email, $message, $account, $recipient->email);
 
         foreach ($message->draft?->attachments ?? [] as $attachment) {
             $email->attach(
@@ -215,5 +216,45 @@ class SendEmailJob implements ShouldQueue
             'attempted_at' => now(),
             'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
         ]);
+    }
+
+    /**
+     * Campaign messages: the From is the campaign's verified sender (docs/43
+     * §43.4.14) with the SMTP account kept as the envelope `Sender`, the
+     * campaign reply-to (or the sender's) becomes `Reply-To`, and RFC 8058
+     * one-click unsubscribe headers point at the signed unsubscribe URL.
+     */
+    private function applyCampaignEnvelope(Email $email, Message $message, SmtpAccount $account, string $recipientEmail): void
+    {
+        if ($message->campaign_id === null) {
+            return;
+        }
+
+        $campaign = \App\Modules\Campaigns\Models\Campaign::query()->find($message->campaign_id);
+        if ($campaign === null) {
+            return;
+        }
+
+        $sender = $campaign->sender_id !== null
+            ? \App\Modules\Senders\Models\Sender::query()->find($campaign->sender_id)
+            : null;
+
+        if ($sender !== null && $sender->isVerified()) {
+            $email->from(new Address($sender->email, (string) $sender->name));
+            if (strcasecmp($sender->email, (string) $account->from_email) !== 0) {
+                $email->sender(new Address($account->from_email));
+            }
+        }
+
+        $replyTo = trim((string) ($campaign->reply_to ?: $sender?->reply_to));
+        if ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+            $email->replyTo($replyTo);
+        }
+
+        if (! $message->is_test) {
+            $url = app(\App\Modules\Suppression\Support\UnsubscribeUrlGenerator::class)->signedUrlFor($recipientEmail);
+            $email->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$url.'>');
+            $email->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+        }
     }
 }

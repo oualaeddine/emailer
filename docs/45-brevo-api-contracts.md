@@ -1573,6 +1573,15 @@ Deviations and contract notes:
 - **WP-61** — `design_json.dynamic_blocks: DynamicBlockRecord[]` (`{id, type:"dynamic_content", variants:[{condition: RuleTree, mjml:""}], fallback_mjml:""}`) is now part of `EmailDesign` (frozen). Dynamic content is marked in MJML as `<mj-raw><div data-dynamic-rule="{id}"></mj-raw>…<mj-raw></div></mj-raw>` and evaluated by `ConditionalBlocksStage` from `campaign.design_json` (not by WP-63 mj-raw markers); unknown/malformed rules keep the block. `GET /editor/sections` returns SVG data-URI thumbnails; saved-section `thumbnail_url` is always `null`. `POST /saved-sections` accepts whole `<mj-section>`/`<mj-wrapper>` only (422 otherwise). Routes: `GET /editor/sections`, `GET/POST /saved-sections`, `PATCH/DELETE /saved-sections/{id}` (`templates.view`|`campaigns.create` to read, `templates.manage`|`campaigns.create` to write; owner or `templates.manage` to modify).
 - **WP-102** — registry groups now use the `NavGroup` values; `topicForUrl` supports `{param}` segments. Help-centre `groupOrder` extended to the Brevo groups at the gate.
 
+### 45.7.9 Visual pass fixes (orchestrator)
+
+Found by driving the app in a browser on an upgraded database (main's schema + demo data, then every programme migration):
+
+- **Delivery** — campaign e-mails use the campaign's verified sender as `From` (the SMTP account becomes the envelope `Sender`), the campaign reply-to (else the sender's) as `Reply-To`, and carry RFC 8058 `List-Unsubscribe` / `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers (not on test sends). `POST /unsubscribe/{token}` is exempt from CSRF (signed URL). Classic campaigns now include `preview_text` as the hidden preheader (sends and test sends).
+- **Upgrade migrations** — `2026_10_24_100001` backfills `campaigns.recipients_count` from non-test messages; `…100002` queues a final `RollupCampaignStatsJob` for historical campaigns without counters; `…100003` registers every legacy `custom_fields` key as a `text` attribute under its exact name (no data moved, legacy segment rules unaffected).
+- **Automations** — `send_email` steps may pick marketing or transactional templates (UI aligned with the backend).
+- **Thumbnails** — `scripts/thumbnail.mjs` honours `THUMBNAIL_CHROMIUM_PATH`; docs/33 lists the Chromium requirement.
+
 ## 45.8 Schema addendum (frozen column lists per migration slot)
 
 Slots and timestamp prefixes are doc 44 §44.11. A column listed here is created **only** by the
