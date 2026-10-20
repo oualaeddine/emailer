@@ -35,7 +35,7 @@ This is the diagram already present at [02-system-architecture.md §2.4](02-syst
 | Web Application | Laravel 12 (PHP 8.4) + Inertia + React, behind Octane/PHP-FPM | Serves the SPA, handles synchronous HTTP requests, authorization, validation |
 | Queue Workers | Laravel Horizon-supervised PHP processes | Executes all queued jobs — sending, imports, health probes, report refresh |
 | Scheduler | Laravel Scheduler (single cron-triggered instance) | Fires time-based jobs (campaign due-check, health probes, snapshot refresh) |
-| App Database | PostgreSQL | System of record for all our own domain data ([04-database-design.md](04-database-design.md)) |
+| App Database | MySQL 8 | System of record for all our own domain data ([04-database-design.md](04-database-design.md)) |
 | Cache/Queue Store | Redis | Cache, Laravel queues, Horizon metrics, rate-limit/quota counters |
 | Object Storage | S3-compatible | Attachments, import/export files |
 | PageJaunes Database | MariaDB/MySQL, external, read-only | Source of company/email directory data |
@@ -57,7 +57,7 @@ graph TB
     AppSvc --> Domain
     Domain --> Repo
     AppSvc --> EventBus
-    Repo --> AppDB[(App PostgreSQL)]
+    Repo --> AppDB[(App MySQL 8)]
     Repo --> PJRepo[PageJaunesCompanyRepository]
     PJRepo --> PJDB[(PageJaunes MySQL)]
     AppSvc --> Jobs[Job Dispatch]

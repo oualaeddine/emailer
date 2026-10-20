@@ -9,7 +9,7 @@ This documentation is written so that **another AI or engineering team can imple
 ## Scope
 
 - Single organization (not multi-tenant)
-- Laravel 12 / PHP 8.4 / PostgreSQL / Redis backend
+- Laravel 12 / PHP 8.4 / MySQL 8 / Redis backend
 - React + Inertia.js + TypeScript + Fluent UI v9 + Tailwind frontend
 - Read-only integration with an external PageJaunes company database
 - Full email delivery engine with SMTP rotation, throttling, tracking, and suppression

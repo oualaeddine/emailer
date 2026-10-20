@@ -26,8 +26,8 @@ graph TB
     end
     subgraph Infrastructure
         F --> H[Repositories]
-        H --> I[(PostgreSQL - App DB)]
-        H --> J[(PostgreSQL - PageJaunes DB, read-only)]
+        H --> I[(MySQL 8 - App DB)]
+        H --> J[(MariaDB/MySQL - PageJaunes DB, read-only)]
         D --> K[Queued Jobs]
         K --> L[(Redis Queues)]
         D --> M[Cache]
@@ -77,8 +77,8 @@ Each module maps to a top-level namespace under `app/Modules/{ModuleName}` — s
 ```mermaid
 graph LR
     User((Browser User)) -->|HTTPS| Web[Laravel App - Octane/PHP-FPM]
-    Web --> AppDB[(App PostgreSQL)]
-    Web -->|read-only| PJDB[(PageJaunes PostgreSQL)]
+    Web --> AppDB[(App MySQL 8)]
+    Web -->|read-only| PJDB[(PageJaunes MariaDB/MySQL)]
     Web --> Redis[(Redis: cache, queues, Horizon)]
     Web --> Storage[(Object/Local Storage - attachments, exports)]
     Worker[Queue Workers - Horizon] --> Redis

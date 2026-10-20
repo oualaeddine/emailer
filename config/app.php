@@ -123,4 +123,20 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | First administrator (production seeding)
+    |--------------------------------------------------------------------------
+    |
+    | Used by SuperAdminSeeder in production only. Without a password a random
+    | one is generated and printed once. An existing account is never reset.
+    |
+    */
+
+    'super_admin' => [
+        'name' => env('SUPER_ADMIN_NAME', 'Super Administrateur'),
+        'email' => env('SUPER_ADMIN_EMAIL', 'admin@pagejaunes.dz'),
+        'password' => env('SUPER_ADMIN_PASSWORD'),
+    ],
+
 ];
