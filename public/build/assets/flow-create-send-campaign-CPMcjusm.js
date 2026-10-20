@@ -89,7 +89,7 @@ const e=`# إرسال حملة خطوة بخطوة
 1. انقروا على **Ajouter des destinataires**. تُفتح نافذة **Choisir les destinataires**.
 2. في **Envoyer à** حددوا [قوائم](help:lists) (تبويب **Listes**) و/أو [شرائح](help:segments) (تبويب **Segments**). يساعد حقل البحث على إيجاد الاسم. الحد الأقصى: 50 قائمة وشريحة.
 3. اختياري: في **Exclure** حددوا ما يجب ألا يُستهدف (مثل عملائكم النشطين).
-4. تتحدث كتلة **Audience estimée** مباشرة: عدد المستلمين والمستبعدين والعناوين «en liste noire». وهذه الأخيرة، أي عناوين [قائمة الحظر](help:suppression)، تُستبعد دائماً. ويظهر تنبيه إذا لم تفتح نسبة كبيرة من الجمهور أي رسالة منذ 90 يوماً.
+4. تبقى العناصر المحددة ظاهرة على شكل شارات فوق القائمة (انقروا على الإشارة × لإزالة أحدها). وتتحدث كتلة **Audience estimée** مباشرة: عدد المستلمين والمستبعدين والعناوين «en liste noire» (جهة اتصال موجودة في عدة قوائم تُحسب مرة واحدة؛ ومن كان في قائمة مستبعَدة يُزال حتى لو ورد في القائمة المختارة). وهذه الأخيرة، أي عناوين [قائمة الحظر](help:suppression)، تُستبعد دائماً. ويظهر تنبيه إذا لم تفتح نسبة كبيرة من الجمهور أي رسالة منذ 90 يوماً.
 5. اختياري: **Champ « À »** لتخصيص الاسم المعروض للمستلم (مثل \`{{ contact.PRENOM }} {{ contact.NOM }}\`).
 6. **Enregistrer**.
 
@@ -101,7 +101,7 @@ const e=`# إرسال حملة خطوة بخطوة
 
 1. في بطاقة **Design** انقروا على **Commencer la conception**. تقترح نافذة **Choisir un modèle** خمسة تبويبات: **Galerie** (قوالب جاهزة، منها **Modèle vierge**) و**Mes modèles** و**Campagnes précédentes** و**Coder** (HTML) و**Éditeur de texte enrichi**.
 2. انقروا على قالب، مثل **Lancement de produit**: يُفتح محرر السحب والإفلات.
-3. عدّلوا المحتوى: اسحبوا كتلاً من **Contenu › Blocs** (عنوان، نص، صورة، زر، فاصل، أعمدة…) أو أقساماً جاهزة (**Sections**)، واضبطوا الكتلة المحددة في لوحة **Propriétés**. وفي كتلة النص تُدرج قائمة **Personnaliser…** وسماً (Prénom، Société، Lien de désinscription…).
+3. عدّلوا المحتوى: اسحبوا كتلاً من **Contenu › Blocs** (عنوان، نص، صورة، زر، فاصل، أعمدة…) أو أقساماً جاهزة (**Sections**)، واضبطوا الكتلة المحددة في لوحة **Propriétés**. وفي كتلة النص تُدرج قائمة **Personnaliser…** وسماً (Prénom، Société، Lien de désinscription…) وتضع المؤشر بعده مباشرة؛ ويكون المدقق الإملائي للمتصفح معطّلاً في لوحة التحرير. وفي الشريط العلوي أصبح **Restaurer une version précédente** أيقونة (تلميح عند التمرير).
 4. انقروا على **Enregistrer et quitter** للعودة إلى الإعداد (ويُبقي **Enregistrer** المحرر مفتوحاً).
 
 ![محرر التصميم](/docs/screenshots/campaign-flow/05-design-editor.png)
@@ -117,11 +117,16 @@ const e=`# إرسال حملة خطوة بخطوة
 - **Page de désinscription**: **Page par défaut** أو **Page personnalisée** (انظروا [صفحات إلغاء الاشتراك](help:unsubscribe-pages))؛
 - **Tags** و**Dossier** لإيجاد الحملة بسهولة في القائمة؛
 - **Suivi Google Analytics (UTM)**: يضيف **Activer le suivi UTM** معاملات \`utm_*\` إلى الروابط؛
-- **Suivi des ouvertures et des clics** (مفعّل افتراضياً) و**Lien miroir** («voir dans le navigateur»).
+- **Suivi des ouvertures et des clics** (مفعّل افتراضياً) و**Lien miroir** («voir dans le navigateur»)؛
+- **Stratégie SMTP**: **Rotation automatique** (افتراضي) أو **Compte unique** (كل الرسائل عبر الحساب المختار؛ وإن كان غير متاح ينتظر الإرسال بدل الانتقال إلى حساب آخر)؛
+- **Plage horaire d'envoi**: الأيام والساعات (بحسب المنطقة الزمنية للحملة) التي يجوز فيها خروج الرسائل؛ خارج الفترة يؤجَّل الإرسال إلى الافتتاح التالي؛
+- **Approbation requise avant l'envoi**: انظروا «الموافقة» أدناه.
 
 وتخدم بطاقة **Test A/B** (زر **Activer le test A/B**) مقارنة نسختين: العنصر المختبَر (**Objet** أو **Contenu**)، وحجم العيّنة (من 5 إلى 50 % من المستلمين)، ومعيار الفائز (معدل الفتح أو النقر)، ومدة الاختبار، والإرسال التلقائي للنسخة الفائزة إلى بقية الجمهور. ويجب أن تكون مواضيع (أو محتويات) النسختين A وB مختلفة.
 
 في الإرسال الأول يمكنكم ترك بقية الإعدادات كما هي.
+
+**الموافقة.** مع **Approbation requise avant l'envoi** تعرض الصفحة شريط **En attente d'approbation**، وتضيف قائمة التحقق بند **Approbation**، ويبقى **Programmer** معطّلًا. ينقر المستخدم الذي يملك صلاحية **Approuver les campagnes** (مسؤول التسويق، المدير) على **Approuver** في الشريط، أو على ⋯ › **Approuver** في قائمة الحملات؛ فيصبح **Programmer** متاحًا. وكل تعديل لاحق للموضوع أو المحتوى أو المرسل أو المستلمين يسحب الموافقة (وتعود الحملة المجدولة إلى مسودة): يجب الموافقة عليها من جديد. وتُسجَّل الموافقات وحالات السحب في سجل التدقيق.
 
 ## 8. الاختبار قبل الإرسال
 
@@ -163,8 +168,8 @@ const e=`# إرسال حملة خطوة بخطوة
 تحمل كل بند شارة: **OK** أو **Recommandé** (نصيحة غير مانعة) أو **À corriger** (يجب تصحيحه) أو **En cours** (الفحص جارٍ) أو **Non vérifié** (لم يُفحص). وتبيّن الشارة العامة في الأعلى:
 
 - **Bloquée** (محجوبة): بند إلزامي واحد على الأقل «À corriger». زر **Programmer** غير فعّال.
-- **Incomplète** (غير مكتملة): لا شيء يمنع، لكن تبقى نصيحة (لم يُرسل اختبار، لم تُفحص الروابط…). يمكنكم الجدولة.
-- **Prête** (جاهزة): كل شيء أخضر.
+- **Incomplète** (غير مكتملة): لا شيء يمنع، لكن تبقى نصيحة (لم يُرسل اختبار، لم تُفحص الروابط…). تصبح الرسالة تحت العنوان «Vous pouvez programmer l'envoi ; quelques vérifications recommandées restent à faire» (يمكنكم جدولة الإرسال؛ وتبقى بعض الفحوص الموصى بها)، ويبقى زر **Programmer** فعّالاً.
+- **Prête** (جاهزة): كل شيء أخضر («Votre campagne est prête à être envoyée»).
 
 انقروا على **Vérifier les liens** للتأكد من استجابة كل رابط في التصميم؛ ويُبلَّغ عن الرابط المعطّل («n lien(s) inaccessible(s)»). هذا الفحص نصيحة: لا يمنع الإرسال.
 
@@ -183,7 +188,7 @@ const e=`# إرسال حملة خطوة بخطوة
 
 قواعد يجب معرفتها:
 
-- في «أفضل وقت» و«على دفعات» يعني ترك التاريخ والساعة فارغين «ابدأ فوراً»؛ ومع تاريخ تنتظر الحملة ذلك الموعد. انتبهوا: يبقى التاريخ المدخل في «Programmer pour plus tard» محفوظاً إذا بدّلتم الخيار.
+- في «أفضل وقت» و«على دفعات» يعني ترك التاريخ والساعة فارغين «ابدأ فوراً»؛ ومع تاريخ تنتظر الحملة ذلك الموعد. يحتفظ كل خيار بحقوله الخاصة فقط: عند الانتقال من «Programmer pour plus tard» إلى «أفضل وقت» أو «على دفعات» يُمسح التاريخ الافتراضي المقترح، ولا يعرض سطر **Envoi prévu** تاريخاً إلا إذا أدخلتموه. وتتمرّر النافذة من الداخل مع بقاء العنوان والأزرار ظاهرين.
 - **لا تقترح الحملة ذات اختبار A/B سوى «Envoyer maintenant» و«Programmer pour plus tard»**: إذ يجب أن تنطلق العيّنة دفعة واحدة ليُختار الفائز على بيانات كاملة.
 - إذا كان التاريخ في الماضي يتحول حقلا Date وHeure إلى حالة الخطأ؛ وإذا خرج حجم الدفعة أو الفاصل عن الحدود يُشار إلى الحقل المعني.
 - يعيد الخادم فحص قائمة التحقق: فإذا تغيّر بند مانع في الأثناء تعرض النافذة «La campagne ne peut pas être programmée : …» مع البنود المعنية.
@@ -249,7 +254,9 @@ const e=`# إرسال حملة خطوة بخطوة
 - **«La campagne doit avoir un objet et un contenu avant l'envoi d'un test.»**: أكملوا الموضوع والتصميم قبل الاختبار.
 - **«Vous pouvez saisir au maximum 5 adresses.»** / **«Limite de 10 envois de test par heure atteinte pour cette campagne.»**: قلّصوا القائمة، أو انتظروا الساعة التالية.
 - **«La campagne ne peut pas être programmée : … »**: ظهر بند مانع بين فتح النافذة والتأكيد؛ أغلقوا النافذة وأعيدوا قراءة قائمة التحقق.
-- **«Cette campagne doit être approuvée avant de pouvoir être envoyée.»**: الخيار **Approbation requise avant l'envoi** مفعّل في **Paramètres supplémentaires**. ألغوا تأشيره إن لم تكن لديكم دورة موافقة.
+- **«Cette campagne doit être approuvée avant de pouvoir être envoyée.»** / **«En attente d'approbation»**: الخيار **Approbation requise avant l'envoi** مفعّل في **Paramètres supplémentaires** ولم يوافق أحد بعد على الحملة (أو سُحبت الموافقة بسبب تعديل). اطلبوا من مسؤول التسويق أو المدير الموافقة عليها (زر **Approuver**)، أو ألغوا تأشير الخيار إن لم تكن لديكم دورة موافقة.
+- **لا يخرج الإرسال إلا صباحًا / في أيام الأسبوع**: **Plage horaire d'envoi** مفعّلة. خارج الفترة تُحتجز الرسائل حتى الافتتاح التالي؛ عدّلوا الفترة في Paramètres supplémentaires (حملة مسودة أو مجدولة أو معلّقة) عند الحاجة.
+- **«Choisissez le compte SMTP unique à utiliser…»**: اختيرت استراتيجية **Compte unique** دون حساب. اختاروا حسابًا أو عودوا إلى **Rotation automatique**.
 - **«Seules les campagnes en brouillon peuvent être programmées.»**: سبق أن أُطلقت الحملة أو جُدولت (مثلاً من تبويب آخر). أعيدوا تحميل القائمة.
 - **يبقى Programmer معطّلاً رغم أن كل شيء أخضر**: اختبار A/B مفعّل لكنه غير مكتمل. افتحوا بطاقة **Test A/B** وصحّحوها («Les objets des versions A et B doivent être différents.»، «Les versions A et B du test A/B sont obligatoires.»)، أو عطّلوا الاختبار.
 - **تبقى الحملة «En cours» دون أن تنطلق أي رسالة**: لا يتوفر أي حساب SMTP (معطّل أو استُنفدت حصته). تُعاد محاولة الرسائل كل 5 دقائق؛ تحققوا من [حسابات SMTP](help:smtp).

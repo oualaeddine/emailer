@@ -68,7 +68,9 @@ scenario('campagne : de la création à la programmation', async (track) => {
     await dialog.getByRole('checkbox', { name: /E2E Liste Charlie/ }).nth(1).check();
     await dialog.getByText('Calcul en cours…').waitFor({ state: 'hidden' });
     // Alpha (3) + Bravo (3) share one contact = 5, minus Charlie's overlap with Alpha (karim) = 4
-    await dialog.getByText(/^4 destinataires$/).waitFor();
+    // The estimate shows the number and its unit separately (« 4 » / « destinataires »).
+    await dialog.getByText(/^4$/).waitFor();
+    await dialog.getByText(/^destinataires$/).waitFor();
     await dialog.getByText(/^1 exclus$/).waitFor();
     await dialog.getByRole('button', { name: 'Enregistrer' }).click();
     await page.getByRole('button', { name: 'Modifier les destinataires' }).waitFor();
