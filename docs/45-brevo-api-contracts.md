@@ -468,6 +468,7 @@ Picker tabs → data sources: **Galerie** `GET /templates/gallery` (§45.6.2; WP
     { "key": "recipients_selected",  "status": "error",   "blocking": true,  "message": "Aucun destinataire", "details": { "count": 0 } },
     { "key": "subject_filled",       "status": "ok",      "blocking": true,  "message": "…", "details": null },
     { "key": "design_ready",         "status": "ok",      "blocking": true,  "message": "…", "details": null },
+    { "key": "merge_tags",           "status": "error",   "blocking": true,  "message": "Balises inconnues : {{attribute.PRENOM}}, {{first_name}}", "details": { "unknown": [ "{{attribute.PRENOM}}", "{{first_name}}" ] } },
     { "key": "unsubscribe_link",     "status": "error",   "blocking": true,  "message": "Le design ne contient pas de lien de désinscription", "details": null },
     { "key": "test_sent",            "status": "warning", "blocking": false, "message": "Aucun e-mail de test envoyé", "details": null },
     { "key": "links_valid",          "status": "pending", "blocking": false, "message": "…", "details": { "broken": [ { "url": "…", "status": 404 } ] } },
@@ -475,11 +476,15 @@ Picker tabs → data sources: **Galerie** `GET /templates/gallery` (§45.6.2; WP
     { "key": "spam_score",           "status": "skipped", "blocking": false, "message": "…", "details": null }
   ],
   "checked_at": "…" }
-// key: "sender_verified" | "recipients_selected" | "subject_filled" | "design_ready" | "unsubscribe_link"
+// key: "sender_verified" | "recipients_selected" | "subject_filled" | "design_ready" | "merge_tags" | "unsubscribe_link"
 //    | "test_sent" | "links_valid" | "email_size" | "spam_score"
 // status: "ok" | "warning" | "error" | "pending" | "skipped"
 // spam_score is the hook for doc 39 (always "skipped" until that analyzer exists).
 ```
+
+`merge_tags` (blocking) scans `subject`, `preview_text`, `html_body` and `to_field` with
+`MergeVariableResolver::unknownTags()` (same pattern and known-variable logic as rendering) and
+is `error` with `details.unknown` (the tags as written) when a tag would be sent as literal text.
 
 `POST /campaigns/{id}/schedule` calls `CampaignChecklistService::evaluate()` (§45.9) and refuses
 (422, `errors.checklist = [keys…]`) when a blocking item is `error`.
@@ -1581,6 +1586,7 @@ Found by driving the app in a browser on an upgraded database (main's schema + d
 - **Upgrade migrations** — `2026_10_24_100001` backfills `campaigns.recipients_count` from non-test messages; `…100002` queues a final `RollupCampaignStatsJob` for historical campaigns without counters; `…100003` registers every legacy `custom_fields` key as a `text` attribute under its exact name (no data moved, legacy segment rules unaffected).
 - **Automations** — `send_email` steps may pick marketing or transactional templates (UI aligned with the backend).
 - **Thumbnails** — `scripts/thumbnail.mjs` honours `THUMBNAIL_CHROMIUM_PATH`; docs/33 lists the Chromium requirement.
+- **Merge-tag check (`next-tags`)** — new blocking checklist item `merge_tags` (§45.4.5): a mistyped tag (`{{attribute.PRENOM}}`, `{{first_name}}`) used to be sent as literal text; scheduling is now refused (422 `errors.checklist`) until subject, preview text, body and `to_field` only use tags the renderer substitutes. `{{ params.* }}` is transactional-only and counts as unknown for campaigns. `{{ contact.X }}` is accepted when X is an attribute definition or the PRENOM/NOM/EMAIL/SOCIETE alias.
 
 ## 45.8 Schema addendum (frozen column lists per migration slot)
 

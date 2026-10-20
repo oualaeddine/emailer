@@ -451,6 +451,7 @@ export type CampaignChecklistKey =
     | 'recipients_selected'
     | 'subject_filled'
     | 'design_ready'
+    | 'merge_tags'
     | 'unsubscribe_link'
     | 'test_sent'
     | 'links_valid'

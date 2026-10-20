@@ -1133,12 +1133,15 @@ export const fr = {
             allGood: 'Votre campagne est prête à être envoyée.',
             blocking: 'Corrigez les points bloquants avant de programmer.',
             brokenLinks: '%d lien(s) inaccessible(s)',
+            // next-tags
+            unknownTags: 'Balises inconnues : %s',
         },
         checklistItems: {
             sender_verified: 'Expéditeur vérifié',
             recipients_selected: 'Destinataires sélectionnés',
             subject_filled: 'Objet renseigné',
             design_ready: 'Design prêt',
+            merge_tags: 'Balises de personnalisation',
             unsubscribe_link: 'Lien de désinscription présent',
             test_sent: 'E-mail de test envoyé',
             links_valid: 'Liens valides',

@@ -4,6 +4,7 @@ namespace App\Modules\Campaigns\Services\Checklist;
 
 use App\Modules\Campaigns\Contracts\AudienceResolver;
 use App\Modules\Campaigns\Models\Campaign;
+use App\Modules\Composer\Services\MergeVariableResolver;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +20,7 @@ class CampaignChecklistService implements CampaignChecklistContract
     public function __construct(
         private readonly LinkChecker $links,
         private readonly AudienceResolver $audience,
+        private readonly MergeVariableResolver $mergeTags,
     ) {
     }
 
@@ -31,6 +33,7 @@ class CampaignChecklistService implements CampaignChecklistContract
             $this->recipientsSelected($campaign),
             $this->subjectFilled($campaign),
             $this->designReady($html),
+            $this->mergeTags($campaign),
             $this->unsubscribeLink($html),
             $this->testSent($campaign),
             $this->linksValid($campaign),
@@ -90,6 +93,25 @@ class CampaignChecklistService implements CampaignChecklistContract
         return trim($html) !== ''
             ? new ChecklistItem('design_ready', ChecklistItem::OK, true, 'Design prêt')
             : new ChecklistItem('design_ready', ChecklistItem::ERROR, true, "Le design de l'e-mail est vide");
+    }
+
+    private function mergeTags(Campaign $campaign): ChecklistItem
+    {
+        $unknown = $this->mergeTags->unknownTags(
+            (string) $campaign->subject,
+            (string) $campaign->preview_text,
+            (string) $campaign->html_body,
+            (string) $campaign->to_field,
+        );
+
+        if ($unknown === []) {
+            return new ChecklistItem('merge_tags', ChecklistItem::OK, true, 'Balises de personnalisation valides', ['unknown' => []]);
+        }
+
+        $shown = implode(', ', array_slice($unknown, 0, 5));
+        $more = count($unknown) > 5 ? ' (+'.(count($unknown) - 5).')' : '';
+
+        return new ChecklistItem('merge_tags', ChecklistItem::ERROR, true, "Balises inconnues : {$shown}{$more}", ['unknown' => $unknown]);
     }
 
     private function unsubscribeLink(string $html): ChecklistItem
