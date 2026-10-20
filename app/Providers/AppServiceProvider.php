@@ -76,6 +76,8 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Route::pattern('campaign', '[0-9a-fA-F-]{36}');
         // docs/45 §45.9 — WP-70: final rollup when a campaign completes.
         \Illuminate\Support\Facades\Event::listen(\App\Modules\Campaigns\Events\CampaignStatusChanged::class, \App\Modules\Tracking\Listeners\RollupCampaignStatsOnCompletion::class);
+        // docs/45 §45.7.4 — WP-90: the double opt-in confirmation confirms the contact's pending form submissions.
+        \Illuminate\Support\Facades\Event::listen(\App\Modules\Suppression\Preferences\Events\DoubleOptInConfirmed::class, \App\Modules\Forms\Listeners\ConfirmFormSubmissionsOnOptIn::class);
         // docs/45 §45.1 (WP-100) — API keys accepted as `Authorization: Bearer` or Brevo-style `api-key` header.
         \Laravel\Sanctum\Sanctum::getAccessTokenFromRequestUsing(fn (\Illuminate\Http\Request $request): ?string => \App\Modules\Transactional\Services\ApiKeyService::tokenFromRequest($request));
     }
