@@ -1,6 +1,6 @@
 # Configuration d'une campagne
 
-La page de configuration empile **cinq cartes** à cocher : Expéditeur, Objet, Destinataires, Design et Paramètres supplémentaires (plus le test A/B quand il est disponible). Chaque carte affiche une coche verte une fois complétée, et une liste de contrôle à droite indique ce qui manque avant l'envoi.
+La page de configuration empile des cartes à cocher : **cinq** (Expéditeur, Objet, Destinataires, Design et Paramètres supplémentaires), ou **six** quand la carte **Test A/B** est disponible. Chaque carte affiche une coche verte une fois complétée, et une liste de contrôle à droite indique ce qui manque avant l'envoi.
 
 ## L'en-tête
 
@@ -16,7 +16,7 @@ Le nom de la campagne se renomme en cliquant sur le crayon. **Enregistrer et qui
 
 ## Tester avant d'envoyer
 
-**Aperçu & test** affiche le rendu bureau et mobile et envoie un test à cinq adresses au plus. Vérifiez les balises de personnalisation et les liens. Si la campagne a un test A/B actif, le sélecteur **Version du test A/B** bascule l'aperçu et l'envoi de test entre la version A et la version B (objet, texte d'aperçu et, pour un test de contenu, le contenu). Les envois de test ne comptent pas dans les résultats du test A/B.
+**Aperçu & test** affiche le rendu bureau et mobile et envoie un test à cinq adresses au plus. Les balises de personnalisation de l'objet et du texte d'aperçu sont remplies avec le premier contact de l'audience (ou affichées entre crochets, par exemple « [SOCIETE] », si l'audience est vide). Vérifiez les balises de personnalisation et les liens. Si la campagne a un test A/B actif, le sélecteur **Version du test A/B** bascule l'aperçu et l'envoi de test entre la version A et la version B (objet, texte d'aperçu et, pour un test de contenu, le contenu). Les envois de test ne comptent pas dans les résultats du test A/B.
 
 ## Programmer
 

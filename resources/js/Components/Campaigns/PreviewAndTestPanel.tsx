@@ -19,7 +19,9 @@ import { useText } from '@/Hooks/useText';
 import { fetchCampaignPreview } from '@/Lib/api/campaigns';
 import type { AbVariantLabel, CampaignV2Detail, TestSendResult } from '@/Lib/types/campaigns';
 import { EmailFrame } from '@/Components/Campaigns/EmailFrame';
+import { hasMergeTags, placeholderMergeTags } from '@/Components/Campaigns/MergeTagText';
 import { InboxPreview } from '@/Components/Campaigns/SubjectCard';
+import { formatText } from '@/Components/Campaigns/campaignUi';
 import { TestSendForm } from '@/Components/Campaigns/TestSendDialog';
 
 type Device = 'desktop' | 'mobile';
@@ -50,6 +52,9 @@ const useStyles = makeStyles({
         borderRadius: '24px',
         border: `8px solid ${tokens.colorNeutralForeground1Static}`,
     },
+    note: {
+        color: tokens.colorNeutralForeground3,
+    },
     empty: {
         color: tokens.colorNeutralForeground3,
         padding: tokens.spacingVerticalXXL,
@@ -73,6 +78,8 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
     const [device, setDevice] = useState<Device>('desktop');
     const [html, setHtml] = useState<string | null>(campaign.html_body);
     const [loading, setLoading] = useState(false);
+    // Subject / preview text rendered by the backend with a sample audience contact.
+    const [rendered, setRendered] = useState<{ subject: string | null; previewText: string | null; sample: boolean; to: string | null } | null>(null);
     const abVariants = campaign.ab_test_enabled ? (campaign.ab_test?.variants ?? []) : [];
     const [variant, setVariant] = useState<AbVariantLabel>('A');
     const activeVariant = abVariants.length > 0 ? (abVariants.find((v) => v.label === variant) ?? abVariants[0]) : null;
@@ -85,16 +92,23 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
         }
         let cancelled = false;
         setHtml(baseHtml);
-        if (!baseHtml) {
-            return;
-        }
-        // Rendered preview (merge tags resolved); falls back to the raw html_body.
-        setLoading(true);
+        setRendered(null);
+        // Rendered preview (merge tags resolved with the first audience contact); falls back to the raw html_body.
+        setLoading(Boolean(baseHtml));
         fetchCampaignPreview(campaign.id, variantLabel ? { variant: variantLabel } : {})
             .then((preview) => {
-                if (!cancelled && preview.html) {
+                if (cancelled) {
+                    return;
+                }
+                if (preview.html) {
                     setHtml(preview.html);
                 }
+                setRendered({
+                    subject: preview.subject,
+                    previewText: preview.preview_text,
+                    sample: Boolean(preview.sample && preview.contact_id),
+                    to: preview.to,
+                });
             })
             .catch(() => undefined)
             .finally(() => {
@@ -109,6 +123,11 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
     }, [open, campaign.id, baseHtml, variantLabel]);
 
     const panel = t.campaignSetup.previewPanel;
+    const rawSubject = (activeVariant ? activeVariant.subject : campaign.subject) ?? '';
+    const rawPreviewText = (activeVariant ? activeVariant.preview_text : campaign.preview_text) ?? '';
+    // Rendered with a real contact when the audience has one, else readable « [SOCIETE] » placeholders.
+    const subject = rendered?.sample ? (rendered.subject ?? rawSubject) : placeholderMergeTags(rawSubject);
+    const previewText = rendered?.sample ? (rendered.previewText ?? rawPreviewText) : placeholderMergeTags(rawPreviewText);
     const width = device === 'desktop' ? 680 : 375;
 
     return (
@@ -130,9 +149,21 @@ export function PreviewAndTestPanel({ open, campaign, onClose, onTestSent }: Pre
             <DrawerBody className={styles.body}>
                 <InboxPreview
                     senderName={campaign.sender?.name ?? t.campaigns.noSender}
-                    subject={(activeVariant ? activeVariant.subject : campaign.subject) ?? ''}
-                    previewText={(activeVariant ? activeVariant.preview_text : campaign.preview_text) ?? ''}
+                    subject={subject}
+                    previewText={previewText}
                 />
+                {rendered?.sample && rendered.to ? (
+                    <Text size={200} className={styles.note}>
+                        {formatText(panel.sampleContact, rendered.to)}
+                    </Text>
+                ) : (
+                    rendered &&
+                    (hasMergeTags(rawSubject) || hasMergeTags(rawPreviewText)) && (
+                        <Text size={200} className={styles.note}>
+                            {panel.samplePlaceholder}
+                        </Text>
+                    )
+                )}
                 {abVariants.length > 0 && (
                     <TabList
                         size="small"

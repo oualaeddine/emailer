@@ -37,7 +37,7 @@ Une barre proche de la saturation en fin de matinée annonce qu'une grosse campa
 
 ## Campagnes récentes
 
-La dernière carte liste les campagnes les plus récentes avec leur statut et leur date : **Brouillon**, **Planifiée**, **Envoi en cours**, **Envoyée**, **En pause**, **Annulée**. Une campagne bloquée sur « Envoi en cours » depuis longtemps se diagnostique depuis la page [Campagnes](help:campaigns).
+La dernière carte liste les campagnes les plus récentes avec leur statut et leur date : **Brouillon**, **Programmée**, **En cours**, **Envoyée**, **En pause**, **Annulée**. Une campagne bloquée sur « En cours » depuis longtemps se diagnostique depuis la page [Campagnes](help:campaigns).
 
 ## Cartes visibles selon votre rôle
 

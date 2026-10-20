@@ -5,7 +5,7 @@ import type { CampaignAudienceInput } from '@/Lib/types/campaigns';
 import { SetupCard } from '@/Components/Campaigns/SetupCard';
 import { RecipientsPickerDialog } from '@/Components/Campaigns/RecipientsPickerDialog';
 import type { SetupStepCardProps } from '@/Components/Campaigns/cardTypes';
-import { formatText } from '@/Components/Campaigns/campaignUi';
+import { formatPlural, formatText } from '@/Components/Campaigns/campaignUi';
 
 const useStyles = makeStyles({
     summary: {
@@ -58,7 +58,7 @@ export function RecipientsCard({ campaign, editable, expanded, onExpand, onColla
                             </Text>
                             {audience.estimated_count !== null && (
                                 <Text weight="semibold">
-                                    {formatText(t.campaignSetup.recipients.estimatedCount, audience.estimated_count)}
+                                    {formatPlural(audience.estimated_count, t.campaignSetup.recipients.estimatedCountOne, t.campaignSetup.recipients.estimatedCount)}
                                 </Text>
                             )}
                             {campaign.to_field && (

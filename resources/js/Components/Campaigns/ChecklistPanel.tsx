@@ -188,6 +188,16 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
         return item.key === 'links_valid' && item.status === 'pending' && !checkingLinks ? 'skipped' : item.status;
     }
 
+    // The header text must agree with the status badge: `can_schedule` is true
+    // for both "complete" and "incomplete" (only recommended items remain).
+    function headerMessage(current: CampaignChecklist): string {
+        if (!current.can_schedule || current.status === 'blocking') {
+            return t.campaignSetup.checklist.blocking;
+        }
+
+        return current.status === 'complete' ? t.campaignSetup.checklist.allGood : t.campaignSetup.checklist.recommended;
+    }
+
     function icon(status: CampaignChecklistItemStatus): ReactElement {
         switch (status) {
             case 'ok':
@@ -233,7 +243,7 @@ export function ChecklistPanel({ campaignId, refreshKey, canCheckLinks, onLoaded
             ) : checklist ? (
                 <>
                     <Text size={200} className={styles.message}>
-                        {checklist.can_schedule ? t.campaignSetup.checklist.allGood : t.campaignSetup.checklist.blocking}
+                        {headerMessage(checklist)}
                     </Text>
                     <ul className={styles.items}>
                         {checklist.items.map((item) => {

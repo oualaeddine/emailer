@@ -137,6 +137,37 @@ class AudienceResolver implements AudienceResolverContract
         return $this->compute($campaign, null)['final'];
     }
 
+    /**
+     * First deliverable member of the audience, for previews (merge tags rendered with real data).
+     * Cheap on purpose: stops at the first included target that yields an active, non-suppressed
+     * recipient instead of resolving the whole audience.
+     */
+    public function sampleRecipient(Campaign $campaign): ?Recipient
+    {
+        foreach ($this->targets($campaign) as $target) {
+            if ($target['mode'] !== AudienceMode::Include) {
+                continue;
+            }
+
+            $query = $target['model'] instanceof RecipientList
+                ? Recipient::query()->whereIn('recipients.id', DB::table('recipient_list_recipient')
+                    ->where('recipient_list_id', $target['model']->id)->select('recipient_id'))
+                : $this->segments->compile($target['model']->rules ?? []);
+
+            $recipient = $query
+                ->where('recipients.status', RecipientStatus::Active->value)
+                ->whereNotIn('recipients.email', SuppressionEntry::query()->select('email'))
+                ->orderBy('recipients.id')
+                ->first();
+
+            if ($recipient !== null) {
+                return $recipient;
+            }
+        }
+
+        return null;
+    }
+
     public function recipients(Campaign $campaign): Collection
     {
         $ids = $this->recipientIds($campaign);

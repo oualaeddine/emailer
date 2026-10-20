@@ -372,6 +372,8 @@ export interface CampaignPreview {
     to: string;
     html: string;
     contact_id: string | null;
+    /** True when the contact was picked automatically from the audience (no `contact_id` requested). */
+    sample?: boolean;
 }
 
 export type AudienceTargetType = 'list' | 'segment';

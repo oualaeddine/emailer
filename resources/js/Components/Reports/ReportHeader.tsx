@@ -17,6 +17,7 @@ import {
 import { ArrowLeftRegular, DataHistogramRegular, EyeRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
 import { formatDateTime, formatText } from '@/Components/Campaigns/campaignUi';
+import { MergeTagText } from '@/Components/Campaigns/MergeTagText';
 import { EmailFrame } from '@/Components/Campaigns/EmailFrame';
 import { ExportButton } from '@/Components/Reports/ExportButton';
 import { headerSentAt, reportMissingText } from '@/Components/Reports/reportUi';
@@ -131,7 +132,7 @@ export function ReportHeader({ campaignId, campaign, tab, onCompare, onViewEmail
                             )}
                             <Text>
                                 <span className={styles.metaLabel}>{t.campaignReport.subject} : </span>
-                                {campaign.subject}
+                                <MergeTagText text={campaign.subject} />
                             </Text>
                         </div>
                     )}

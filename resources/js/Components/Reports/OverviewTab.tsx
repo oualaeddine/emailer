@@ -22,6 +22,15 @@ export function OverviewTab({ data }: { data: ReportOverview }) {
     const k = t.campaignReport.kpis;
     const s = data.globalStats;
     const bounces = s.hardBounces + s.softBounces;
+    // "Restants" only makes sense while the campaign is still going; a finished one has messages "en file d'attente".
+    const finished = data.campaign.status === 'completed' || data.campaign.status === 'cancelled';
+    const sentHint =
+        [
+            data.remaining > 0 ? `${finished ? k.remainingQueued : k.remaining} : ${formatCount(data.remaining)}` : null,
+            (data.skipped ?? 0) > 0 ? `${k.skipped} : ${formatCount(data.skipped)}` : null,
+        ]
+            .filter(Boolean)
+            .join(' · ') || undefined;
 
     return (
         <TabStack>
@@ -29,7 +38,7 @@ export function OverviewTab({ data }: { data: ReportOverview }) {
                 <KpiTile
                     label={k.sent}
                     value={formatCount(s.sent)}
-                    hint={data.remaining > 0 ? `${k.remaining} : ${formatCount(data.remaining)}` : undefined}
+                    hint={sentHint}
                 />
                 <KpiTile
                     label={k.delivered}
