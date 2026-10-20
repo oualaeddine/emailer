@@ -28,6 +28,10 @@ use Illuminate\Support\Facades\Cache;
  * evenly, the remainder waits for `PickAbWinnerJob` and is then sent with
  * the winner's subject / html.
  *
+ * Campaigns with a send window (`business_hours_*`) are only released
+ * inside it: outside, the job re-enqueues itself for the next opening
+ * ({@see CampaignService::sendWindowDeferral()}).
+ *
  * `$scheduledFor` is set on the delayed job created by a schedule: if the
  * campaign was unscheduled / rescheduled / sent now since, the stale job
  * does nothing.
@@ -54,6 +58,14 @@ class DispatchCampaignJob implements ShouldQueue
         $campaign = Campaign::find($this->campaignId);
 
         if ($campaign === null || $this->isStale($campaign)) {
+            return;
+        }
+
+        // Send window: outside it nothing is released — come back when it opens.
+        $opening = $campaigns->sendWindowDeferral($campaign);
+        if ($opening !== null) {
+            static::dispatch($campaign->id, $this->scheduledFor)->delay($opening);
+
             return;
         }
 

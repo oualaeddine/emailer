@@ -34,6 +34,8 @@ Une campagne suit un cycle de vie strict. Les actions du menu ⋯ dépendent du 
 | Envoyée | Tous les destinataires ont été traités. | Rapport, Dupliquer, Envoyer aux nouveaux contacts, Archiver |
 | Annulée | Envoi arrêté définitivement. | Dupliquer, Archiver, Supprimer |
 
+Quand **Approbation requise avant l'envoi** est activée sur une campagne, la colonne Statut ajoute le badge **En attente d'approbation** (ou **Approuvée**) sous le statut pour les brouillons, programmées et suspendues. Un utilisateur disposant du droit **Approuver les campagnes** (Responsable marketing, Administrateur) trouve ⋯ › **Approuver** sur les campagnes en attente (brouillon ou suspendue) ; les autres rôles ne voient pas cette action. Tant qu'une campagne n'est pas approuvée, **Programmer** et **Envoyer maintenant** échouent avec « Cette campagne doit être approuvée avant de pouvoir être envoyée. », et **Reprendre** une campagne suspendue aussi. Modifier une campagne approuvée (objet, contenu, expéditeur, destinataires) retire son approbation.
+
 Deux points importants :
 
 - **Mettre en pause** n'annule rien : les messages déjà confiés au moteur d'envoi partent normalement, seuls les suivants sont retenus. **Reprendre** repart là où l'envoi s'était arrêté.
@@ -59,6 +61,7 @@ Pour une campagne envoyée, **Rapport** (ou un clic sur son nom) ouvre le [rappo
 
 - **La campagne reste en « En cours » très longtemps** : l'envoi passe par vos comptes SMTP, dans le respect de leurs quotas. Si rien ne bouge, vérifiez qu'au moins un compte est disponible dans les [comptes SMTP](help:smtp).
 - **Le nombre de destinataires est inférieur à celui de la liste** : les adresses de la [liste de suppression](help:suppression) et les exclusions sont écartées avant l'envoi.
+- **« Cette campagne doit être approuvée… »** : voir ⋯ › **Approuver** (réservé au droit « Approuver les campagnes »), ou demandez à un Responsable marketing.
 - **Impossible de mettre en pause** : l'action n'apparaît que pour une campagne « En cours ». Une campagne « Programmée » se déprogramme ou s'annule.
 - **Impossible de modifier une campagne** : seules les campagnes Brouillon, Programmée et Suspendue sont modifiables. Dupliquez-la pour repartir de la même base.
 - **Une campagne a disparu de la liste** : elle est peut-être archivée ; ouvrez l'onglet **Archivées** ou réinitialisez les filtres.

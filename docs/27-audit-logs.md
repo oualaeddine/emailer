@@ -9,7 +9,7 @@
 | Category | Actions Logged |
 |---|---|
 | Authentication | `auth.login_succeeded`, `auth.login_failed`, `auth.logout`, `auth.password_changed` |
-| Campaign actions | `campaign.created`, `campaign.updated`, `campaign.sent`, `campaign.paused`, `campaign.resumed`, `campaign.cancelled`, `campaign.approved` |
+| Campaign actions | `campaign.created`, `campaign.updated`, `campaign.sent`, `campaign.paused`, `campaign.resumed`, `campaign.cancelled`, `campaign.approved`, `campaign.approval_reset` |
 | SMTP changes | `smtp_account.created`, `smtp_account.updated` (credentials redacted, see 27.4), `smtp_account.deactivated`, `smtp_account.deleted`, `smtp_account.tested` |
 | Imports | `import.started`, `import.committed`, `import.failed` |
 | Exports | `export.recipients`, `export.report`, `export.audit_log` |

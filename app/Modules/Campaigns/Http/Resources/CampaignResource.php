@@ -71,6 +71,9 @@ class CampaignResource extends JsonResource
             'approval_required' => $this->approval_required,
             'approved_by' => $this->approvedBy?->uuid,
             'approved_at' => self::iso($this->approved_at),
+            'approver' => $this->approvedBy !== null ? ['id' => $this->approvedBy->uuid, 'name' => $this->approvedBy->name] : null,
+            // `not_required` | `pending` (needs a `campaigns.approve` user) | `approved`.
+            'approval_status' => ! $this->approval_required ? 'not_required' : ($this->approved_by === null ? 'pending' : 'approved'),
 
             'tracking_enabled' => $this->tracking_enabled,
             'cloned_from_campaign_id' => $this->clonedFrom?->uuid,

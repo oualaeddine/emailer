@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Button,
     Input,
@@ -21,8 +21,10 @@ import { PageHelp } from '@/Components/Help/PageHelp';
 import { AppShell } from '@/Components/Shell/AppShell';
 import { useText } from '@/Hooks/useText';
 import { fetchCampaignV2, updateCampaignV2 } from '@/Lib/api/campaigns';
+import { hasPermission } from '@/Lib/permissions';
 import type { CampaignChecklist, CampaignSendMode, CampaignV2Detail } from '@/Lib/types/campaigns';
 import { AbTestCard, isAbTestReady } from '@/Components/Campaigns/AbTestCard';
+import { ApprovalBanner, isApprovalPending } from '@/Components/Campaigns/ApprovalBanner';
 import { ChecklistPanel } from '@/Components/Campaigns/ChecklistPanel';
 import { ConfirmSendDialog, allowedSendModes } from '@/Components/Campaigns/ConfirmSendDialog';
 import { DesignCard, isDesignComplete } from '@/Components/Campaigns/DesignCard';
@@ -119,6 +121,9 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
     const toasterId = useId('campaign-setup-toaster');
     const { dispatchToast } = useToastController(toasterId);
 
+    const { props } = usePage<{ auth?: { permissions?: string[] } }>();
+    const canApprove = hasPermission(props.auth?.permissions ?? [], 'campaigns.approve');
+
     const [campaign, setCampaign] = useState<CampaignV2Detail | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [expanded, setExpanded] = useState<CardKey | null>(null);
@@ -131,7 +136,7 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
     const [savingName, setSavingName] = useState(false);
 
     const notify = useCallback(
-        (text: string, intent: 'success' | 'error' = 'success') => {
+        (text: string, intent: 'success' | 'error' | 'warning' = 'success') => {
             dispatchToast(
                 <Toast>
                     <ToastTitle>{text}</ToastTitle>
@@ -158,9 +163,26 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
     }, [campaignId, t]);
 
     function handleSaved(updated: CampaignV2Detail) {
+        // An edit of approved content withdraws the approval (and unschedules a scheduled campaign).
+        const revoked = campaign?.approval_status === 'approved' && updated.approval_status === 'pending';
         setCampaign(updated);
         setChecklistKey((key) => key + 1);
-        notify(t.common.saved);
+        if (revoked) {
+            notify(
+                campaign?.status === 'scheduled' && updated.status === 'draft'
+                    ? t.campaignSetup.approval.revokedUnscheduled
+                    : t.campaignSetup.approval.revoked,
+                'warning',
+            );
+        } else {
+            notify(t.common.saved);
+        }
+    }
+
+    function handleApproved(updated: CampaignV2Detail) {
+        setCampaign(updated);
+        setChecklistKey((key) => key + 1);
+        notify(t.campaignSetup.approval.approved);
     }
 
     async function saveName() {
@@ -214,8 +236,13 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
     const requiredComplete =
         isSenderComplete(campaign) && isSubjectComplete(campaign) && isRecipientsComplete(campaign) && isDesignComplete(campaign) &&
         isAbTestReady(campaign);
+    const approvalPending = isApprovalPending(campaign);
     const canProgram =
-        editable && requiredComplete && allowedSendModes(campaign).length > 0 && (checklist ? checklist.can_schedule : true);
+        editable &&
+        requiredComplete &&
+        !approvalPending &&
+        allowedSendModes(campaign).length > 0 &&
+        (checklist ? checklist.can_schedule : true);
 
     const cardProps = (key: CardKey) => ({
         campaign,
@@ -306,13 +333,18 @@ export default function CampaignSetup({ campaignId }: SetupPageProps) {
                     {canProgram ? (
                         programButton
                     ) : (
-                        <Tooltip content={t.campaignSetup.scheduleDisabled} relationship="description">
+                        <Tooltip
+                            content={approvalPending ? t.campaignSetup.approval.scheduleBlocked : t.campaignSetup.scheduleDisabled}
+                            relationship="description"
+                        >
                             {programButton}
                         </Tooltip>
                     )}
                 </div>
             </header>
             <PageHelp topic="campaign-setup" hideHeaderRow />
+
+            <ApprovalBanner campaign={campaign} canApprove={canApprove} onApproved={handleApproved} />
 
             {campaign.status === 'suspended' && campaign.suspended_reason && (
                 <MessageBar intent="warning" style={{ marginBottom: tokens.spacingVerticalM }}>

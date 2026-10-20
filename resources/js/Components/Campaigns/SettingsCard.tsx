@@ -52,7 +52,13 @@ export function SettingsCard({ campaign, editable, expanded, onExpand, onCollaps
                                 {s.attachment} : {campaign.attachment.filename}
                             </Text>
                         )}
-                        {campaign.requires_approval && <Text size={200}>{s.requiresApproval}</Text>}
+                        {campaign.requires_approval && (
+                            <Text size={200}>
+                                {campaign.approval_status === 'approved'
+                                    ? t.campaignSetup.approval.summaryApproved
+                                    : t.campaignSetup.approval.summaryPending}
+                            </Text>
+                        )}
                     </div>
                 }
                 actionLabel={s.edit}

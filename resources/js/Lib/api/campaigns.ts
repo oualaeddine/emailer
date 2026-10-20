@@ -197,6 +197,13 @@ export async function sendCampaignToNewContacts(
     return response.data.data;
 }
 
+/** POST /campaigns/{id}/approve — needs `campaigns.approve`. */
+export async function approveCampaign(id: string): Promise<CampaignV2Detail> {
+    const response = await axios.post<DataItem<CampaignV2Detail>>(`/api/v1/campaigns/${id}/approve`);
+
+    return response.data.data;
+}
+
 export async function archiveCampaign(id: string): Promise<CampaignV2Detail> {
     const response = await axios.post<DataItem<CampaignV2Detail>>(`/api/v1/campaigns/${id}/archive`);
 

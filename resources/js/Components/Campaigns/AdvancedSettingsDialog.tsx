@@ -453,7 +453,7 @@ export function AdvancedSettingsDialog({ open, campaign, onClose, onSaved }: Adv
 
                         {/* Envoi (our own settings) */}
                         <div className={styles.section}>
-                            <Field label={s.smtpStrategy} validationMessage={errors.smtp_strategy}>
+                            <Field label={s.smtpStrategy} hint={form.smtpStrategy === 'single' ? s.smtpStrategyHelp : undefined} validationMessage={errors.smtp_strategy}>
                                 <RadioGroup
                                     layout="horizontal"
                                     value={form.smtpStrategy}

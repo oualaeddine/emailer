@@ -171,6 +171,9 @@ class AbTestService
             }
 
             $campaign->update($updates);
+
+            // The versions are part of what a reviewer approved.
+            app(\App\Modules\Campaigns\Services\CampaignService::class)->resetApprovalAfterEdit($campaign, ['ab_test']);
         });
 
         return $campaign->fresh();
