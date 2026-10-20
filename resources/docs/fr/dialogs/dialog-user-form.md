@@ -18,6 +18,8 @@ Cette fenêtre sert à la fois à créer un compte et à modifier un compte exis
 
 En modification, l'adresse e-mail disparaît volontairement : c'est l'identifiant permanent du compte. Le mot de passe enregistré n'est jamais réaffiché, mais vous pouvez en définir un nouveau (personne qui l'a oublié, départ d'un poste partagé…). La réinitialisation déconnecte la personne de toutes ses sessions et révoque ses clés API personnelles ; elle est consignée dans le [journal d'audit](help:audit-log).
 
+La double authentification d'une personne se réinitialise depuis le bouton bouclier de sa ligne dans la liste, pas depuis cette fenêtre (voir [Utilisateurs](help:admin-users)).
+
 Pour votre propre compte, ces champs n'apparaissent pas : utilisez **Changer le mot de passe** dans le menu du compte (en haut à droite), qui demande votre mot de passe actuel.
 
 ## Choisir le rôle

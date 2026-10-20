@@ -4,7 +4,6 @@ namespace App\Modules\Identity\Http\Controllers;
 
 use App\Domain\Events\TwoFactorChallengeFailed;
 use App\Http\Controllers\Controller;
-use App\Modules\Identity\Exceptions\TooManyLoginAttemptsException;
 use App\Modules\Identity\Models\User;
 use App\Modules\Identity\Services\AuthService;
 use App\Modules\Identity\Services\TwoFactorAuthenticator;
@@ -54,10 +53,13 @@ class TwoFactorChallengeController extends Controller
             'recovery_code' => ['nullable', 'string'],
         ]);
 
-        $this->assertNotLockedOut($user);
-
         $code = trim((string) ($validated['code'] ?? ''));
         $recoveryCode = trim((string) ($validated['recovery_code'] ?? ''));
+
+        // Errors belong under the field the user is actually looking at.
+        $field = $code === '' && $recoveryCode !== '' ? 'recovery_code' : 'code';
+
+        $this->assertNotLockedOut($user, $field);
 
         $passed = match (true) {
             $code !== '' => $this->authenticator->verify($user->two_factor_secret, $code),
@@ -70,7 +72,7 @@ class TwoFactorChallengeController extends Controller
             TwoFactorChallengeFailed::dispatch($user);
 
             throw ValidationException::withMessages([
-                'code' => ['Le code de vérification est invalide.'],
+                $field => ['Le code de vérification est invalide.'],
             ]);
         }
 
@@ -84,6 +86,16 @@ class TwoFactorChallengeController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    /**
+     * Abandon the pending challenge: forget the parked identity and return to login.
+     */
+    public function cancel(Request $request): RedirectResponse
+    {
+        $request->session()->forget(['two_factor.login.id', 'two_factor.login.remember']);
+
+        return redirect()->route('login');
     }
 
     private function pendingUser(): ?User
@@ -121,12 +133,19 @@ class TwoFactorChallengeController extends Controller
     }
 
     /**
-     * @throws TooManyLoginAttemptsException
+     * A validation-style 429: Inertia gets a redirect back with the message under
+     * the field; a JSON caller still receives HTTP 429 with the errors payload.
+     *
+     * @throws ValidationException
      */
-    private function assertNotLockedOut(User $user): void
+    private function assertNotLockedOut(User $user, string $field): void
     {
         if (RateLimiter::tooManyAttempts($this->throttleKey($user), self::MAX_ATTEMPTS)) {
-            throw new TooManyLoginAttemptsException(RateLimiter::availableIn($this->throttleKey($user)));
+            $seconds = RateLimiter::availableIn($this->throttleKey($user));
+
+            throw ValidationException::withMessages([
+                $field => ["Trop de tentatives de vérification. Réessayez dans {$seconds} secondes."],
+            ])->status(429);
         }
     }
 

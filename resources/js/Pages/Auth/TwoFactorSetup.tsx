@@ -1,17 +1,20 @@
-import { FormEvent } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import {
     Button,
     Card,
     CardHeader,
+    Checkbox,
     Field,
     Input,
+    Link,
     Body1,
     Caption1,
     Title2,
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
+import { ArrowDownloadRegular, CopyRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
 import { BrandMark } from '@/Components/Shell/BrandMark';
 import { PageHelp } from '@/Components/Help/PageHelp';
@@ -74,8 +77,16 @@ const useStyles = makeStyles({
         borderRadius: tokens.borderRadiusMedium,
         fontFamily: tokens.fontFamilyMonospace,
     },
+    codeActions: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: tokens.spacingHorizontalS,
+    },
     submit: {
         width: '100%',
+    },
+    secondary: {
+        textAlign: 'center',
     },
 });
 
@@ -94,6 +105,52 @@ export default function TwoFactorSetup({ confirmed, secret, qrSvg, recoveryCodes
     const styles = useStyles();
     const t = useText();
     const { data, setData, post, processing, errors } = useForm<ConfirmForm>({ code: '' });
+    const codesRef = useRef<HTMLDivElement>(null);
+    const [acknowledged, setAcknowledged] = useState(false);
+    const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
+
+    function selectCodes() {
+        const node = codesRef.current;
+        const selection = window.getSelection();
+        if (!node || !selection) {
+            return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    function handleCopy() {
+        const text = (recoveryCodes ?? []).join('\n');
+        // The clipboard call must start inside the click handler (user gesture).
+        const fallback = () => {
+            selectCodes();
+            setCopyStatus('failed');
+        };
+        try {
+            navigator.clipboard.writeText(text).then(() => setCopyStatus('copied'), fallback);
+        } catch {
+            // Clipboard API unavailable (insecure context): same fallback.
+            fallback();
+        }
+    }
+
+    function handleDownload() {
+        const content = `${t.auth.twoFactor.codesFileHeader}\n\n${(recoveryCodes ?? []).join('\n')}\n`;
+        const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = t.auth.twoFactor.codesFileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    function handleLogout() {
+        router.post('/logout');
+    }
 
     function handleSubmit(event: FormEvent) {
         event.preventDefault();
@@ -115,14 +172,32 @@ export default function TwoFactorSetup({ confirmed, secret, qrSvg, recoveryCodes
                         <CardHeader header={<Title2>{t.auth.twoFactor.recoveryCodesTitle}</Title2>} />
                         <div className={styles.body}>
                             <Body1 className={styles.intro}>{t.auth.twoFactor.recoveryCodesIntro}</Body1>
-                            <div className={styles.codes}>
+                            <div className={styles.codes} ref={codesRef}>
                                 {recoveryCodes!.map((code) => (
                                     <span key={code}>{code}</span>
                                 ))}
                             </div>
+                            <div className={styles.codeActions}>
+                                <Button icon={<CopyRegular />} onClick={handleCopy}>
+                                    {t.auth.twoFactor.copyCodes}
+                                </Button>
+                                <Button icon={<ArrowDownloadRegular />} onClick={handleDownload}>
+                                    {t.auth.twoFactor.downloadCodes}
+                                </Button>
+                            </div>
+                            <Caption1 className={styles.intro} role="status" aria-live="polite">
+                                {copyStatus === 'copied' && t.auth.twoFactor.codesCopied}
+                                {copyStatus === 'failed' && t.auth.twoFactor.codesCopyFailed}
+                            </Caption1>
+                            <Checkbox
+                                checked={acknowledged}
+                                onChange={(_, checkboxData) => setAcknowledged(checkboxData.checked === true)}
+                                label={t.auth.twoFactor.recoveryCodesAcknowledge}
+                            />
                             <Button
                                 appearance="primary"
                                 className={styles.submit}
+                                disabled={!acknowledged}
                                 onClick={() => router.visit('/dashboard')}
                             >
                                 {t.auth.twoFactor.recoveryCodesContinue}
@@ -167,6 +242,11 @@ export default function TwoFactorSetup({ confirmed, secret, qrSvg, recoveryCodes
                                     {t.auth.twoFactor.confirm}
                                 </Button>
                             </form>
+                            <div className={styles.secondary}>
+                                <Link as="button" type="button" onClick={handleLogout}>
+                                    {t.auth.twoFactor.logout}
+                                </Link>
+                            </div>
                         </div>
                     </>
                 )}

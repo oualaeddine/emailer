@@ -33,6 +33,11 @@ class UserPolicy
         return $user->hasPermission(PermissionName::UsersManage->value);
     }
 
+    public function resetTwoFactor(User $user, User $target): bool
+    {
+        return $user->hasPermission(PermissionName::UsersManage->value);
+    }
+
     public function delete(User $user, User $target): bool
     {
         return $user->hasPermission(PermissionName::UsersManage->value)

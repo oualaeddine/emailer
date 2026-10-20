@@ -978,7 +978,7 @@ export const pageGuides: Record<string, PageGuideDefinition> = {
             {
                 step: 3,
                 title: 'Noter les codes de récupération',
-                description: 'Les 8 codes à usage unique ne sont affichés qu’une seule fois : conservez-les en lieu sûr.',
+                description: 'Les 8 codes à usage unique ne sont affichés qu’une seule fois : copiez-les ou téléchargez-les, cochez « J’ai conservé mes codes en lieu sûr » puis continuez.',
             },
             {
                 step: 4,
