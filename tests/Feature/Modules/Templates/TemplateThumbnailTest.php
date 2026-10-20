@@ -115,4 +115,54 @@ class TemplateThumbnailTest extends TestCase
         $this->assertNull($service->renderFor('template', 999999));
         $this->assertNull($service->renderFor('saved_section', 1));
     }
+
+    public function test_html_goes_to_the_renderer_on_stdin_not_as_an_argument(): void
+    {
+        if (! is_dir(base_path('node_modules/playwright'))) {
+            $this->markTestSkipped('playwright not installed');
+        }
+        $service = new class extends TemplateThumbnailService
+        {
+            public array $command = [];
+
+            public string $stdin = '';
+
+            protected function execute(array $command, string $stdin = ''): bool
+            {
+                $this->command = $command;
+                $this->stdin = $stdin;
+                file_put_contents(end($command), 'PNGDATA');
+
+                return true;
+            }
+        };
+
+        $html = '<img src="http://169.254.169.254/latest"><p>$(rm -rf /)</p>';
+        $this->assertSame('PNGDATA', $service->renderHtml($html));
+        $this->assertSame($html, $service->stdin);
+        $this->assertSame('-', $service->command[2]);
+        $this->assertNotContains($html, $service->command);
+    }
+
+    public function test_renderer_url_policy_blocks_private_hosts_and_allows_public_https(): void
+    {
+        $node = (new \Symfony\Component\Process\ExecutableFinder)->find('node');
+        if ($node === null) {
+            $this->markTestSkipped('node not available');
+        }
+        $script = <<<'JS'
+        import { isAllowedUrl } from process.argv[1];
+        const resolver = async (h) => h === 'evil.test' ? [{ address: '10.0.0.5' }] : [{ address: '93.184.216.34' }];
+        const urls = ['data:image/png;base64,AA', 'https://example.com/a.png', 'http://example.com/a.png', 'https://127.0.0.1/', 'https://169.254.169.254/latest/meta-data', 'https://[::1]/', 'https://evil.test/x', 'https://localhost/', 'file:///etc/passwd'];
+        const out = [];
+        for (const u of urls) out.push(await isAllowedUrl(u, resolver));
+        console.log(JSON.stringify(out));
+        JS;
+        $script = str_replace('process.argv[1]', json_encode('file://'.base_path('scripts/thumbnail.mjs')), $script);
+        $process = new \Symfony\Component\Process\Process([$node, '--input-type=module', '-e', $script]);
+        $process->run();
+
+        $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+        $this->assertSame([true, true, false, false, false, false, false, false, false], json_decode(trim($process->getOutput()), true));
+    }
 }

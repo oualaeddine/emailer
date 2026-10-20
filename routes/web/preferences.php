@@ -14,7 +14,11 @@ use Inertia\Inertia;
 */
 
 Route::middleware('signed')->group(function (): void {
-    Route::get('preferences/{token}/confirm', [PreferencesController::class, 'confirm'])->name('preferences.confirm');
+    // GET only renders a landing page (mail scanners prefetch links); the POST confirms.
+    Route::get('preferences/{token}/confirm', [PreferencesController::class, 'confirmLanding'])->name('preferences.confirm');
+    Route::post('preferences/{token}/confirm', [PreferencesController::class, 'confirm'])
+        ->middleware('throttle:10,1')
+        ->name('preferences.confirm.store');
     Route::get('preferences/{token}', [PreferencesController::class, 'show'])->name('preferences.show');
     Route::post('preferences/{token}', [PreferencesController::class, 'update'])
         ->middleware('throttle:10,1')

@@ -93,4 +93,14 @@ class TemplateGalleryTest extends TestCase
 
         $this->actingAs($this->manager)->getJson('/api/v1/templates?is_gallery=0&scope=marketing')->assertJsonCount(1, 'data');
     }
+
+    public function test_category_counts_use_portable_aliases(): void
+    {
+        Template::factory()->count(2)->create(['is_gallery' => true, 'gallery_category' => 'newsletter']);
+        Template::factory()->create(['is_gallery' => true, 'gallery_category' => 'promo']);
+
+        $counts = app(\App\Modules\Templates\Services\TemplateGalleryService::class)->categoryCounts();
+
+        $this->assertSame([['key' => 'newsletter', 'count' => 2], ['key' => 'promo', 'count' => 1]], $counts);
+    }
 }

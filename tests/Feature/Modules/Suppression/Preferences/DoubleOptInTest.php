@@ -52,21 +52,41 @@ class DoubleOptInTest extends TestCase
         $this->assertStringContainsString('https://exemple.dz/preferences/x/confirm', $html);
     }
 
-    public function test_confirm_sets_opt_in_columns_once(): void
+    public function test_get_confirm_is_a_landing_page_that_does_not_confirm(): void
     {
         $recipient = Recipient::factory()->create(['email' => 'nadia@exemple.dz']);
         $url = app(PreferenceTokenService::class)->confirmUrl($recipient->email);
 
-        $this->get($url)->assertOk()->assertSee('confirmée');
+        $this->get($url)->assertOk()->assertSee('Confirmer mon inscription')->assertSee('method="POST"', false);
+
+        $this->assertNull($recipient->fresh()->opt_in_at);
+    }
+
+    public function test_confirm_sets_opt_in_columns_once(): void
+    {
+        $recipient = Recipient::factory()->create(['email' => 'nadia@exemple.dz']);
+        $token = \App\Modules\Suppression\Support\UnsubscribeUrlGenerator::encode($recipient->email);
+        $post = URL::temporarySignedRoute('preferences.confirm.store', now()->addHour(), ['token' => $token]);
+
+        $this->post($post)->assertOk()->assertSee('confirmée');
 
         $recipient->refresh();
         $this->assertNotNull($recipient->opt_in_at);
         $this->assertSame('double_opt_in', $recipient->opt_in_source);
         $first = $recipient->opt_in_at;
 
-        $this->travel(1)->hours();
-        $this->get($url)->assertOk();
+        $this->travel(1)->minutes();
+        $this->post($post)->assertOk();
         $this->assertEquals($first, $recipient->fresh()->opt_in_at);
+    }
+
+    public function test_unsigned_post_confirm_is_forbidden(): void
+    {
+        $recipient = Recipient::factory()->create(['email' => 'nadia@exemple.dz']);
+        $token = \App\Modules\Suppression\Support\UnsubscribeUrlGenerator::encode($recipient->email);
+
+        $this->post("/preferences/{$token}/confirm")->assertForbidden();
+        $this->assertNull($recipient->fresh()->opt_in_at);
     }
 
     public function test_confirm_rejects_tampered_expired_and_unknown_links(): void

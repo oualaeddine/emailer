@@ -28,10 +28,26 @@ class MjmlCompiler
 
     public const PARSE_FAILED = 'Le code MJML est invalide et ne peut pas être compilé.';
 
+    public const INCLUDE_FORBIDDEN = 'La balise <mj-include> n’est pas autorisée.';
+
+    public static function containsInclude(string $mjml): bool
+    {
+        return preg_match('/<\s*mj-include\b/i', $mjml) === 1;
+    }
+
     public function __construct(private readonly HtmlSanitizer $sanitizer) {}
 
     public function compile(string $mjml): CompiledMjml
     {
+        // mj-include would let the Node process read arbitrary server files.
+        if (self::containsInclude($mjml)) {
+            return new CompiledMjml('', [[
+                'line' => null,
+                'message' => self::INCLUDE_FORBIDDEN,
+                'tag_name' => 'mj-include',
+            ]]);
+        }
+
         try {
             $result = $this->convert($mjml);
         } catch (CouldNotConvertMjml $e) {
@@ -81,6 +97,7 @@ class MjmlCompiler
 
         return Mjml::new()
             ->keepComments()
+            ->ignoreIncludes()
             ->convert($mjml);
     }
 }

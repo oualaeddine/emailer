@@ -175,6 +175,8 @@ class TemplateService
             'html_content' => $template->html_content,
             'created_by' => $author->id,
             'change_note' => $changeNote,
+            'design_json' => $template->design_json,
+            'editor_type' => $template->editor_type,
         ]);
     }
 
@@ -197,12 +199,22 @@ class TemplateService
      */
     public function restoreVersion(Template $template, TemplateVersion $version, User $author): Template
     {
-        return $this->update(
-            $template,
-            $author,
-            $version->html_content,
-            'Restauré depuis la version '.$version->version_number,
-        );
+        $fresh = DB::transaction(function () use ($template, $version, $author): Template {
+            // A version without a design snapshot (pre-snapshot or plain HTML) restores as an HTML template.
+            $hasDesign = $version->design_json !== null;
+            $template->update([
+                'html_content' => $version->html_content,
+                'design_json' => $hasDesign ? $version->design_json : null,
+                'editor_type' => $hasDesign ? ($version->editor_type ?: $template->editor_type) : 'html',
+            ]);
+            $this->saveVersion($template, $author, 'Restauré depuis la version '.$version->version_number);
+
+            return $template->fresh();
+        });
+
+        TemplateSaved::dispatch($fresh->id);
+
+        return $fresh;
     }
 
     /**

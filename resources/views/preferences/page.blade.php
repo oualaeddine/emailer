@@ -71,7 +71,28 @@
         @if (! empty($content['body']))
             <p>{{ $content['body'] }}</p>
         @endif
-        <button type="button" disabled>{{ $content['button_label'] }}</button>
+        @if (! empty($action))
+            <p class="muted">{{ $email ?? '' }}</p>
+            <form method="POST" action="{{ $action }}">
+                @csrf
+                @if (! empty($content['show_reason_survey']) && ! empty($content['reasons']))
+                    @foreach ($content['reasons'] as $reason)
+                        <label class="row"><input type="radio" name="reason" value="{{ $reason }}"> {{ $reason }}</label>
+                    @endforeach
+                    <label class="field">Précisions (facultatif)
+                        <input type="text" name="reason_other" maxlength="500">
+                    </label>
+                @endif
+                <button type="submit">{{ $content['button_label'] }}</button>
+            </form>
+        @else
+            <button type="button" disabled>{{ $content['button_label'] }}</button>
+        @endif
+    @elseif ($mode === 'confirm')
+        <form method="POST" action="{{ $action }}">
+            @csrf
+            <button type="submit">{{ $content['button_label'] }}</button>
+        </form>
     @endif
 </main>
 </body>
