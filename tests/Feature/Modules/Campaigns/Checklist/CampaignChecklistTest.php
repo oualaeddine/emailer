@@ -227,7 +227,7 @@ class CampaignChecklistTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.campaign_id', $c->uuid)
             ->assertJsonPath('data.status', 'blocking')
-            ->assertJsonCount(9, 'data.items')
+            ->assertJsonCount(10, 'data.items')
             ->assertJsonPath('data.items.0.key', 'sender_verified');
 
         $this->app['auth']->forgetGuards();
@@ -243,8 +243,8 @@ class CampaignChecklistTest extends TestCase
 
         $this->actingAs($operator)->postJson("/api/v1/campaigns/{$c->uuid}/checklist/links")
             ->assertStatus(202)
-            ->assertJsonPath('data.items.6.key', 'links_valid')
-            ->assertJsonPath('data.items.6.status', 'pending');
+            ->assertJsonPath('data.items.7.key', 'links_valid')
+            ->assertJsonPath('data.items.7.status', 'pending');
 
         Queue::assertPushed(CheckCampaignLinksJob::class, fn ($j) => $j->campaignId === $c->id);
     }

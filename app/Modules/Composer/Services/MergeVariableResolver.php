@@ -25,6 +25,15 @@ use Throwable;
  */
 class MergeVariableResolver
 {
+    /** Extra variables supplied by the rendering pipeline (MergeTagsStage), lower-cased. */
+    public const EXTRA_VARIABLES = ['mirror', 'update_profile', 'campaign.name', 'campaign.subject', 'sender.name', 'sender.email'];
+
+    private const SYSTEM_PATHS = ['unsubscribe_url', 'unsubscribe', 'current_date'];
+
+    private const RECIPIENT_PATHS = ['recipient.first_name', 'recipient.last_name', 'recipient.email', 'recipient.company_name'];
+
+    private const CONTACT_ALIASES = ['PRENOM', 'NOM', 'EMAIL', 'SOCIETE'];
+
     private const PATTERN = '/\{\{\s*([a-zA-Z0-9_.]+)\s*(?:\|\s*([^}]*?))?\s*\}\}/';
 
     /** @var Collection<string, ContactAttribute>|null */
@@ -220,6 +229,54 @@ class MergeVariableResolver
         }
 
         return $this->definitions;
+    }
+
+    /**
+     * Merge tags (as written, de-duplicated) that the renderer would not substitute: same PATTERN
+     * and same known-variable logic as {@see resolvePath()}. `{{ params.* }}` is transactional-only,
+     * so it is unknown here. `{{ contact.X }}` is known when X is an attribute definition or a
+     * built-in alias; free-form legacy custom fields cannot be verified statically.
+     *
+     * @return list<string>
+     */
+    public function unknownTags(string ...$contents): array
+    {
+        $unknown = [];
+
+        foreach ($contents as $content) {
+            if ($content === '') {
+                continue;
+            }
+            preg_match_all(self::PATTERN, $content, $matches, PREG_SET_ORDER);
+            foreach ($matches as $m) {
+                if (! $this->isKnownPath($m[1])) {
+                    $unknown[$m[0]] = true;
+                }
+            }
+        }
+
+        return array_map('strval', array_keys($unknown));
+    }
+
+    private function isKnownPath(string $path): bool
+    {
+        if (in_array(strtolower($path), self::EXTRA_VARIABLES, true)
+            || in_array($path, self::SYSTEM_PATHS, true)
+            || in_array($path, self::RECIPIENT_PATHS, true)) {
+            return true;
+        }
+
+        if (str_starts_with($path, 'recipient.custom_fields.')) {
+            return strlen($path) > strlen('recipient.custom_fields.');
+        }
+
+        if (str_starts_with(strtolower($path), 'contact.')) {
+            $upper = strtoupper(substr($path, 8));
+
+            return $upper !== '' && (in_array($upper, self::CONTACT_ALIASES, true) || $this->definitions()->has($upper));
+        }
+
+        return false;
     }
 
     /**
