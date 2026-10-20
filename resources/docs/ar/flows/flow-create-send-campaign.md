@@ -117,11 +117,16 @@
 - **Page de désinscription**: **Page par défaut** أو **Page personnalisée** (انظروا [صفحات إلغاء الاشتراك](help:unsubscribe-pages))؛
 - **Tags** و**Dossier** لإيجاد الحملة بسهولة في القائمة؛
 - **Suivi Google Analytics (UTM)**: يضيف **Activer le suivi UTM** معاملات `utm_*` إلى الروابط؛
-- **Suivi des ouvertures et des clics** (مفعّل افتراضياً) و**Lien miroir** («voir dans le navigateur»).
+- **Suivi des ouvertures et des clics** (مفعّل افتراضياً) و**Lien miroir** («voir dans le navigateur»)؛
+- **Stratégie SMTP**: **Rotation automatique** (افتراضي) أو **Compte unique** (كل الرسائل عبر الحساب المختار؛ وإن كان غير متاح ينتظر الإرسال بدل الانتقال إلى حساب آخر)؛
+- **Plage horaire d'envoi**: الأيام والساعات (بحسب المنطقة الزمنية للحملة) التي يجوز فيها خروج الرسائل؛ خارج الفترة يؤجَّل الإرسال إلى الافتتاح التالي؛
+- **Approbation requise avant l'envoi**: انظروا «الموافقة» أدناه.
 
 وتخدم بطاقة **Test A/B** (زر **Activer le test A/B**) مقارنة نسختين: العنصر المختبَر (**Objet** أو **Contenu**)، وحجم العيّنة (من 5 إلى 50 % من المستلمين)، ومعيار الفائز (معدل الفتح أو النقر)، ومدة الاختبار، والإرسال التلقائي للنسخة الفائزة إلى بقية الجمهور. ويجب أن تكون مواضيع (أو محتويات) النسختين A وB مختلفة.
 
 في الإرسال الأول يمكنكم ترك بقية الإعدادات كما هي.
+
+**الموافقة.** مع **Approbation requise avant l'envoi** تعرض الصفحة شريط **En attente d'approbation**، وتضيف قائمة التحقق بند **Approbation**، ويبقى **Programmer** معطّلًا. ينقر المستخدم الذي يملك صلاحية **Approuver les campagnes** (مسؤول التسويق، المدير) على **Approuver** في الشريط، أو على ⋯ › **Approuver** في قائمة الحملات؛ فيصبح **Programmer** متاحًا. وكل تعديل لاحق للموضوع أو المحتوى أو المرسل أو المستلمين يسحب الموافقة (وتعود الحملة المجدولة إلى مسودة): يجب الموافقة عليها من جديد. وتُسجَّل الموافقات وحالات السحب في سجل التدقيق.
 
 ## 8. الاختبار قبل الإرسال
 
@@ -249,7 +254,9 @@
 - **«La campagne doit avoir un objet et un contenu avant l'envoi d'un test.»**: أكملوا الموضوع والتصميم قبل الاختبار.
 - **«Vous pouvez saisir au maximum 5 adresses.»** / **«Limite de 10 envois de test par heure atteinte pour cette campagne.»**: قلّصوا القائمة، أو انتظروا الساعة التالية.
 - **«La campagne ne peut pas être programmée : … »**: ظهر بند مانع بين فتح النافذة والتأكيد؛ أغلقوا النافذة وأعيدوا قراءة قائمة التحقق.
-- **«Cette campagne doit être approuvée avant de pouvoir être envoyée.»**: الخيار **Approbation requise avant l'envoi** مفعّل في **Paramètres supplémentaires**. ألغوا تأشيره إن لم تكن لديكم دورة موافقة.
+- **«Cette campagne doit être approuvée avant de pouvoir être envoyée.»** / **«En attente d'approbation»**: الخيار **Approbation requise avant l'envoi** مفعّل في **Paramètres supplémentaires** ولم يوافق أحد بعد على الحملة (أو سُحبت الموافقة بسبب تعديل). اطلبوا من مسؤول التسويق أو المدير الموافقة عليها (زر **Approuver**)، أو ألغوا تأشير الخيار إن لم تكن لديكم دورة موافقة.
+- **لا يخرج الإرسال إلا صباحًا / في أيام الأسبوع**: **Plage horaire d'envoi** مفعّلة. خارج الفترة تُحتجز الرسائل حتى الافتتاح التالي؛ عدّلوا الفترة في Paramètres supplémentaires (حملة مسودة أو مجدولة أو معلّقة) عند الحاجة.
+- **«Choisissez le compte SMTP unique à utiliser…»**: اختيرت استراتيجية **Compte unique** دون حساب. اختاروا حسابًا أو عودوا إلى **Rotation automatique**.
 - **«Seules les campagnes en brouillon peuvent être programmées.»**: سبق أن أُطلقت الحملة أو جُدولت (مثلاً من تبويب آخر). أعيدوا تحميل القائمة.
 - **يبقى Programmer معطّلاً رغم أن كل شيء أخضر**: اختبار A/B مفعّل لكنه غير مكتمل. افتحوا بطاقة **Test A/B** وصحّحوها («Les objets des versions A et B doivent être différents.»، «Les versions A et B du test A/B sont obligatoires.»)، أو عطّلوا الاختبار.
 - **تبقى الحملة «En cours» دون أن تنطلق أي رسالة**: لا يتوفر أي حساب SMTP (معطّل أو استُنفدت حصته). تُعاد محاولة الرسائل كل 5 دقائق؛ تحققوا من [حسابات SMTP](help:smtp).

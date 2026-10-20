@@ -12,7 +12,24 @@ Le nom de la campagne se renomme en cliquant sur le crayon. **Enregistrer et qui
 2. **Objet** : saisissez l'objet et le texte d'aperçu (préheader).
 3. **Destinataires** : sélectionnez les [listes](help:lists) et [segments](help:segments) à cibler, puis ceux à exclure ; le nombre de destinataires se met à jour en direct.
 4. **Design** : choisissez un [modèle](help:templates) puis ouvrez l'[éditeur](help:campaign-design).
-5. **Paramètres supplémentaires** : page de [désinscription](help:unsubscribe-pages), tags, suivi UTM, pièce jointe.
+5. **Paramètres supplémentaires** : page de [désinscription](help:unsubscribe-pages), tags, suivi UTM, pièce jointe, stratégie SMTP, plage horaire d'envoi et approbation (voir ci-dessous).
+
+## Stratégie SMTP et plage horaire d'envoi
+
+- **Stratégie SMTP** : **Rotation automatique** (par défaut) répartit les messages entre vos comptes SMTP disponibles. **Compte unique** impose un compte pour toute la campagne : si ce compte est indisponible (désactivé, quota atteint), l'envoi attend, il ne bascule jamais sur un autre compte. Le compte doit être choisi pour pouvoir programmer.
+- **Plage horaire d'envoi** : cochez-la pour n'envoyer que certains jours, entre une heure de début et une heure de fin, dans le fuseau horaire de la campagne (Alger par défaut). En dehors de la plage, rien ne part : l'envoi reprend automatiquement à la prochaine ouverture (par exemple lundi 08:00). La campagne reste « Programmée » ou « En cours » pendant l'attente.
+
+## Approbation avant l'envoi
+
+Si **Approbation requise avant l'envoi** est activée dans Paramètres supplémentaires :
+
+- un bandeau **En attente d'approbation** s'affiche en haut de la page, la liste de vérification contient un point **Approbation** à corriger, et **Programmer** reste grisé (l'info-bulle l'explique) ;
+- un utilisateur disposant du droit **Approuver les campagnes** (Responsable marketing, Administrateur) voit le bouton **Approuver** dans le bandeau ; dans la liste des [campagnes](help:campaigns), le même droit donne ⋯ › **Approuver**. Les autres rôles voient le bandeau mais ne peuvent pas approuver : demandez à un responsable ;
+- une fois approuvée, le bandeau indique qui a approuvé et quand, et **Programmer** se dégrise ;
+- **modifier l'objet, le texte d'aperçu, l'expéditeur, le contenu, les destinataires ou le test A/B retire l'approbation** : la campagne doit être approuvée à nouveau. Une campagne déjà programmée repasse en Brouillon. Les autres réglages (nom, tags, suivi…) ne retirent rien ;
+- chaque approbation, et chaque retrait d'approbation, est inscrit dans le [journal d'audit](help:audit-log) (`campaign.approved`, `campaign.approval_reset`).
+
+Il n'existe pas de refus motivé : si la campagne ne convient pas, demandez des corrections à son auteur, qui la modifie puis la soumet à nouveau.
 
 ## Tester avant d'envoyer
 

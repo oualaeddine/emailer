@@ -28,18 +28,19 @@ class CampaignChecklistService implements CampaignChecklistContract
     {
         $html = (string) $campaign->html_body;
 
-        return new CampaignChecklist($campaign->uuid, [
+        return new CampaignChecklist($campaign->uuid, array_values(array_filter([
             $this->senderVerified($campaign),
             $this->recipientsSelected($campaign),
             $this->subjectFilled($campaign),
             $this->designReady($html),
             $this->mergeTags($campaign),
             $this->unsubscribeLink($html),
+            $this->approval($campaign),
             $this->testSent($campaign),
             $this->linksValid($campaign),
             $this->emailSize($html),
             $this->spamScore($campaign),
-        ], Carbon::now());
+        ])), Carbon::now());
     }
 
     public function blockingFailures(Campaign $campaign): array
@@ -122,6 +123,22 @@ class CampaignChecklistService implements CampaignChecklistContract
         return $present
             ? new ChecklistItem('unsubscribe_link', ChecklistItem::OK, true, 'Lien de désinscription présent')
             : new ChecklistItem('unsubscribe_link', ChecklistItem::ERROR, true, 'Le design ne contient pas de lien de désinscription');
+    }
+
+    /**
+     * Only listed when the campaign requires approval (`approval_required`);
+     * a withdrawn / missing approval blocks scheduling until a user holding
+     * `campaigns.approve` approves.
+     */
+    private function approval(Campaign $campaign): ?ChecklistItem
+    {
+        if (! $campaign->approval_required) {
+            return null;
+        }
+
+        return $campaign->approved_by !== null
+            ? new ChecklistItem('approval', ChecklistItem::OK, true, 'Campagne approuvée')
+            : new ChecklistItem('approval', ChecklistItem::ERROR, true, 'En attente d’approbation par un responsable marketing');
     }
 
     private function testSent(Campaign $campaign): ChecklistItem

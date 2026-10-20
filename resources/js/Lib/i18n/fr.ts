@@ -940,6 +940,17 @@ export const fr = {
             classic: 'E-mail',
             ab_test: 'Test A/B',
         },
+        // gap-approval — approbation avant envoi (liste des campagnes).
+        approvalStatus: {
+            not_required: 'Sans approbation',
+            pending: 'En attente d’approbation',
+            approved: 'Approuvée',
+        },
+        approve: {
+            action: 'Approuver',
+            done: 'Campagne approuvée.',
+            confirm: 'Approuver cette campagne ? Elle pourra ensuite être programmée ou envoyée.',
+        },
         suspendedReasons: {
             quota_exhausted: 'Quota d’envoi atteint',
             smtp_unavailable: 'Aucun compte SMTP disponible',
@@ -1126,7 +1137,10 @@ export const fr = {
             smtpStrategy: 'Stratégie SMTP',
             smtpAccount: 'Compte SMTP',
             sendWindow: 'Plage horaire d’envoi',
-            sendWindowHelp: 'Les e-mails ne partent que pendant ces heures.',
+            sendWindowHelp:
+                'Les e-mails ne partent que ces jours-là, entre ces heures (fuseau horaire de la campagne). Hors plage, l’envoi est reporté à la prochaine ouverture.',
+            smtpStrategyHelp:
+                'Compte unique : tous les e-mails de la campagne partent par ce compte. S’il est indisponible ou a atteint son quota, l’envoi attend sans basculer sur un autre compte.',
             sendWindowDays: 'Jours',
             sendWindowStart: 'Début',
             sendWindowEnd: 'Fin',
@@ -1149,6 +1163,25 @@ export const fr = {
             4: 'Jeudi',
             5: 'Vendredi',
             6: 'Samedi',
+        },
+        // gap-approval — bandeau d’approbation de la page de configuration.
+        approval: {
+            pendingTitle: 'En attente d’approbation',
+            pendingCanApprove:
+                'Cette campagne doit être approuvée avant de pouvoir être programmée ou envoyée. Vous pouvez l’approuver après avoir relu l’objet, le contenu et les destinataires.',
+            pendingCannotApprove:
+                'Cette campagne doit être approuvée avant de pouvoir être programmée ou envoyée. Demandez à un responsable marketing (droit « Approuver les campagnes ») de l’approuver.',
+            approvedTitle: 'Campagne approuvée',
+            approvedBy: 'Approuvée par %s le %s.',
+            approvedNote: 'Modifier l’objet, le contenu, l’expéditeur ou les destinataires retire l’approbation.',
+            approve: 'Approuver',
+            approving: 'Approbation…',
+            approved: 'Campagne approuvée. Vous pouvez maintenant la programmer.',
+            scheduleBlocked: 'Cette campagne doit d’abord être approuvée par un responsable marketing.',
+            revoked: 'L’approbation a été retirée : la campagne modifiée doit être approuvée à nouveau.',
+            revokedUnscheduled: 'L’approbation a été retirée et la campagne est revenue en brouillon : elle doit être approuvée à nouveau avant d’être reprogrammée.',
+            summaryPending: 'Approbation requise — en attente',
+            summaryApproved: 'Approbation requise — approuvée',
         },
         previewPanel: {
             title: 'Aperçu & test',
@@ -1186,6 +1219,7 @@ export const fr = {
             links_valid: 'Liens valides',
             email_size: 'Taille de l’e-mail',
             spam_score: 'Score de spam',
+            approval: 'Approbation',
         },
         checklistItemStatus: {
             ok: 'OK',

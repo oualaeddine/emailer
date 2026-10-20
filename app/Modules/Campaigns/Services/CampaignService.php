@@ -5,6 +5,7 @@ namespace App\Modules\Campaigns\Services;
 use App\Domain\Enums\MessageStatus;
 use App\Domain\Enums\RecipientSource;
 use App\Domain\Enums\RecipientStatus;
+use App\Modules\Audit\Services\AuditLogger;
 use App\Modules\Campaigns\AbTesting\Services\AbTestService;
 use App\Modules\Campaigns\Contracts\AudienceResolver as AudienceResolverContract;
 use App\Modules\Campaigns\Enums\AudienceMode;
@@ -12,6 +13,7 @@ use App\Modules\Campaigns\Enums\AudienceTargetType;
 use App\Modules\Campaigns\Enums\CampaignEditorType;
 use App\Modules\Campaigns\Enums\CampaignRecipientStatus;
 use App\Modules\Campaigns\Enums\CampaignSendMode;
+use App\Modules\Campaigns\Enums\CampaignSmtpStrategy;
 use App\Modules\Campaigns\Enums\CampaignStatus;
 use App\Modules\Campaigns\Enums\CampaignSuspendedReason;
 use App\Modules\Campaigns\Events\CampaignDesignSaved;
@@ -25,6 +27,7 @@ use App\Modules\Campaigns\Jobs\DispatchCampaignJob;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Campaigns\Models\CampaignAudience;
 use App\Modules\Campaigns\Models\CampaignRecipient;
+use App\Modules\Campaigns\Support\SendWindow;
 use App\Modules\DeliveryEngine\Jobs\SendEmailJob;
 use App\Modules\DeliveryEngine\Rendering\RenderingPipeline;
 use App\Modules\Identity\Models\User;
@@ -73,9 +76,26 @@ class CampaignService
      */
     public const AB_TEST_EXCLUDED_MODES = ['best_time', 'batches'];
 
+    /** docs/27-audit-logs.md §27.3 — `campaign.approved`; the reset has its own action. */
+    public const AUDIT_APPROVED = 'campaign.approved';
+
+    public const AUDIT_APPROVAL_RESET = 'campaign.approval_reset';
+
+    /**
+     * Attributes whose change invalidates an approval: what the reviewer saw
+     * (sender, subject, content) and who receives it (audience, see
+     * {@see self::audienceSignature()}).
+     *
+     * @var list<string>
+     */
+    public const APPROVAL_SENSITIVE_ATTRIBUTES = [
+        'subject', 'preview_text', 'html_body', 'design_json', 'sender_id', 'reply_to', 'to_field', 'attachment_id',
+    ];
+
     public function __construct(
         private readonly RenderingPipeline $rendering,
         private readonly AudienceResolverContract $audience,
+        private readonly AuditLogger $audit,
     ) {}
 
     // ---------------------------------------------------------------------
@@ -132,7 +152,11 @@ class CampaignService
                 $data['segment_id'] = null;
             }
 
-            $campaign->update($data);
+            $audienceBefore = $this->audienceSignature($campaign);
+
+            $campaign->fill($data);
+            $changed = $this->approvalRelevantChanges($campaign);
+            $campaign->save();
 
             if (is_array($audience)) {
                 $this->syncAudience($campaign, $audience);
@@ -140,6 +164,11 @@ class CampaignService
                 $this->syncLegacyAudience($campaign->fresh());
             }
 
+            if ($this->audienceSignature($campaign) !== $audienceBefore) {
+                $changed[] = 'audience';
+            }
+
+            $this->resetApprovalAfterEdit($campaign, $changed);
             $this->assertStillReady($campaign);
         });
 
@@ -204,12 +233,15 @@ class CampaignService
         $this->assertEditable($campaign);
 
         DB::transaction(function () use ($campaign, $editorType, $htmlBody, $designJson): void {
-            $campaign->update([
+            $campaign->fill([
                 'editor_type' => $editorType,
                 'html_body' => $htmlBody,
                 'design_json' => $editorType === CampaignEditorType::Dnd->value ? $designJson : null,
             ]);
+            $changed = $this->approvalRelevantChanges($campaign);
+            $campaign->save();
 
+            $this->resetApprovalAfterEdit($campaign, $changed);
             $this->assertStillReady($campaign);
         });
 
@@ -234,8 +266,11 @@ class CampaignService
         };
 
         DB::transaction(function () use ($campaign, $attributes): void {
-            $campaign->update($attributes);
+            $campaign->fill($attributes);
+            $changed = $this->approvalRelevantChanges($campaign);
+            $campaign->save();
 
+            $this->resetApprovalAfterEdit($campaign, $changed);
             $this->assertStillReady($campaign);
         });
 
@@ -373,6 +408,8 @@ class CampaignService
             throw new InvalidCampaignTransitionException($campaign->statusEnum(), CampaignStatus::Running);
         }
 
+        $this->assertApproved($campaign);
+
         $this->transition($campaign, CampaignStatus::Running);
         $campaign->update(['suspended_reason' => null]);
 
@@ -411,15 +448,36 @@ class CampaignService
     }
 
     /**
-     * §15.4 Review Before Sending — records approval.
+     * §15.4 Review Before Sending — records approval (`campaign.approved`
+     * audit entry). Possible while the campaign can still be sent: draft, or
+     * suspended (an edit of a suspended campaign withdraws its approval, which
+     * {@see self::resume()} then requires again). Approving an already
+     * approved campaign changes nothing.
      */
     public function approve(Campaign $campaign, User $approver): Campaign
     {
-        if ($campaign->status !== CampaignStatus::Draft->value) {
+        $this->assertNotArchived($campaign);
+
+        if (! in_array($campaign->status, [CampaignStatus::Draft->value, CampaignStatus::Suspended->value], true)) {
             throw new InvalidCampaignTransitionException($campaign->statusEnum(), CampaignStatus::Draft);
         }
 
-        $campaign->update(['approved_by' => $approver->id, 'approved_at' => now()]);
+        if (! $campaign->approval_required) {
+            throw new CampaignStateConflictException('Cette campagne ne nécessite pas d’approbation.');
+        }
+
+        if ($campaign->approved_by !== null) {
+            return $campaign->fresh();
+        }
+
+        DB::transaction(function () use ($campaign, $approver): void {
+            $campaign->update(['approved_by' => $approver->id, 'approved_at' => now()]);
+
+            $this->audit->record(self::AUDIT_APPROVED, $campaign, $approver, null, [
+                'approved_by' => $approver->uuid,
+                'approved_at' => $campaign->approved_at?->utc()->toIso8601String(),
+            ]);
+        });
 
         return $campaign->fresh();
     }
@@ -681,6 +739,33 @@ class CampaignService
     }
 
     /**
+     * Send window (`business_hours_*`, docs/15 §15.5): the instant the next
+     * dispatch cycle must wait for, or `null` when the campaign may release
+     * messages now (no window, inside it, or nothing left to release so the
+     * campaign can still complete).
+     */
+    public function sendWindowDeferral(Campaign $campaign): ?Carbon
+    {
+        $window = SendWindow::forCampaign($campaign);
+
+        if ($window === null || $window->contains(now())) {
+            return null;
+        }
+
+        if (! in_array($campaign->status, [CampaignStatus::Scheduled->value, CampaignStatus::Running->value], true)) {
+            return null;
+        }
+
+        if ($campaign->status === CampaignStatus::Running->value
+            && $campaign->isAudienceMaterialised()
+            && ! $campaign->campaignRecipients()->where('status', CampaignRecipientStatus::Pending->value)->exists()) {
+            return null;
+        }
+
+        return $window->nextOpening(now());
+    }
+
+    /**
      * Legacy helper (analytics `targeted`) — final audience without
      * materialisation.
      *
@@ -849,7 +934,84 @@ class CampaignService
     private function assertStillReady(Campaign $campaign): void
     {
         if (in_array($campaign->status, [CampaignStatus::Scheduled->value, CampaignStatus::Suspended->value], true)) {
-            $this->assertReadyToDispatch($campaign->fresh());
+            // A suspended campaign keeps its place without approval; resume() asks for it.
+            $this->assertReadyToDispatch($campaign->fresh(), $campaign->status === CampaignStatus::Scheduled->value);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function audienceSignature(Campaign $campaign): array
+    {
+        return $campaign->audiences()->get()
+            ->map(fn (CampaignAudience $row): string => $row->target_type.':'.$row->target_id.':'.$row->mode)
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Approval-sensitive attributes dirty on the (filled, unsaved) campaign,
+     * plus `approval_required` when it was just switched on.
+     *
+     * @return list<string>
+     */
+    private function approvalRelevantChanges(Campaign $campaign): array
+    {
+        $changed = array_values(array_intersect(array_keys($campaign->getDirty()), self::APPROVAL_SENSITIVE_ATTRIBUTES));
+
+        if ($campaign->isDirty('approval_required') && $campaign->approval_required) {
+            $changed[] = 'approval_required';
+        }
+
+        return $changed;
+    }
+
+    /**
+     * Editing what a reviewer approved (sender, subject, content, audience)
+     * withdraws the approval — otherwise the approved version and the sent
+     * version could differ. A scheduled campaign that thereby needs approval
+     * again goes back to draft (its delayed dispatch job is then stale and
+     * does nothing); `campaign.approval_reset` is audited.
+     *
+     * @param  list<string>  $changed
+     */
+    public function resetApprovalAfterEdit(Campaign $campaign, array $changed): void
+    {
+        if ($changed === []) {
+            return;
+        }
+
+        $hadApproval = $campaign->approved_by !== null;
+
+        if ($hadApproval) {
+            $previousApprover = $campaign->approvedBy?->uuid;
+            $campaign->forceFill(['approved_by' => null, 'approved_at' => null])->save();
+
+            if ($campaign->approval_required) {
+                $this->audit->record(self::AUDIT_APPROVAL_RESET, $campaign, auth()->user(), [
+                    'approved_by' => $previousApprover,
+                ], [
+                    'approved_by' => null,
+                    'changed' => array_values(array_unique($changed)),
+                ]);
+            }
+        }
+
+        if ($campaign->approval_required
+            && $campaign->approved_by === null
+            && $campaign->status === CampaignStatus::Scheduled->value
+            && ($hadApproval || in_array('approval_required', $changed, true))) {
+            $this->transition($campaign, CampaignStatus::Draft);
+            $campaign->update(['scheduled_at' => null]);
+        }
+    }
+
+    private function assertApproved(Campaign $campaign): void
+    {
+        if ($campaign->approval_required && $campaign->approved_by === null) {
+            throw new CampaignNotReadyException('Cette campagne doit être approuvée avant de pouvoir être envoyée.');
         }
     }
 
@@ -864,7 +1026,7 @@ class CampaignService
         $campaign->forceFill(['recipients_count' => 0])->save();
     }
 
-    private function assertReadyToDispatch(Campaign $campaign): void
+    private function assertReadyToDispatch(Campaign $campaign, bool $requireApproval = true): void
     {
         if (! $this->hasAudience($campaign)) {
             throw new CampaignNotReadyException('La campagne doit cibler au moins une liste de destinataires ou un segment.');
@@ -874,12 +1036,20 @@ class CampaignService
             throw new CampaignNotReadyException('La campagne doit avoir un objet et un contenu avant de pouvoir être envoyée.');
         }
 
-        if ($campaign->approval_required && $campaign->approved_by === null) {
-            throw new CampaignNotReadyException('Cette campagne doit être approuvée avant de pouvoir être envoyée.');
+        if ($campaign->smtp_strategy === CampaignSmtpStrategy::Pinned->value && $campaign->singleSmtpAccount === null) {
+            throw new CampaignNotReadyException('Choisissez le compte SMTP unique à utiliser, ou repassez en rotation automatique.');
+        }
+
+        if ($requireApproval) {
+            $this->assertApproved($campaign);
         }
 
         if (app()->bound(self::CHECKLIST_SERVICE)) {
             $failures = array_values((array) app(self::CHECKLIST_SERVICE)->blockingFailures($campaign));
+
+            if (! $requireApproval) {
+                $failures = array_values(array_diff($failures, ['approval']));
+            }
 
             if ($failures !== []) {
                 throw new CampaignChecklistBlockedException($failures);

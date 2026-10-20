@@ -87,7 +87,7 @@ class SendEmailJob implements ShouldQueue
             return;
         }
 
-        $account = $rotation->selectAccount(excludeAccountIds: $this->excludedAccountIds);
+        $account = $rotation->selectAccount($this->pinnedAccount($message), $this->excludedAccountIds);
 
         if ($account === null) {
             static::dispatch($this->messageId, $this->excludedAccountIds)->delay(now()->addMinutes(5));
@@ -145,6 +145,29 @@ class SendEmailJob implements ShouldQueue
                 $startedAt,
             );
         }
+    }
+
+    /**
+     * Campaign SMTP strategy `single` (`pinned`): every message of the
+     * campaign goes through its `single_smtp_account_id` — the rotation only
+     * checks that account's eligibility (it waits, never falls back to
+     * another one). `null` = automatic rotation.
+     */
+    private function pinnedAccount(Message $message): ?SmtpAccount
+    {
+        if ($message->campaign_id === null) {
+            return null;
+        }
+
+        $campaign = \App\Modules\Campaigns\Models\Campaign::query()->find($message->campaign_id);
+
+        if ($campaign === null
+            || $campaign->smtp_strategy !== \App\Modules\Campaigns\Enums\CampaignSmtpStrategy::Pinned->value
+            || $campaign->single_smtp_account_id === null) {
+            return null;
+        }
+
+        return SmtpAccount::query()->find($campaign->single_smtp_account_id);
     }
 
     private function handleTransportFailure(
