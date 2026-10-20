@@ -1,11 +1,11 @@
 import { useLayoutEffect, useRef } from 'react';
+import { useText } from '@/Hooks/useText';
 import { Text, makeStyles, tokens } from '@fluentui/react-components';
 import { FlagRegular } from '@fluentui/react-icons';
 import type { AutomationStepType, AutomationTrigger } from '@/Lib/types/automations';
 import { countSteps, listTerminates, widthUnits, type BranchRef, type DraftStep, type StepIssue } from './graph';
 import { COLUMN_WIDTH, FlowContext, StepList, type FlowContextValue } from './StepList';
 import { TriggerCard } from './TriggerCard';
-import { automationMissingText as mt } from './text';
 
 const useStyles = makeStyles({
     canvas: {
@@ -74,6 +74,7 @@ export function FlowCanvas({
     ariaLabel,
 }: FlowCanvasProps) {
     const styles = useStyles();
+    const t = useText();
     const canvasRef = useRef<HTMLDivElement>(null);
     const width = widthUnits(steps) * COLUMN_WIDTH;
 
@@ -105,7 +106,7 @@ export function FlowCanvas({
                     {!listTerminates(steps) && (
                         <Text size={200} className={styles.endPill}>
                             <FlagRegular aria-hidden="true" />
-                            {mt.step.flowEnd}
+                            {t.automations.editor.step.flowEnd}
                         </Text>
                     )}
                 </div>

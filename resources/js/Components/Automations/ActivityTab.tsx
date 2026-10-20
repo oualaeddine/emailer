@@ -34,7 +34,6 @@ import { exitAutomationRun, fetchAutomationActivity, fetchAutomationRuns, type A
 import type { AutomationActivity, AutomationEmailActivity, AutomationRun, AutomationRunStatus } from '@/Lib/types/automations';
 import type { Uuid } from '@/Lib/types/common';
 import { numberSteps, type DraftStep } from './graph';
-import { automationMissingText as mt } from './text';
 
 const PERIODS = [0, 7, 30, 90] as const;
 type Period = (typeof PERIODS)[number];
@@ -218,7 +217,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
         }
     }
 
-    const periodLabel = (value: Period) => (value === 0 ? mt.activity.periodAll : formatText(mt.activity.periodDays, value));
+    const periodLabel = (value: Period) => (value === 0 ? t.automations.editor.activity.periodAll : formatText(t.automations.editor.activity.periodDays, value));
 
     const emailColumns: TableColumnDefinition<AutomationEmailActivity>[] = [
         createTableColumn({
@@ -232,7 +231,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
                         <Text weight="semibold">{row.template_name}</Text>
                         {entry && (
                             <Text size={200} className={styles.muted}>
-                                {formatText(mt.step.number, entry.number)}
+                                {formatText(t.automations.editor.step.number, entry.number)}
                             </Text>
                         )}
                     </div>
@@ -241,17 +240,17 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
         }),
         createTableColumn({
             columnId: 'sent',
-            renderHeaderCell: () => mt.activity.sent,
+            renderHeaderCell: () => t.automations.editor.activity.sent,
             renderCell: (row) => <span className={styles.numeric}>{formatCount(row.globalStats.sent)}</span>,
         }),
         createTableColumn({
             columnId: 'delivered',
-            renderHeaderCell: () => mt.activity.delivered,
+            renderHeaderCell: () => t.automations.editor.activity.delivered,
             renderCell: (row) => <span className={styles.numeric}>{formatCount(row.globalStats.delivered)}</span>,
         }),
         createTableColumn({
             columnId: 'opens',
-            renderHeaderCell: () => mt.activity.openRate,
+            renderHeaderCell: () => t.automations.editor.activity.openRate,
             renderCell: (row) => (
                 <span className={styles.numeric}>
                     {formatRate(row.rates.open_rate)} <span className={styles.muted}>({formatCount(row.globalStats.uniqueViews)})</span>
@@ -260,7 +259,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
         }),
         createTableColumn({
             columnId: 'clicks',
-            renderHeaderCell: () => mt.activity.clickRate,
+            renderHeaderCell: () => t.automations.editor.activity.clickRate,
             renderCell: (row) => (
                 <span className={styles.numeric}>
                     {formatRate(row.rates.click_rate)} <span className={styles.muted}>({formatCount(row.globalStats.uniqueClicks)})</span>
@@ -269,7 +268,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
         }),
         createTableColumn({
             columnId: 'unsubscribes',
-            renderHeaderCell: () => mt.activity.unsubscribeRate,
+            renderHeaderCell: () => t.automations.editor.activity.unsubscribeRate,
             renderCell: (row) => <span className={styles.numeric}>{formatRate(row.rates.unsubscribe_rate)}</span>,
         }),
     ];
@@ -277,7 +276,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
     const runColumns: TableColumnDefinition<AutomationRun>[] = [
         createTableColumn({
             columnId: 'contact',
-            renderHeaderCell: () => mt.activity.contact,
+            renderHeaderCell: () => t.automations.editor.activity.contact,
             renderCell: (run) => <Text truncate>{run.recipient.email}</Text>,
         }),
         createTableColumn({
@@ -298,27 +297,27 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
         }),
         createTableColumn({
             columnId: 'step',
-            renderHeaderCell: () => mt.activity.currentStep,
+            renderHeaderCell: () => t.automations.editor.activity.currentStep,
             renderCell: (run) => {
                 if (!run.current_step_id) return t.common.emptyValue;
                 const entry = stepsById.get(run.current_step_id);
 
-                return entry ? `${formatText(mt.step.number, entry.number)} · ${t.automations.steps[entry.step.type]}` : mt.activity.unknownStep;
+                return entry ? `${formatText(t.automations.editor.step.number, entry.number)} · ${t.automations.steps[entry.step.type]}` : t.automations.editor.activity.unknownStep;
             },
         }),
         createTableColumn({
             columnId: 'started',
-            renderHeaderCell: () => mt.activity.startedAt,
+            renderHeaderCell: () => t.automations.editor.activity.startedAt,
             renderCell: (run) => formatDateTime(run.started_at),
         }),
         createTableColumn({
             columnId: 'next',
-            renderHeaderCell: () => mt.activity.nextRunAt,
+            renderHeaderCell: () => t.automations.editor.activity.nextRunAt,
             renderCell: (run) => formatDateTime(run.next_run_at),
         }),
         createTableColumn({
             columnId: 'finished',
-            renderHeaderCell: () => mt.activity.finishedAt,
+            renderHeaderCell: () => t.automations.editor.activity.finishedAt,
             renderCell: (run) => formatDateTime(run.finished_at),
         }),
         createTableColumn({
@@ -394,14 +393,14 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
                         </DataGrid>
                     </div>
                 ) : (
-                    !activityLoading && <Text className={styles.muted}>{mt.activity.emailsEmpty}</Text>
+                    !activityLoading && <Text className={styles.muted}>{t.automations.editor.activity.emailsEmpty}</Text>
                 )}
             </section>
 
             <section className={styles.section} aria-labelledby="automation-runs-title">
                 <div className={styles.toolbar}>
                     <Title3 as="h3" id="automation-runs-title">
-                        {mt.activity.runs}
+                        {t.automations.editor.activity.runs}
                     </Title3>
                     <Dropdown
                         className={styles.dropdown}
@@ -428,7 +427,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
                 {runsLoading && runs.length === 0 ? (
                     <Spinner label={t.common.loading} />
                 ) : runs.length === 0 ? (
-                    <Text className={styles.muted}>{runStatus ? t.common.noResults : mt.activity.runsEmpty}</Text>
+                    <Text className={styles.muted}>{runStatus ? t.common.noResults : t.automations.editor.activity.runsEmpty}</Text>
                 ) : (
                     <div className={styles.scroll}>
                         <DataGrid items={runs} columns={runColumns} getRowId={(run: AutomationRun) => run.id} className={styles.runsGrid}>
@@ -458,7 +457,7 @@ export function ActivityTab({ automationId, steps }: ActivityTabProps) {
                 <DialogSurface>
                     <DialogBody>
                         <DialogTitle>{t.automations.exitRun}</DialogTitle>
-                        <DialogContent>{exitTarget ? formatText(mt.activity.exitConfirm, exitTarget.recipient.email) : ''}</DialogContent>
+                        <DialogContent>{exitTarget ? formatText(t.automations.editor.activity.exitConfirm, exitTarget.recipient.email) : ''}</DialogContent>
                         <DialogActions>
                             <Button appearance="secondary" onClick={() => setExitTarget(null)} disabled={exiting}>
                                 {t.common.cancel}

@@ -51,7 +51,6 @@ import { AppShell } from '@/Components/Shell/AppShell';
 import { EmptyState } from '@/Components/Shell/EmptyState';
 import { CreateAutomationDialog } from '@/Components/Automations/CreateAutomationDialog';
 import { AUTOMATION_STATUS_BADGE } from '@/Components/Automations/graph';
-import { automationMissingText as mt } from '@/Components/Automations/text';
 import { apiErrorMessage, apiValidationErrors, formatCount, formatDateTime, formatText } from '@/Components/Campaigns/campaignUi';
 import { useText } from '@/Hooks/useText';
 import {
@@ -233,7 +232,7 @@ export default function AutomationsIndex() {
     const duplicate = (automation: Automation) =>
         run(async () => {
             await duplicateAutomation(automation.id);
-            notify(mt.list.duplicated);
+            notify(t.automations.editor.list.duplicated);
         });
 
     const automations = response?.data ?? [];
@@ -271,12 +270,12 @@ export default function AutomationsIndex() {
         }),
         createTableColumn<Automation>({
             columnId: 'in_progress',
-            renderHeaderCell: () => mt.columns.contactsInFlow,
+            renderHeaderCell: () => t.automations.editor.columns.contactsInFlow,
             renderCell: (automation) => <span className={styles.numeric}>{formatCount(automation.stats.in_progress)}</span>,
         }),
         createTableColumn<Automation>({
             columnId: 'started_finished',
-            renderHeaderCell: () => mt.columns.startedFinished,
+            renderHeaderCell: () => t.automations.editor.columns.startedFinished,
             renderCell: (automation) => (
                 <span className={styles.numeric}>
                     {formatCount(automation.stats.started)} / {formatCount(automation.stats.completed)}
@@ -321,7 +320,7 @@ export default function AutomationsIndex() {
                             <MenuItem
                                 icon={<DeleteRegular />}
                                 disabled={automation.status === 'active'}
-                                title={automation.status === 'active' ? mt.list.deleteActive : undefined}
+                                title={automation.status === 'active' ? t.automations.editor.list.deleteActive : undefined}
                                 onClick={() => setToDelete(automation)}
                             >
                                 {t.common.delete}
@@ -334,7 +333,7 @@ export default function AutomationsIndex() {
     ];
 
     const hasFilters = tab !== 'all' || q !== '';
-    const tabLabel = (value: StatusTab) => (value === 'all' ? mt.statusTabs.all : t.automations.statusLabels[value]);
+    const tabLabel = (value: StatusTab) => (value === 'all' ? t.automations.editor.statusTabs.all : t.automations.statusLabels[value]);
 
     return (
         <AppShell>
@@ -378,7 +377,7 @@ export default function AutomationsIndex() {
                         </div>
                     ) : automations.length === 0 ? (
                         hasFilters ? (
-                            <EmptyState icon={FlowchartRegular} title={t.common.noResults} body={mt.list.emptyTab} />
+                            <EmptyState icon={FlowchartRegular} title={t.common.noResults} body={t.automations.editor.list.emptyTab} />
                         ) : (
                             <EmptyState
                                 icon={FlowchartRegular}
@@ -450,7 +449,7 @@ export default function AutomationsIndex() {
                                     if (target) {
                                         void run(async () => {
                                             await deleteAutomation(target.id);
-                                            notify(mt.list.deleted);
+                                            notify(t.automations.editor.list.deleted);
                                         });
                                     }
                                 }}

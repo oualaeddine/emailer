@@ -1,6 +1,5 @@
 import { Field, Radio, RadioGroup, SpinButton, makeStyles, tokens } from '@fluentui/react-components';
 import { useText } from '@/Hooks/useText';
-import { automationMissingText as mt } from './text';
 
 export type ReentryMode = 'never' | 'after' | 'always';
 
@@ -40,7 +39,7 @@ export function ReentrySettings({ allowReentry, reentryAfterDays, onChange, erro
 
     return (
         <div className={styles.root}>
-            <Field label={mt.settings.reentryTitle} validationMessage={modeError} validationState={modeError ? 'error' : 'none'}>
+            <Field label={t.automations.editor.settings.reentryTitle} validationMessage={modeError} validationState={modeError ? 'error' : 'none'}>
                 <RadioGroup
                     disabled={disabled}
                     value={mode}
@@ -52,9 +51,9 @@ export function ReentrySettings({ allowReentry, reentryAfterDays, onChange, erro
                         });
                     }}
                 >
-                    <Radio value="never" label={mt.settings.reentryNever} />
-                    <Radio value="after" label={mt.settings.reentryAfter} />
-                    <Radio value="always" label={mt.settings.reentryAlways} />
+                    <Radio value="never" label={t.automations.editor.settings.reentryNever} />
+                    <Radio value="after" label={t.automations.editor.settings.reentryAfter} />
+                    <Radio value="always" label={t.automations.editor.settings.reentryAlways} />
                 </RadioGroup>
             </Field>
             {mode === 'after' && (

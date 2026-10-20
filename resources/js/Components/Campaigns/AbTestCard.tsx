@@ -251,7 +251,7 @@ export function AbTestCard({ campaign, editable, expanded, onExpand, onCollapse,
                                     )}
                                 </Field>
                             </div>
-                            <Field label={`${s.abTest.variantB} — HTML`} required>
+                            <Field label={s.abTest.variantBHtml} required>
                                 <Textarea
                                     className={styles.html}
                                     value={htmlB}
@@ -266,7 +266,7 @@ export function AbTestCard({ campaign, editable, expanded, onExpand, onCollapse,
                                 disabled={saving || !campaign.html_body}
                                 onClick={() => setHtmlB(campaign.html_body ?? '')}
                             >
-                                {`${t.common.copy} : ${s.abTest.variantA}`}
+                                {s.abTest.copyFromVariantA}
                             </Button>
                         </>
                     )}

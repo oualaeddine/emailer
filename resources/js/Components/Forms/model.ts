@@ -1,7 +1,6 @@
 import type { ContactAttribute } from '@/Lib/types/attributes';
 import type { FormDesign, FormField, FormSettings, SubscriptionForm, SubscriptionFormInput } from '@/Lib/types/forms';
 import type { TranslationDictionary } from '@/Lib/i18n/fr';
-import { formText } from '@/Components/Forms/strings';
 
 /** The attribute every form must collect (publish answers 422 without it). */
 export const EMAIL_ATTRIBUTE = 'EMAIL';
@@ -50,10 +49,10 @@ export function defaultSettings(t: TranslationDictionary): FormSettings {
     };
 }
 
-export function emailField(): FormField {
+export function emailField(t: TranslationDictionary): FormField {
     return {
         attribute: EMAIL_ATTRIBUTE,
-        label: formText.fields.emailLabel,
+        label: t.forms.editor.fields.emailLabel,
         placeholder: null,
         required: true,
         help_text: null,
@@ -66,8 +65,8 @@ export function newFormInput(t: TranslationDictionary, name: string): Subscripti
     return {
         name,
         list_ids: [],
-        fields: [toFieldInput(emailField())],
-        gdpr: { enabled: true, text: formText.fields.defaultGdprText, required: true },
+        fields: [toFieldInput(emailField(t))],
+        gdpr: { enabled: true, text: t.forms.editor.fields.defaultGdprText, required: true },
         design: defaultDesign(t, name),
         settings: defaultSettings(t),
     };

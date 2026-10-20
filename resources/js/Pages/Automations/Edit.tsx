@@ -41,7 +41,6 @@ import {
 import { AutomationLookupsProvider, useAutomationLookups } from '@/Components/Automations/lookups';
 import { ReentrySettings } from '@/Components/Automations/ReentrySettings';
 import { StepEditorDrawer } from '@/Components/Automations/StepEditorDrawer';
-import { automationMissingText as mt } from '@/Components/Automations/text';
 import { apiErrorMessage, apiStatus, apiValidationErrors } from '@/Components/Campaigns/campaignUi';
 import { useText } from '@/Hooks/useText';
 import {
@@ -292,7 +291,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
         const firstResource = Object.values(resourceErrors)[0];
         setNotice({
             intent: 'error',
-            text: mapped.general[0] ?? firstResource ?? (Object.keys(mapped.byStep).length > 0 ? mt.editor.fixBeforeSave : apiErrorMessage(error)),
+            text: mapped.general[0] ?? firstResource ?? (Object.keys(mapped.byStep).length > 0 ? t.automations.editor.editor.fixBeforeSave : apiErrorMessage(error)),
         });
         if (Object.keys(mapped.byStep).length > 0 || mapped.general.length > 0) setTab('flow');
         else if (Object.keys(resourceErrors).some((key) => !key.startsWith('trigger'))) setTab('settings');
@@ -302,20 +301,20 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
     async function save(options: { navigate: boolean } = { navigate: true }): Promise<{ detail: AutomationDetail; drafts: DraftStep[] } | null> {
         setAttempted(true);
         if (nameMissing) {
-            setNotice({ intent: 'error', text: mt.editor.nameRequired });
+            setNotice({ intent: 'error', text: t.automations.editor.editor.nameRequired });
             setTab('settings');
 
             return null;
         }
         if (!trigger || !triggerReady) {
-            setNotice({ intent: 'error', text: mt.trigger.notConfigured });
+            setNotice({ intent: 'error', text: t.automations.editor.trigger.notConfigured });
             setTab('flow');
             setDrawer({ kind: 'trigger' });
 
             return null;
         }
         if (issues.size > 0) {
-            setNotice({ intent: 'error', text: mt.editor.fixBeforeSave });
+            setNotice({ intent: 'error', text: t.automations.editor.editor.fixBeforeSave });
             setTab('flow');
 
             return null;
@@ -374,7 +373,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
         setAttempted(true);
         if (!canActivate) return;
         if (issues.size > 0) {
-            setNotice({ intent: 'error', text: mt.editor.fixBeforeActivate });
+            setNotice({ intent: 'error', text: t.automations.editor.editor.fixBeforeActivate });
             setTab('flow');
 
             return;
@@ -434,7 +433,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
             <>
                 <Head title={t.automations.title} />
                 <MessageBar intent="error" className={styles.notice}>
-                    <MessageBarBody>{loadFailed === 'not_found' ? t.common.notFound : mt.editor.loadFailed}</MessageBarBody>
+                    <MessageBarBody>{loadFailed === 'not_found' ? t.common.notFound : t.automations.editor.editor.loadFailed}</MessageBarBody>
                 </MessageBar>
                 <Button appearance="subtle" icon={<ArrowLeftRegular />} onClick={() => router.visit('/automations')}>
                     {t.common.back}
@@ -484,7 +483,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
                     ) : canActivate ? (
                         activateButton
                     ) : (
-                        <Tooltip content={mt.editor.activateDisabled} relationship="description">
+                        <Tooltip content={t.automations.editor.editor.activateDisabled} relationship="description">
                             {activateButton}
                         </Tooltip>
                     )}
@@ -498,8 +497,8 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
             )}
 
             <TabList className={styles.tabs} selectedValue={tab} onTabSelect={(_, data) => setTab(data.value as EditorTab)}>
-                <Tab value="flow">{mt.tabs.flow}</Tab>
-                <Tab value="settings">{mt.tabs.settings}</Tab>
+                <Tab value="flow">{t.automations.editor.tabs.flow}</Tab>
+                <Tab value="settings">{t.automations.editor.tabs.settings}</Tab>
                 <Tab value="activity" disabled={!automation}>
                     {t.automations.tabs.activity}
                 </Tab>
@@ -518,7 +517,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
                         </MessageBar>
                     )}
                     <FlowCanvas
-                        ariaLabel={mt.tabs.flow}
+                        ariaLabel={t.automations.editor.tabs.flow}
                         trigger={trigger}
                         triggerInvalid={triggerInvalid}
                         steps={steps}
@@ -537,12 +536,12 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
             {tab === 'settings' && (
                 <section className={styles.card} aria-labelledby="automation-settings-title">
                     <Title3 as="h2" id="automation-settings-title">
-                        {mt.settings.general}
+                        {t.automations.editor.settings.general}
                     </Title3>
                     <Field
                         label={t.automations.name}
                         required
-                        validationMessage={fieldErrors.name ?? (attempted && nameMissing ? mt.editor.nameRequired : undefined)}
+                        validationMessage={fieldErrors.name ?? (attempted && nameMissing ? t.automations.editor.editor.nameRequired : undefined)}
                         validationState={fieldErrors.name || (attempted && nameMissing) ? 'error' : 'none'}
                     >
                         <Input value={name} maxLength={255} disabled={busy} onChange={(_, data) => changeMeta(setName, ['name'])(data.value)} />
@@ -574,7 +573,7 @@ function AutomationEditor({ uuid }: AutomationEditProps) {
                     <ActivityTab automationId={automation.id} steps={savedSteps} />
                 ) : (
                     <MessageBar intent="info">
-                        <MessageBarBody>{mt.editor.draftNotSaved}</MessageBarBody>
+                        <MessageBarBody>{t.automations.editor.editor.draftNotSaved}</MessageBarBody>
                     </MessageBar>
                 ))}
 

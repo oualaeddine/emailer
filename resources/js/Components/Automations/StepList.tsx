@@ -45,7 +45,6 @@ import {
     type StepIssue,
 } from './graph';
 import { useAutomationLookups } from './lookups';
-import { automationMissingText as mt } from './text';
 
 /** Width of one layout column (a step card plus breathing room), in px. */
 export const COLUMN_WIDTH = 300;
@@ -228,7 +227,7 @@ function Connector({ branch, index, listLength, depth }: { branch: BranchRef; in
             {!flow.readOnly && (
                 <Menu positioning="after">
                     <MenuTrigger disableButtonEnhancement>
-                        <Tooltip content={full ? formatText(mt.step.maxSteps, MAX_STEPS) : t.automations.addStep} relationship="label">
+                        <Tooltip content={full ? formatText(t.automations.editor.step.maxSteps, MAX_STEPS) : t.automations.addStep} relationship="label">
                             <Button
                                 className={styles.insert}
                                 size="small"
@@ -236,7 +235,7 @@ function Connector({ branch, index, listLength, depth }: { branch: BranchRef; in
                                 appearance="outline"
                                 icon={<AddRegular />}
                                 disabled={full}
-                                aria-label={mt.step.insertHere}
+                                aria-label={t.automations.editor.step.insertHere}
                             />
                         </Tooltip>
                     </MenuTrigger>
@@ -246,7 +245,7 @@ function Connector({ branch, index, listLength, depth }: { branch: BranchRef; in
                                 const Icon = STEP_ICONS[type];
                                 const tooDeep = type === 'condition' && depth >= MAX_CONDITION_DEPTH;
                                 const notLast = type === 'end' && index !== listLength;
-                                const hint = tooDeep ? formatText(mt.step.maxDepth, MAX_CONDITION_DEPTH) : notLast ? mt.step.endOnlyLast : undefined;
+                                const hint = tooDeep ? formatText(t.automations.editor.step.maxDepth, MAX_CONDITION_DEPTH) : notLast ? t.automations.editor.step.endOnlyLast : undefined;
 
                                 return (
                                     <MenuItem
@@ -276,33 +275,33 @@ function useStepSummary(): (step: DraftStep) => string {
     return (step) => {
         switch (step.type) {
             case 'send_email': {
-                if (!step.config.template_id) return mt.step.noTemplate;
+                if (!step.config.template_id) return t.automations.editor.step.noTemplate;
                 const name = label('templates', step.config.template_id) ?? `${step.config.template_id.slice(0, 8)}…`;
 
                 return step.config.subject ? `${name} · « ${step.config.subject} »` : name;
             }
             case 'wait':
-                return formatText(mt.step.waitSummary, step.config.amount, t.automations.waitUnits[step.config.unit]);
+                return formatText(t.automations.editor.step.waitSummary, step.config.amount, t.automations.waitUnits[step.config.unit]);
             case 'condition': {
                 const count = countConditions(step.config.rules);
 
-                return count === 0 ? mt.step.noCondition : formatText(mt.step.conditionCount, count);
+                return count === 0 ? t.automations.editor.step.noCondition : formatText(t.automations.editor.step.conditionCount, count);
             }
             case 'add_to_list':
             case 'remove_from_list':
-                return step.config.list_id ? (label('lists', step.config.list_id) ?? `${step.config.list_id.slice(0, 8)}…`) : mt.step.noList;
+                return step.config.list_id ? (label('lists', step.config.list_id) ?? `${step.config.list_id.slice(0, 8)}…`) : t.automations.editor.step.noList;
             case 'update_attribute': {
-                if (!step.config.attribute) return mt.step.noAttribute;
+                if (!step.config.attribute) return t.automations.editor.step.noAttribute;
                 const definition = attributes.find((a) => a.name === step.config.attribute);
 
                 return formatText(
-                    mt.step.attributeSummary,
+                    t.automations.editor.step.attributeSummary,
                     definition?.label ?? step.config.attribute,
                     formatAttributeValue(definition, step.config.value, t.conditionBuilder.booleanValues.true, t.conditionBuilder.booleanValues.false),
                 );
             }
             case 'end':
-                return mt.step.endSummary;
+                return t.automations.editor.step.endSummary;
         }
     };
 }
@@ -353,7 +352,7 @@ function StepCard({ step }: { step: DraftStep }) {
                         <MenuPopover onClick={(event) => event.stopPropagation()}>
                             <MenuList>
                                 <MenuItem icon={<EditRegular />} onClick={() => flow.onOpenStep(step.key)}>
-                                    {mt.step.edit}
+                                    {t.automations.editor.step.edit}
                                 </MenuItem>
                                 <MenuItem icon={<DeleteRegular />} onClick={() => flow.onRemoveStep(step.key)}>
                                     {t.automations.removeStep}
@@ -368,7 +367,7 @@ function StepCard({ step }: { step: DraftStep }) {
             </Text>
             {step.stats && (
                 <Text size={200} className={styles.stats}>
-                    {formatText(mt.step.stats, step.stats.entered, step.stats.completed)}
+                    {formatText(t.automations.editor.step.stats, step.stats.entered, step.stats.completed)}
                 </Text>
             )}
             {serverMessage ? (
@@ -379,7 +378,7 @@ function StepCard({ step }: { step: DraftStep }) {
             ) : issue ? (
                 <Text size={200} className={styles.warning}>
                     <WarningRegular aria-hidden="true" />
-                    {issue === 'wait_range' ? mt.step.waitRange : mt.step.incomplete}
+                    {issue === 'wait_range' ? t.automations.editor.step.waitRange : t.automations.editor.step.incomplete}
                 </Text>
             ) : null}
         </Card>
@@ -436,6 +435,7 @@ export interface StepListProps {
 
 /** Vertical linear list of steps with "+" insert points between them. */
 export function StepList({ steps, branch, depth }: StepListProps) {
+    const t = useText();
     const styles = useStyles();
     const items = [];
     let reachable = true;
@@ -445,7 +445,7 @@ export function StepList({ steps, branch, depth }: StepListProps) {
         if (!reachable) {
             items.push(
                 <Text key={`unreachable-${step.key}`} size={200} className={styles.unreachable} role="note">
-                    <WarningRegular aria-hidden="true" /> {mt.step.unreachable}
+                    <WarningRegular aria-hidden="true" /> {t.automations.editor.step.unreachable}
                 </Text>,
             );
             reachable = true;

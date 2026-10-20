@@ -25,7 +25,6 @@ import { FormPreview } from '@/Components/Forms/FormPreview';
 import { SettingsPanel } from '@/Components/Forms/SettingsPanel';
 import { SharePanel } from '@/Components/Forms/SharePanel';
 import { EMAIL_ATTRIBUTE, areValidEmails, draftFromForm, draftToInput, isHttpUrl, type FormDraft } from '@/Components/Forms/model';
-import { formText } from '@/Components/Forms/strings';
 import { useText } from '@/Hooks/useText';
 import {
     apiErrorMessage,
@@ -122,12 +121,12 @@ function localErrors(draft: FormDraft, t: ReturnType<typeof useText>): Record<st
     if (draft.design.button_text.trim() === '') errors['design.button_text'] = t.common.required;
     if (draft.settings.redirect_url !== null) {
         if (draft.settings.redirect_url.trim() === '') errors['settings.redirect_url'] = t.common.required;
-        else if (!isHttpUrl(draft.settings.redirect_url)) errors['settings.redirect_url'] = formText.settings.invalidUrl;
+        else if (!isHttpUrl(draft.settings.redirect_url)) errors['settings.redirect_url'] = t.forms.editor.settings.invalidUrl;
     } else if (draft.settings.success_message.trim() === '') {
         errors['settings.success_message'] = t.common.required;
     }
-    if (!isHttpUrl(draft.settings.doi_redirect_url)) errors['settings.doi_redirect_url'] = formText.settings.invalidUrl;
-    if (!areValidEmails(draft.settings.notify_emails)) errors['settings.notify_emails'] = formText.settings.invalidEmails;
+    if (!isHttpUrl(draft.settings.doi_redirect_url)) errors['settings.doi_redirect_url'] = t.forms.editor.settings.invalidUrl;
+    if (!areValidEmails(draft.settings.notify_emails)) errors['settings.notify_emails'] = t.forms.editor.settings.invalidEmails;
 
     return errors;
 }
@@ -268,7 +267,7 @@ export default function FormEdit({ uuid }: FormEditProps) {
         if (!form || !draft) return;
         const publishing = form.status !== 'active';
         if (publishing && draft.list_ids.length === 0) {
-            reportErrors({ list_ids: formText.settings.listRequired }, formText.settings.listRequired);
+            reportErrors({ list_ids: t.forms.editor.settings.listRequired }, t.forms.editor.settings.listRequired);
 
             return;
         }
@@ -277,7 +276,7 @@ export default function FormEdit({ uuid }: FormEditProps) {
             const current = dirty ? await save() : form;
             if (!current) return;
             applyForm(publishing ? await publishForm(current.id) : await unpublishForm(current.id));
-            setNotice({ intent: 'success', text: publishing ? t.forms.published : formText.list.unpublished });
+            setNotice({ intent: 'success', text: publishing ? t.forms.published : t.forms.editor.list.unpublished });
             if (publishing) setTab('share');
         } catch (error) {
             const validation = apiValidationErrors(error);

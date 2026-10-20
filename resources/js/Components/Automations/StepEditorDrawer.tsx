@@ -25,7 +25,6 @@ import { conditionRuleErrors, stepIssue, type DraftStep } from './graph';
 import { EntityPicker, useAutomationLookups } from './lookups';
 import { STEP_ICONS } from './StepList';
 import { TRIGGER_ICONS, TriggerConfigEditor } from './TriggerCard';
-import { automationMissingText as mt } from './text';
 
 const WAIT_UNITS: AutomationWaitUnit[] = ['minutes', 'hours', 'days'];
 
@@ -128,7 +127,7 @@ export function StepEditorDrawer({
                         <>
                             {triggerLocked && !readOnly && (
                                 <MessageBar intent="info">
-                                    <MessageBarBody>{mt.trigger.cannotChangeActive}</MessageBarBody>
+                                    <MessageBarBody>{t.automations.editor.trigger.cannotChangeActive}</MessageBarBody>
                                 </MessageBar>
                             )}
                             <TriggerConfigEditor
@@ -198,7 +197,7 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
             const templateSubject = hint('templates', step.config.template_id);
             editor = (
                 <>
-                    <Field label={t.automations.template} required hint={mt.step.templateHint} {...state('template_id', !step.config.template_id)}>
+                    <Field label={t.automations.template} required hint={t.automations.editor.step.templateHint} {...state('template_id', !step.config.template_id)}>
                         <EntityPicker
                             kind="templates"
                             single
@@ -208,7 +207,7 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
                             onChange={(values) => setConfig({ template_id: values[0] ?? '' })}
                         />
                     </Field>
-                    <Field label={mt.step.subject} {...state('subject')}>
+                    <Field label={t.automations.editor.step.subject} {...state('subject')}>
                         <Input
                             disabled={disabled}
                             maxLength={255}
@@ -217,7 +216,7 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
                             onChange={(_, data) => setConfig({ subject: data.value === '' ? null : data.value })}
                         />
                     </Field>
-                    <Field label={mt.step.previewText} {...state('preview_text')}>
+                    <Field label={t.automations.editor.step.previewText} {...state('preview_text')}>
                         <Input
                             disabled={disabled}
                             maxLength={255}
@@ -230,10 +229,10 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
             break;
         }
         case 'wait': {
-            const rangeMessage = errors['config.amount'] ?? (issue === 'wait_range' ? mt.step.waitRange : undefined);
+            const rangeMessage = errors['config.amount'] ?? (issue === 'wait_range' ? t.automations.editor.step.waitRange : undefined);
             editor = (
                 <div className={styles.row}>
-                    <Field label={mt.step.amount} required validationMessage={rangeMessage} validationState={rangeMessage ? 'error' : 'none'}>
+                    <Field label={t.automations.editor.step.amount} required validationMessage={rangeMessage} validationState={rangeMessage ? 'error' : 'none'}>
                         <SpinButton
                             disabled={disabled}
                             min={1}
@@ -244,10 +243,10 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
                             }}
                         />
                     </Field>
-                    <Field label={mt.step.unit} {...state('unit')}>
+                    <Field label={t.automations.editor.step.unit} {...state('unit')}>
                         <Dropdown
                             disabled={disabled}
-                            aria-label={mt.step.unit}
+                            aria-label={t.automations.editor.step.unit}
                             selectedOptions={[step.config.unit]}
                             value={t.automations.waitUnits[step.config.unit]}
                             onOptionSelect={(_, data) => data.optionValue && setConfig({ unit: data.optionValue })}
@@ -266,7 +265,7 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
         case 'condition':
             editor = (
                 <>
-                    <Text className={styles.muted}>{mt.step.conditionHint}</Text>
+                    <Text className={styles.muted}>{t.automations.editor.step.conditionHint}</Text>
                     <div className={styles.builderSurface}>
                         <ConditionBuilder
                             value={step.config.rules}
@@ -285,11 +284,11 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
         case 'add_to_list':
         case 'remove_from_list':
             editor = (
-                <Field label={mt.step.list} required {...state('list_id', !step.config.list_id)}>
+                <Field label={t.automations.editor.step.list} required {...state('list_id', !step.config.list_id)}>
                     <EntityPicker
                         kind="lists"
                         single
-                        ariaLabel={mt.step.list}
+                        ariaLabel={t.automations.editor.step.list}
                         disabled={disabled}
                         values={step.config.list_id ? [step.config.list_id] : []}
                         onChange={(values) => setConfig({ list_id: values[0] ?? '' })}
@@ -304,10 +303,10 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
             const valueEmpty = value === null || value === '' || (Array.isArray(value) && value.length === 0);
             editor = (
                 <>
-                    <Field label={mt.trigger.attribute} required {...state('attribute', !step.config.attribute)}>
+                    <Field label={t.automations.editor.trigger.attribute} required {...state('attribute', !step.config.attribute)}>
                         <Dropdown
                             disabled={disabled}
-                            aria-label={mt.trigger.attribute}
+                            aria-label={t.automations.editor.trigger.attribute}
                             placeholder={t.conditionBuilder.chooseField}
                             selectedOptions={step.config.attribute ? [step.config.attribute] : []}
                             value={definition?.label ?? step.config.attribute}
@@ -320,10 +319,10 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
                             ))}
                         </Dropdown>
                     </Field>
-                    <Field label={mt.step.value} required {...state('value', Boolean(step.config.attribute) && valueEmpty)}>
+                    <Field label={t.automations.editor.step.value} required {...state('value', Boolean(step.config.attribute) && valueEmpty)}>
                         <AttributeValueEditor
                             attribute={definition}
-                            ariaLabel={mt.step.value}
+                            ariaLabel={t.automations.editor.step.value}
                             disabled={disabled}
                             value={value}
                             onChange={(next) => setConfig({ value: next })}
@@ -334,7 +333,7 @@ function StepConfigEditor({ step, onChange, errors, disabled, showRequired }: St
             break;
         }
         case 'end':
-            editor = <Text>{mt.step.endSummary}</Text>;
+            editor = <Text>{t.automations.editor.step.endSummary}</Text>;
             break;
     }
 
