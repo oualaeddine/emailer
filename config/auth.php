@@ -114,4 +114,19 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Authentication
+    |--------------------------------------------------------------------------
+    |
+    | docs/28-security.md §28.1 — when disabled, users are neither forced to
+    | enrol in TOTP nor challenged for a code at login. Existing enrolments
+    | are kept, so re-enabling restores the previous behaviour.
+    |
+    */
+
+    'two_factor' => [
+        'enabled' => (bool) env('AUTH_TWO_FACTOR_ENABLED', true),
+    ],
+
 ];
