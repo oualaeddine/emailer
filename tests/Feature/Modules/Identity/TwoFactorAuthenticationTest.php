@@ -48,6 +48,28 @@ class TwoFactorAuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_password_alone_authenticates_when_two_factor_is_disabled(): void
+    {
+        config(['auth.two_factor.enabled' => false]);
+        $user = $this->twoFactorUser();
+
+        $response = $this->post('/login', [
+            'email' => 'secure@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('dashboard'));
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_unenrolled_user_is_not_forced_to_enrol_when_two_factor_is_disabled(): void
+    {
+        config(['auth.two_factor.enabled' => false]);
+        $user = User::factory()->withRole(RoleName::Viewer)->create();
+
+        $this->actingAs($user)->get(route('dashboard'))->assertOk();
+    }
+
     public function test_valid_totp_code_completes_login(): void
     {
         $user = $this->twoFactorUser();

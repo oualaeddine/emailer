@@ -61,7 +61,7 @@ class AuthService
         $this->clearLockout($email);
 
         /** @var User $user */
-        if ($user->hasTwoFactorEnabled()) {
+        if (config('auth.two_factor.enabled') && $user->hasTwoFactorEnabled()) {
             return LoginResult::twoFactorRequired($user);
         }
 
