@@ -14,6 +14,7 @@ use App\Modules\DeliveryEngine\Rendering\Stages\PlainTextStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\SignatureStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\ToFieldStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\TrackingStage;
+use App\Modules\DeliveryEngine\Rendering\Stages\UnsubscribeFooterStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\UtmRewriteStage;
 use App\Modules\Recipients\Models\Recipient;
 use App\Modules\Tracking\Models\Message;
@@ -44,6 +45,7 @@ class RenderingPipeline
      */
     public const STAGES = [
         LinkIdStage::class,            // 1b data-link-id on the authored hrefs (before merge tags: one id per authored link)
+        UnsubscribeFooterStage::class, // 1c campaign without an opt-out link: standard footer with {{ unsubscribe_url }}
         MergeTagsStage::class,         // 2  merge variables (+ links/campaign/sender tags)
         ToFieldStage::class,           // 2b To display name (header only, docs/45 §45.6.3)
         ConditionalBlocksStage::class, // 3  no-op in v1 (§38.5)
@@ -56,8 +58,8 @@ class RenderingPipeline
         InlineImagesStage::class,      // 8  MIME assembly: cid: related parts
     ];
 
-    /** docs/38 §38.6 — previews run stages 1, 2 and 6 only. */
-    public const PREVIEW_STAGES = [MergeTagsStage::class, CssInlineStage::class];
+    /** docs/38 §38.6 — previews run stages 1, 2 and 6 only (plus the auto unsubscribe footer, so it is visible). */
+    public const PREVIEW_STAGES = [UnsubscribeFooterStage::class, MergeTagsStage::class, CssInlineStage::class];
 
     public function __construct(private readonly Container $container) {}
 

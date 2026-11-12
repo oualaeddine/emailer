@@ -117,8 +117,9 @@ class CampaignChecklistTest extends TestCase
         $this->assertSame('ok', $this->itemStatus($href, 'unsubscribe_link'));
         $none = $this->campaign(['html_body' => '<p>Hi</p>']);
         $item = app(CampaignChecklistContract::class)->evaluate($none)->item('unsubscribe_link');
-        $this->assertSame('error', $item->status);
-        $this->assertTrue($item->blocking);
+        // No link in the design: a footer is added at send time, so it no longer blocks.
+        $this->assertSame('ok', $item->status);
+        $this->assertSame(['auto_footer' => true], $item->details);
     }
 
     public function test_test_sent_is_a_warning_not_an_error(): void
@@ -153,7 +154,7 @@ class CampaignChecklistTest extends TestCase
         $c = $this->campaign(['html_body' => '<p>no unsub</p>']);
         $service = app(CampaignChecklistContract::class);
         $failures = $service->blockingFailures($c);
-        $this->assertContains('unsubscribe_link', $failures);
+        $this->assertNotContains('unsubscribe_link', $failures);
         $this->assertContains('sender_verified', $failures);
         $this->assertNotContains('test_sent', $failures);
         $this->assertSame('blocking', $service->evaluate($c)->toArray()['status']);

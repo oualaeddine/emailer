@@ -16,6 +16,7 @@ use App\Modules\DeliveryEngine\Rendering\Stages\PlainTextStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\SignatureStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\ToFieldStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\TrackingStage;
+use App\Modules\DeliveryEngine\Rendering\Stages\UnsubscribeFooterStage;
 use App\Modules\DeliveryEngine\Rendering\Stages\UtmRewriteStage;
 use App\Modules\DeliveryEngine\Rendering\Support\Links;
 use App\Modules\Recipients\Models\Recipient;
@@ -40,6 +41,7 @@ class RenderingPipelineTest extends TestCase
     {
         $this->assertSame([
             LinkIdStage::class,
+            UnsubscribeFooterStage::class,
             MergeTagsStage::class,
             ToFieldStage::class,
             ConditionalBlocksStage::class,
@@ -53,7 +55,7 @@ class RenderingPipelineTest extends TestCase
         ], array_map(fn ($s) => $s::class, app(RenderingPipeline::class)->stages()));
 
         $personalise = array_map(fn ($s) => $s::class, app(RenderingPipeline::class)->stages(RenderingStage::PHASE_PERSONALISE));
-        $this->assertSame([LinkIdStage::class, MergeTagsStage::class, ToFieldStage::class, ConditionalBlocksStage::class, SignatureStage::class, UtmRewriteStage::class, LinkIdStage::class], $personalise);
+        $this->assertSame([LinkIdStage::class, UnsubscribeFooterStage::class, MergeTagsStage::class, ToFieldStage::class, ConditionalBlocksStage::class, SignatureStage::class, UtmRewriteStage::class, LinkIdStage::class], $personalise);
     }
 
     public function test_data_link_id_is_sha1_prefix_of_the_url_the_click_tracker_receives(): void
@@ -179,14 +181,14 @@ class RenderingPipelineTest extends TestCase
         $pipeline = app(RenderingPipeline::class);
 
         $off = Campaign::factory()->create(['mirror_link_enabled' => false]);
-        $this->assertSame('[]', $pipeline->run(new RenderedEmail('S', '[{{ mirror }}]'), new RenderContext($recipient, $message, $off), RenderingStage::PHASE_PERSONALISE)->html);
+        $this->assertSame('[]', $this->pipelineRun('[{{ mirror }}]', $recipient, $message, $off));
 
         $on = Campaign::factory()->create(['mirror_link_enabled' => true]);
-        $url = $pipeline->run(new RenderedEmail('S', '{{ mirror }}'), new RenderContext($recipient, $message, $on), RenderingStage::PHASE_PERSONALISE)->html;
+        $url = $this->pipelineRun('{{ mirror }}', $recipient, $message, $on);
         $this->assertStringStartsWith(url('m/'.$message->uuid).'?signature=', $url);
 
         $expiring = Campaign::factory()->create(['mirror_link_enabled' => true, 'email_expiration_duration' => 2, 'email_expiration_unit' => 'days']);
-        $url = $pipeline->run(new RenderedEmail('S', '{{ mirror }}'), new RenderContext($recipient, $message, $expiring), RenderingStage::PHASE_PERSONALISE)->html;
+        $url = $this->pipelineRun('{{ mirror }}', $recipient, $message, $expiring);
         $this->assertStringContainsString('expires='.now()->addDays(2)->getTimestamp(), $url);
     }
 
@@ -225,9 +227,33 @@ class RenderingPipelineTest extends TestCase
         $this->get($url)->assertOk();
     }
 
+    /** Personalised HTML without the automatic unsubscribe footer (campaign fragments have no opt-out link). */
     private function pipelineRun(string $html, Recipient $recipient, Message $message, ?Campaign $campaign = null): string
     {
-        return app(RenderingPipeline::class)->run(new RenderedEmail('S', $html), new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE)->html;
+        $out = app(RenderingPipeline::class)->run(new RenderedEmail('S', $html), new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE)->html;
+
+        return (string) preg_replace('#<div data-unsubscribe-footer="1".*$#s', '', $out);
+    }
+
+    public function test_campaign_without_unsubscribe_link_gets_a_footer_once(): void
+    {
+        [$message, $recipient] = $this->message();
+        $campaign = Campaign::factory()->create();
+        $pipeline = app(RenderingPipeline::class);
+
+        $once = $pipeline->run(new RenderedEmail('S', '<html><body><p>Bonjour</p></body></html>'), new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE);
+        $this->assertStringContainsString('data-unsubscribe-footer="1"', $once->html);
+        $this->assertStringContainsString('href="'.url('unsubscribe').'/', $once->html);
+        $this->assertStringEndsWith('</div></body></html>', $once->html);
+
+        $twice = $pipeline->run($once, new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE);
+        $this->assertSame(1, substr_count($twice->html, 'data-unsubscribe-footer'));
+
+        $own = $pipeline->run(new RenderedEmail('S', '<p><a href="{{ unsubscribe }}">stop</a></p>'), new RenderContext($recipient, $message, $campaign), RenderingStage::PHASE_PERSONALISE);
+        $this->assertStringNotContainsString('data-unsubscribe-footer', $own->html);
+
+        $transactional = $pipeline->run(new RenderedEmail('S', '<p>Commande</p>'), new RenderContext($recipient, $message), RenderingStage::PHASE_PERSONALISE);
+        $this->assertStringNotContainsString('data-unsubscribe-footer', $transactional->html);
     }
 
     public function test_merge_values_are_escaped_in_html_but_not_in_subject_and_defaults_apply(): void
