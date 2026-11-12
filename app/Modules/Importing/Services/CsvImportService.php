@@ -2,6 +2,7 @@
 
 namespace App\Modules\Importing\Services;
 
+use App\Modules\Importing\Support\ImportHeader;
 use Generator;
 use RuntimeException;
 
@@ -32,8 +33,14 @@ class CsvImportService
                 return;
             }
 
-            $header = array_map(fn (?string $h) => trim((string) $h), $header);
-            $header[0] = ltrim($header[0], "\xEF\xBB\xBF"); // UTF-8 BOM
+            $resolved = ImportHeader::resolve($header);
+            $firstRow = $resolved['is_data'] ? $header : null;
+            $header = $resolved['headers'];
+
+            if ($firstRow !== null) {
+                $firstRow[0] = ltrim((string) $firstRow[0], "\xEF\xBB\xBF");
+                yield array_combine($header, array_pad(array_slice($firstRow, 0, count($header)), count($header), null));
+            }
 
             while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
                 if ($row === [null] || $row === false) {
