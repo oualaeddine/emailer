@@ -306,7 +306,7 @@ export const fr = {
         tags: 'Étiquettes',
         createTitle: 'Créer un destinataire',
         active: 'Actif',
-        suppressed: 'Supprimé',
+        suppressed: 'En liste noire',
         invalid: 'Invalide',
         sourceManual: 'Manuel',
         sourceCsvImport: 'Import CSV',
@@ -1670,7 +1670,7 @@ export const fr = {
         },
         statusLabels: {
             active: 'Actif',
-            suppressed: 'Supprimé',
+            suppressed: 'En liste noire',
             invalid: 'Invalide',
         },
         sourceLabels: {
