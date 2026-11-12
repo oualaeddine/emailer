@@ -3,6 +3,7 @@
 namespace App\Modules\Importing\Services;
 
 use App\Modules\Importing\Models\ImportJob;
+use App\Modules\Importing\Support\ImportHeader;
 use App\Modules\Importing\Support\ImportSource;
 use Generator;
 
@@ -46,6 +47,12 @@ class ImportPreviewService
         foreach ($headers as $index => $header) {
             $attribute = $this->catalog->guess($header);
 
+            // Header gives no hint (generic "Colonne 1", or a header-less file):
+            // a column whose sample values are emails is the EMAIL column.
+            if ($attribute === null && ! $emailTaken && $this->columnHoldsEmails($rows, $index)) {
+                $attribute = 'EMAIL';
+            }
+
             if ($attribute === 'EMAIL') {
                 if ($emailTaken) {
                     $attribute = null;
@@ -67,6 +74,16 @@ class ImportPreviewService
             'delimiter' => ImportSource::isDelimited($job->source_type) ? $this->csv->detectDelimiterOf($path) : null,
             'suggested_mapping' => $suggested,
         ];
+    }
+
+    /**
+     * @param  list<list<string>>  $rows
+     */
+    private function columnHoldsEmails(array $rows, int $index): bool
+    {
+        $values = array_filter(array_map(fn (array $row) => trim($row[$index] ?? ''), $rows), fn (string $v) => $v !== '');
+
+        return $values !== [] && count(array_filter($values, [ImportHeader::class, 'isEmail'])) * 2 >= count($values);
     }
 
     /**

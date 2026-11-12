@@ -2,6 +2,7 @@
 
 namespace App\Modules\Importing\Services;
 
+use App\Modules\Importing\Support\ImportHeader;
 use Generator;
 use OpenSpout\Reader\XLSX\Reader;
 
@@ -55,9 +56,12 @@ class ExcelImportService
                     );
 
                     if ($header === null) {
-                        $header = array_map(fn (?string $h) => trim((string) $h), $cells);
+                        $resolved = ImportHeader::resolve($cells);
+                        $header = $resolved['headers'];
 
-                        continue;
+                        if (! $resolved['is_data']) {
+                            continue;
+                        }
                     }
 
                     $cells = array_pad(array_slice($cells, 0, count($header)), count($header), null);

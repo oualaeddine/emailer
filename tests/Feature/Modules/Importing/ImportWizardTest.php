@@ -89,6 +89,22 @@ class ImportWizardTest extends TestCase
         $this->assertSame('ignore', $preview['suggested_mapping'][3]['target']['type']);
     }
 
+    public function test_headerless_file_keeps_first_row_and_suggests_email_column(): void
+    {
+        [$id, $preview] = $this->upload("first@example.com\nsecond@example.com\n");
+
+        $this->assertSame(['Colonne 1'], $preview['headers']);
+        $this->assertSame(2, $preview['total_rows']);
+        $this->assertSame(['first@example.com'], $preview['rows'][0]);
+        $this->assertSame('EMAIL', $preview['suggested_mapping'][0]['target']['attribute']);
+
+        $this->actingAs($this->operator)->putJson("/api/v1/import-jobs/{$id}/mapping", ['mapping' => $preview['suggested_mapping']])
+            ->assertOk();
+        $emails = collect($this->actingAs($this->operator)->getJson("/api/v1/import-jobs/{$id}/rows")->json('data'))
+            ->pluck('raw_data.email')->all();
+        $this->assertSame(['first@example.com', 'second@example.com'], $emails);
+    }
+
     public function test_paste_source_creates_a_job_with_preview(): void
     {
         $response = $this->actingAs($this->operator)->postJson('/api/v1/import-jobs', [

@@ -5,6 +5,7 @@ namespace App\Modules\Campaigns\Services\Checklist;
 use App\Modules\Campaigns\Contracts\AudienceResolver;
 use App\Modules\Campaigns\Models\Campaign;
 use App\Modules\Composer\Services\MergeVariableResolver;
+use App\Modules\DeliveryEngine\Rendering\Stages\UnsubscribeFooterStage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -117,12 +118,10 @@ class CampaignChecklistService implements CampaignChecklistContract
 
     private function unsubscribeLink(string $html): ChecklistItem
     {
-        $present = preg_match('/\{\{\s*(unsubscribe|unsubscribe_url)\s*\}\}/i', $html) === 1
-            || preg_match('#href\s*=\s*["\'][^"\']*/unsubscribe/#i', $html) === 1;
-
-        return $present
+        // A design without one gets a standard footer at send time (UnsubscribeFooterStage).
+        return UnsubscribeFooterStage::hasUnsubscribeLink($html)
             ? new ChecklistItem('unsubscribe_link', ChecklistItem::OK, true, 'Lien de désinscription présent')
-            : new ChecklistItem('unsubscribe_link', ChecklistItem::ERROR, true, 'Le design ne contient pas de lien de désinscription');
+            : new ChecklistItem('unsubscribe_link', ChecklistItem::OK, true, 'Lien de désinscription ajouté automatiquement en pied de page', ['auto_footer' => true]);
     }
 
     /**

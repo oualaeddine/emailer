@@ -59,7 +59,7 @@ class CampaignReviewFixesTest extends TestCase
             '<a href="{{unsubscribe_url}}">u</a>' => 'ok',
             '<a href="{{ UNSUBSCRIBE_URL }}">u</a>' => 'ok',
             '<a href="https://mail.example.dz/unsubscribe/abc">u</a>' => 'ok',
-            '<a href="https://example.dz/">u</a>' => 'error',
+            '<a href="https://example.dz/">u</a>' => 'ok', // footer added at send time
         ] as $html => $expected) {
             $campaign->html_body = '<p>Bonjour</p>'.$html;
             $this->assertSame($expected, $this->checklistStatus($campaign, 'unsubscribe_link'), $html);
@@ -130,12 +130,12 @@ class CampaignReviewFixesTest extends TestCase
         $user = $campaign->createdBy;
         $html = $campaign->html_body;
 
-        $this->actingAs($user)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['html_body' => '<p>Sans lien</p>'])
-            ->assertStatus(422)->assertJsonPath('errors.checklist', ['unsubscribe_link']);
+        $this->actingAs($user)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['html_body' => null])
+            ->assertStatus(422)->assertJsonPath('errors.checklist', ['design_ready']);
         $this->assertSame($html, $campaign->fresh()->html_body);
 
-        $this->actingAs($user)->putJson("/api/v1/campaigns/{$campaign->uuid}/design", ['editor_type' => 'html', 'html_body' => '<p>Sans lien</p>'])
-            ->assertStatus(422)->assertJsonPath('errors.checklist', ['unsubscribe_link']);
+        $this->actingAs($user)->putJson("/api/v1/campaigns/{$campaign->uuid}/design", ['editor_type' => 'html', 'html_body' => null])
+            ->assertStatus(422)->assertJsonPath('errors.checklist', ['design_ready']);
         $this->assertSame($html, $campaign->fresh()->html_body);
 
         $this->actingAs($user)->patchJson("/api/v1/campaigns/{$campaign->uuid}", ['name' => 'Renommée'])->assertOk();
