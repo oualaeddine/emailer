@@ -22,6 +22,7 @@ import type {
     CampaignUpdateInput,
     CampaignV2Detail,
     CreateCampaignPayload,
+    TestSendMessageStatus,
     TestSendResult,
     UpdateCampaignPayload,
 } from '@/Lib/types/campaigns';
@@ -165,6 +166,15 @@ export async function estimateCampaignAudience(id: string, payload: AudienceEsti
 
 export async function sendCampaignTest(id: string, payload: CampaignTestSendInput): Promise<TestSendResult> {
     const response = await axios.post<DataItem<TestSendResult>>(`/api/v1/campaigns/${id}/test-send`, payload);
+
+    return response.data.data;
+}
+
+/** Delivery outcome of the test messages returned by {@link sendCampaignTest}. */
+export async function fetchCampaignTestStatus(id: string, messageIds: string[]): Promise<TestSendMessageStatus[]> {
+    const response = await axios.get<DataList<TestSendMessageStatus>>(`/api/v1/campaigns/${id}/test-send/status`, {
+        params: { ids: messageIds },
+    });
 
     return response.data.data;
 }

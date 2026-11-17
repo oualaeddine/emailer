@@ -318,6 +318,36 @@ class CampaignV2EndpointsTest extends TestCase
         $this->actingAs($user)->getJson("/api/v1/campaigns/{$campaign->uuid}/recipients")->assertJsonCount(0, 'data');
     }
 
+    public function test_test_send_status_reports_real_outcome(): void
+    {
+        Bus::fake();
+        $user = $this->operator();
+        $campaign = Campaign::factory()->create(['created_by' => $user->id]);
+        $other = Campaign::factory()->create(['created_by' => $user->id]);
+
+        $ids = $this->actingAs($user)->postJson("/api/v1/campaigns/{$campaign->uuid}/test-send", [
+            'emails' => ['ok@exemple.dz', 'ko@exemple.dz'],
+        ])->assertStatus(202)->json('data.message_ids');
+
+        $messages = Message::query()->whereIn('uuid', $ids)->with('recipient')->get()->keyBy(fn (Message $m) => $m->recipient->email);
+        $messages['ok@exemple.dz']->forceFill(['status' => 'accepted', 'sent_at' => now()])->save();
+        $messages['ko@exemple.dz']->forceFill(['status' => 'failed', 'last_provider_response' => '554 Blacklisted [127.0.0.1]'])->save();
+
+        $data = collect($this->actingAs($user)->getJson("/api/v1/campaigns/{$campaign->uuid}/test-send/status?".http_build_query(['ids' => $ids]))
+            ->assertOk()->assertJsonCount(2, 'data')->json('data'))->keyBy('email');
+
+        $this->assertSame('accepted', $data['ok@exemple.dz']['status']);
+        $this->assertNotNull($data['ok@exemple.dz']['sent_at']);
+        $this->assertSame('failed', $data['ko@exemple.dz']['status']);
+        $this->assertSame('554 Blacklisted [127.0.0.1]', $data['ko@exemple.dz']['error']);
+
+        // Another campaign's id never leaks the messages; ids are validated.
+        $this->actingAs($user)->getJson("/api/v1/campaigns/{$other->uuid}/test-send/status?".http_build_query(['ids' => $ids]))
+            ->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($user)->getJson("/api/v1/campaigns/{$campaign->uuid}/test-send/status?ids[]=not-a-uuid")->assertStatus(422);
+        $this->actingAs($user)->getJson("/api/v1/campaigns/{$campaign->uuid}/test-send/status")->assertStatus(422);
+    }
+
     public function test_test_send_limits(): void
     {
         Bus::fake();

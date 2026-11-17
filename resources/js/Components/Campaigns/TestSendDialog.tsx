@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Button,
     Dialog,
@@ -18,11 +18,60 @@ import {
 } from '@fluentui/react-components';
 import { SendRegular } from '@fluentui/react-icons';
 import { useText } from '@/Hooks/useText';
-import { sendCampaignTest } from '@/Lib/api/campaigns';
-import type { AbVariantLabel, TestSendResult } from '@/Lib/types/campaigns';
+import { fetchCampaignTestStatus, sendCampaignTest } from '@/Lib/api/campaigns';
+import type { AbVariantLabel, TestSendMessageStatus, TestSendResult } from '@/Lib/types/campaigns';
 import { apiErrorMessage, apiValidationErrors, formatDateTime, formatText, isEmailLike } from '@/Components/Campaigns/campaignUi';
 
 const MAX_TEST_EMAILS = 5;
+const TEST_STATUS_POLL_MS = 3000;
+/** The delivery engine retries for ~15 min; stop watching after 3 min and say it is still pending. */
+const TEST_STATUS_TIMEOUT_MS = 3 * 60 * 1000;
+
+const DELIVERED_STATUSES = ['accepted', 'delivered', 'opened', 'clicked'];
+const PENDING_STATUSES = ['queued', 'sending'];
+
+type FeedbackIntent = 'success' | 'error' | 'info' | 'warning';
+
+interface TestDeliveryTexts {
+    testSent: string;
+    testDeliveredTo: string;
+    testFailed: string;
+    testRetrying: string;
+}
+
+export interface TestDeliveryOutcome {
+    /** Every message reached a final state. */
+    done: boolean;
+    intent: FeedbackIntent;
+    text: string;
+    /** Set while a message waits for a retry after a server refusal. */
+    retrying?: string;
+}
+
+/** Turns the test messages' statuses into the message shown under "Envoyer un test". */
+export function summarizeTestDelivery(rows: TestSendMessageStatus[], texts: TestDeliveryTexts): TestDeliveryOutcome {
+    const label = (row: TestSendMessageStatus) => row.email ?? '?';
+    const failed = rows.filter((row) => !DELIVERED_STATUSES.includes(row.status) && !PENDING_STATUSES.includes(row.status));
+    const pending = rows.filter((row) => PENDING_STATUSES.includes(row.status));
+    const retrying = pending.filter((row) => row.error);
+    const retryText = retrying.length > 0
+        ? formatText(texts.testRetrying, retrying.map(label).join(', '), retrying[0].error ?? '')
+        : undefined;
+
+    if (failed.length > 0) {
+        return {
+            done: pending.length === 0,
+            intent: 'error',
+            text: formatText(texts.testFailed, failed.map(label).join(', '), failed[0].error ?? failed[0].status),
+            retrying: retryText,
+        };
+    }
+    if (pending.length > 0 || rows.length === 0) {
+        return { done: false, intent: 'info', text: '', retrying: retryText };
+    }
+
+    return { done: true, intent: 'success', text: formatText(texts.testDeliveredTo, rows.map(label).join(', ')) };
+}
 
 const useStyles = makeStyles({
     root: {
@@ -64,7 +113,7 @@ export function TestSendForm({ campaignId, variant, lastTestSentAt, disabled, on
     const t = useText();
     const [raw, setRaw] = useState('');
     const [busy, setBusy] = useState(false);
-    const [feedback, setFeedback] = useState<{ intent: 'success' | 'error'; text: string } | null>(null);
+    const [feedback, setFeedback] = useState<{ intent: FeedbackIntent; text: string } | null>(null);
     const [sentAt, setSentAt] = useState<string | null>(lastTestSentAt ?? null);
 
     useEffect(() => setSentAt(lastTestSentAt ?? null), [lastTestSentAt]);
@@ -74,16 +123,81 @@ export function TestSendForm({ campaignId, variant, lastTestSentAt, disabled, on
     const invalid = emails.find((email) => !isEmailLike(email));
     const validation = tooMany ? t.campaignSetup.previewPanel.tooManyEmails : invalid;
 
+    // The API only queues the test: poll its real outcome so "envoyé" is shown
+    // once the SMTP server accepted it, and the server's error otherwise.
+    const pollTimer = useRef<number | null>(null);
+    const pollRun = useRef(0);
+
+    function stopPolling() {
+        pollRun.current += 1;
+        if (pollTimer.current !== null) {
+            window.clearTimeout(pollTimer.current);
+            pollTimer.current = null;
+        }
+    }
+
+    useEffect(() => stopPolling, []);
+
+    function trackDelivery(messageIds: string[]) {
+        stopPolling();
+        if (messageIds.length === 0) {
+            setFeedback({ intent: 'success', text: t.campaignSetup.previewPanel.testSent });
+
+            return;
+        }
+        const run = pollRun.current;
+        const panel = t.campaignSetup.previewPanel;
+        const startedAt = Date.now();
+        setFeedback({ intent: 'info', text: panel.testQueued });
+
+        const poll = async () => {
+            let rows: TestSendMessageStatus[];
+            try {
+                rows = await fetchCampaignTestStatus(campaignId, messageIds);
+            } catch {
+                if (run === pollRun.current) {
+                    setFeedback({ intent: 'warning', text: panel.testStatusUnknown });
+                }
+
+                return;
+            }
+            if (run !== pollRun.current) {
+                return;
+            }
+            const outcome = summarizeTestDelivery(rows, panel);
+            if (outcome.done) {
+                setFeedback({ intent: outcome.intent, text: outcome.text });
+
+                return;
+            }
+            const interim: { intent: FeedbackIntent; text: string } = outcome.intent === 'error'
+                ? { intent: 'error', text: outcome.text }
+                : outcome.retrying
+                    ? { intent: 'warning', text: outcome.retrying }
+                    : { intent: 'info', text: panel.testQueued };
+            if (Date.now() - startedAt >= TEST_STATUS_TIMEOUT_MS) {
+                setFeedback(interim.intent === 'info' ? { intent: 'warning', text: panel.testStillPending } : interim);
+
+                return;
+            }
+            setFeedback(interim);
+            pollTimer.current = window.setTimeout(() => void poll(), TEST_STATUS_POLL_MS);
+        };
+
+        pollTimer.current = window.setTimeout(() => void poll(), TEST_STATUS_POLL_MS);
+    }
+
     async function handleSend() {
         if (emails.length === 0 || validation) {
             return;
         }
+        stopPolling();
         setBusy(true);
         setFeedback(null);
         try {
             const result = await sendCampaignTest(campaignId, variant ? { emails, variant } : { emails });
             setSentAt(result.test_sent_at);
-            setFeedback({ intent: 'success', text: t.campaignSetup.previewPanel.testSent });
+            trackDelivery(result.message_ids ?? []);
             onSent?.(result);
         } catch (err) {
             const errors = apiValidationErrors(err);
