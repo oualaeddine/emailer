@@ -428,6 +428,16 @@ export interface TestSendResult {
     test_sent_at: string;
 }
 
+/** GET /campaigns/{id}/test-send/status — one row per test message. */
+export interface TestSendMessageStatus {
+    id: string;
+    email: string | null;
+    status: string;
+    sent_at: string | null;
+    /** Last SMTP/provider response — set on failure, or while a retry is pending. */
+    error: string | null;
+}
+
 /** POST /campaigns/{id}/schedule. */
 export interface CampaignScheduleInput {
     mode: CampaignSendMode;

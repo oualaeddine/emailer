@@ -33,6 +33,7 @@ Route::post('campaigns/{campaign}/design/copy', [CampaignController::class, 'cop
 Route::get('campaigns/{campaign}/preview', [CampaignController::class, 'preview']);
 Route::post('campaigns/{campaign}/audience/estimate', [CampaignController::class, 'estimateAudience']);
 Route::post('campaigns/{campaign}/test-send', [CampaignController::class, 'testSend']);
+Route::get('campaigns/{campaign}/test-send/status', [CampaignController::class, 'testSendStatus']);
 Route::post('campaigns/{campaign}/schedule', [CampaignController::class, 'schedule']);
 Route::post('campaigns/{campaign}/unschedule', [CampaignController::class, 'unschedule']);
 Route::post('campaigns/{campaign}/send', [CampaignController::class, 'send']);

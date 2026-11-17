@@ -24,6 +24,7 @@ use App\Modules\Campaigns\Services\CampaignService;
 use App\Modules\Campaigns\Support\ExternalReferences;
 use App\Modules\Composer\Services\MergeVariableResolver;
 use App\Modules\Recipients\Models\Recipient;
+use App\Modules\Tracking\Models\Message;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
@@ -209,6 +210,38 @@ class CampaignController extends Controller
         $result = $this->campaigns->testSend($campaign, $request->validated('emails'), $contact, $request->user(), $variant);
 
         return response()->json(['data' => $result], 202);
+    }
+
+    /**
+     * `GET /campaigns/{id}/test-send/status?ids[]=…` — delivery outcome of the
+     * test messages returned by `test-send` (`message_ids`), so the UI can show
+     * "sent" only once the SMTP server accepted them, and the provider's error
+     * otherwise. Same permission as sending the test; only this campaign's
+     * test messages are visible.
+     */
+    public function testSendStatus(Request $request, Campaign $campaign): JsonResponse
+    {
+        $this->authorize('prepare', $campaign);
+
+        $ids = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:5'],
+            'ids.*' => ['required', 'string', 'uuid'],
+        ])['ids'];
+
+        $messages = Message::query()
+            ->with(['recipient' => fn ($q) => $q->withTrashed()])
+            ->where('campaign_id', $campaign->id)
+            ->where('is_test', true)
+            ->whereIn('uuid', $ids)
+            ->get();
+
+        return response()->json(['data' => $messages->map(fn (Message $message): array => [
+            'id' => $message->uuid,
+            'email' => $message->recipient?->email,
+            'status' => $message->status,
+            'sent_at' => $message->sent_at?->toIso8601ZuluString(),
+            'error' => $message->last_provider_response,
+        ])->values()]);
     }
 
     /**
